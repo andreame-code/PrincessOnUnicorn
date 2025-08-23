@@ -14,9 +14,9 @@ export class Level2 {
       this.boss.x - (this.game.player.x + this.game.player.width);
   }
 
-  update() {
-    const speed = this.game.speed + 2;
-    this.wallTimer++;
+  update(delta) {
+    const speed = (this.game.speed + 2) * delta;
+    this.wallTimer += delta;
     if (this.wallTimer > this.wallInterval && !this.bossFlee) {
       this.walls.push(new Obstacle(this.boss.x, this.game.groundY, 30, 50));
       this.wallTimer = 0;
@@ -46,9 +46,9 @@ export class Level2 {
 
     this.coins.forEach(c => {
       c.x -= speed;
-      c.y += c.vy;
-      c.vy += 0.1;
-      c.life--;
+      c.y += c.vy * delta;
+      c.vy += 0.1 * delta;
+      c.life -= delta;
     });
     this.coins = this.coins.filter(c => c.life > 0 && c.x > -10);
 
