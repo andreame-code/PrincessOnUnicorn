@@ -1,2 +1,7 @@
 # PrincessOnUnicorn
-a game from and for my daughters: they will create the user stories
+
+A simple runner game inspired by the Chrome offline T-Rex, but featuring a princess riding a unicorn.
+
+## Avvio
+
+Apri `index.html` in un browser moderno e premi la barra spaziatrice per saltare gli ostacoli.
