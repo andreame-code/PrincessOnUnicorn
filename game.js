@@ -24,6 +24,13 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+// Allow starting directly at the boss level via URL parameter ?level=2
+const params = new URLSearchParams(window.location.search);
+if (params.get('level') === '2') {
+  score = 1000;
+  boss = { x: canvas.width, width: 40, height: 60 };
+}
+
 let obstacles = [];
 let score = 0;
 // Slower game speed and lower gravity make the game easier
