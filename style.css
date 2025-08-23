@@ -1,5 +1,13 @@
 body { text-align: center; font-family: sans-serif; }
 canvas { background: #f0f0f0; display: block; margin: 0 auto; width: 100%; }
+#menu {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+#menu button { padding: 10px 20px; }
 .overlay {
   position: fixed;
   top: 0;
