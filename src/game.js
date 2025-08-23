@@ -69,7 +69,17 @@ export class Game {
 
   resizeCanvas() {
     this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight || this.canvas.height;
+    // Ensure the canvas fits in the remaining viewport height so the
+    // player is visible without scrolling, especially on mobile devices.
+    let availableHeight = window.innerHeight || this.canvas.height;
+    if (
+      typeof window.innerHeight === 'number' &&
+      typeof this.canvas.getBoundingClientRect === 'function'
+    ) {
+      const rect = this.canvas.getBoundingClientRect();
+      availableHeight = window.innerHeight - rect.top;
+    }
+    this.canvas.height = availableHeight > 0 ? availableHeight : this.canvas.height;
     this.groundY = this.canvas.height - 50;
     if (this.player && !this.player.jumping) {
       this.player.y = this.groundY;
