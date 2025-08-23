@@ -1,0 +1,49 @@
+{
+  "princess_run": {
+    "src": "sprites/player/princess/run/*.png",
+    "fps": 10,
+    "anchor": [0.5, 1.0]
+  },
+  "princess_idle": {
+    "src": "sprites/player/princess/idle/*.png",
+    "fps": 6,
+    "anchor": [0.5, 1.0]
+  },
+  "princess_jump": {
+    "src": "sprites/player/princess/jump/*.png",
+    "fps": 8,
+    "anchor": [0.5, 1.0]
+  },
+  "unicorn_run": {
+    "src": "sprites/player/unicorn/run/*.png",
+    "fps": 12,
+    "anchor": [0.5, 1.0]
+  },
+  "black_knight_run": {
+    "src": "sprites/enemies/black_knight/run/*.png",
+    "fps": 10,
+    "anchor": [0.5, 1.0]
+  },
+  "black_knight_idle": {
+    "src": "sprites/enemies/black_knight/idle/*.png",
+    "fps": 8,
+    "anchor": [0.5, 1.0]
+  },
+  "black_knight_attack": {
+    "src": "sprites/enemies/black_knight/attack/*.png",
+    "fps": 8,
+    "anchor": [0.5, 1.0]
+  },
+  "trees": {
+    "src": "sprites/obstacles/trees/*.png",
+    "fps": 2,
+    "loop": true,
+    "anchor": [0.5, 1.0]
+  },
+  "wall": {
+    "src": "sprites/obstacles/wall/*.png",
+    "rotate": true,
+    "deg_per_sec": 900,
+    "anchor": [0.5, 0.5]
+  }
+}
