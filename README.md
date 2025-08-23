@@ -2,6 +2,12 @@
 
 A simple runner game inspired by the Chrome offline T-Rex, but featuring a princess riding a unicorn.
 
+## Funzionalità
+
+- Interfaccia a tema medievale.
+- Il menu iniziale scompare automaticamente durante la partita.
+- Due livelli di gioco, inclusa una boss fight contro il Cavaliere Nero.
+
 ## Avvio
 
 Apri `index.html` in un browser moderno e premi la barra spaziatrice o tocca lo schermo per saltare gli ostacoli.
@@ -25,9 +31,13 @@ abbastanza vicino fugge e la principessa vince.
 
 Gioco realizzato quasi interamente con l'aiuto di ChatGPT.
 
+## Sviluppo
+
+Il progetto non richiede dipendenze esterne; è sufficiente un ambiente Node.js recente per eseguire i test e sviluppare nuove funzionalità.
+
 ## Test
 
-Esegui i test unitari con:
+Assicurati di avere Node.js installato ed esegui i test unitari con:
 
 ```
 npm test
