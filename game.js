@@ -33,6 +33,7 @@ let gameOver = false;
 let win = false;
 let obstacleTimer = 0;
 let obstacleInterval = getObstacleInterval();
+let boss = null;
 
 function getObstacleInterval() {
   return 80 + Math.random() * 70; // ensure obstacles are neither too close nor too far apart
@@ -65,6 +66,7 @@ function reset() {
   unicorn.jumping = false;
   obstacleTimer = 0;
   obstacleInterval = getObstacleInterval();
+  boss = null;
   requestAnimationFrame(loop);
 }
 
@@ -78,29 +80,40 @@ function update() {
     unicorn.jumping = false;
   }
 
-  // Control obstacle spacing so jumps remain possible
-  obstacleTimer++;
-  if (obstacleTimer > obstacleInterval) {
-    obstacles.push({x: canvas.width, width: 20, height: 40});
-    obstacleTimer = 0;
-    obstacleInterval = getObstacleInterval();
-  }
+  if (!boss) {
+    // Control obstacle spacing so jumps remain possible
+    obstacleTimer++;
+    if (obstacleTimer > obstacleInterval) {
+      obstacles.push({ x: canvas.width, width: 20, height: 40 });
+      obstacleTimer = 0;
+      obstacleInterval = getObstacleInterval();
+    }
 
-  obstacles.forEach(o => o.x -= speed);
-  obstacles = obstacles.filter(o => o.x + o.width > 0);
+    obstacles.forEach(o => o.x -= speed);
+    obstacles = obstacles.filter(o => o.x + o.width > 0);
 
-  obstacles.forEach(o => {
-    if (isColliding(unicorn, o, groundY)) {
+    obstacles.forEach(o => {
+      if (isColliding(unicorn, o, groundY)) {
+        gameOver = true;
+      }
+    });
+
+    if (score >= 1000) {
+      boss = { x: canvas.width, width: 40, height: 60 };
+      obstacles = [];
+    }
+  } else {
+    boss.x -= speed + 1;
+    if (isColliding(unicorn, boss, groundY)) {
       gameOver = true;
     }
-  });
+    if (boss.x + boss.width < 0) {
+      gameOver = true;
+      win = true;
+    }
+  }
 
   score++;
-
-  if (score >= 1000) {
-    gameOver = true;
-    win = true;
-  }
 }
 
 function drawUnicorn() {
@@ -133,6 +146,11 @@ function draw() {
     ctx.fillRect(o.x, groundY - o.height, o.width, o.height);
   });
 
+  if (boss) {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(boss.x, groundY - boss.height, boss.width, boss.height);
+  }
+
   ctx.fillStyle = '#000';
   ctx.font = '16px sans-serif';
   ctx.fillText(`Punteggio: ${score}`, canvas.width - 150, 20);
@@ -141,7 +159,7 @@ function draw() {
     ctx.fillStyle = '#000';
     ctx.font = '24px sans-serif';
     const msg = win
-      ? 'Complimenti! Hai raggiunto 1000 punti!'
+      ? 'Complimenti! Hai sconfitto il Cavaliere Nero!'
       : 'Game Over - tocca o premi Spazio per ricominciare';
     const msgWidth = ctx.measureText(msg).width;
     ctx.fillText(msg, (canvas.width - msgWidth) / 2, 100);
