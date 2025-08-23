@@ -23,7 +23,7 @@ export function createStubGame({
   const canvas = { width: canvasWidth, height: 200, getContext: () => ctx };
   const overlay = { classList: { add: noop, remove: noop } };
   const overlayContent = { textContent: '' };
-  const overlayButton = { onclick: null };
+  const overlayButton = { onclick: null, textContent: '', addEventListener: noop };
 
   global.document = {
     getElementById: (id) => {
