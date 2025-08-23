@@ -15,6 +15,12 @@ index.html?level=2
 
 Questo URL salta il primo livello e avvia subito il boss fight.
 
+Nel secondo livello il Cavaliere Nero lancia dei muri contro l'unicorno.
+Premi di nuovo la barra spaziatrice o tocca lo schermo per attivare uno
+scudo: se un muro lo raggiunge mentre lo scudo è attivo il muro viene
+frantumato e l'unicorno avanza verso il nemico. Quando il cavaliere è
+abbastanza vicino fugge e la principessa vince.
+
 ## Test
 
 Esegui i test unitari con:
