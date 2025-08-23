@@ -10,8 +10,7 @@ A simple runner game inspired by the Chrome offline T-Rex, but featuring a princ
 
 ## Avvio
 
-Apri `index.html` in un browser moderno e premi la barra spaziatrice o tocca lo schermo per saltare gli ostacoli.
-L'obiettivo è raggiungere 1000 punti e superare il Cavaliere Nero; il gioco è stato reso più semplice per essere adatto anche ai più piccoli.
+Apri `index.html` in un browser moderno e premi la barra spaziatrice o tocca lo schermo per saltare gli ostacoli. L'obiettivo è raggiungere 1000 punti e superare il Cavaliere Nero; il gioco è stato reso più semplice per essere adatto anche ai più piccoli.
 
 Per accedere direttamente al secondo livello (la sfida con il Cavaliere Nero) senza passare dal primo, apri:
 
@@ -21,11 +20,7 @@ index.html?level=2
 
 Questo URL salta il primo livello e avvia subito il boss fight.
 
-Nel secondo livello il Cavaliere Nero lancia dei muri contro l'unicorno.
-Premi di nuovo la barra spaziatrice o tocca lo schermo per attivare uno
-scudo: se un muro lo raggiunge mentre lo scudo è attivo il muro viene
-frantumato e l'unicorno avanza verso il nemico. Quando il cavaliere è
-abbastanza vicino fugge e la principessa vince.
+Nel secondo livello il Cavaliere Nero lancia dei muri contro l'unicorno. Premi di nuovo la barra spaziatrice o tocca lo schermo per attivare uno scudo: se un muro lo raggiunge mentre lo scudo è attivo il muro viene frantumato e l'unicorno avanza verso il nemico. Quando il cavaliere è abbastanza vicino fugge e la principessa vince.
 
 ## Credits
 
@@ -42,3 +37,14 @@ Assicurati di avere Node.js installato ed esegui i test unitari con:
 ```
 npm test
 ```
+
+Durante lo sviluppo puoi attivare la modalità watch per rieseguire automaticamente i test ad ogni modifica con:
+
+```
+npm test -- --watch
+```
+
+## Contribuire
+
+Le pull request sono benvenute! Se desideri proporre modifiche, apri una issue o invia una pull request descrivendo i cambiamenti.
+
