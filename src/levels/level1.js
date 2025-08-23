@@ -2,15 +2,16 @@ import { Obstacle } from '../obstacle.js';
 import { isColliding } from '../../collision.js';
 
 export class Level1 {
-  constructor(game) {
+  constructor(game, random = Math.random) {
     this.game = game;
+    this.random = random;
     this.obstacles = [];
     this.timer = 0;
-    this.interval = Level1.getInterval();
+    this.interval = Level1.getInterval(this.random);
   }
 
-  static getInterval() {
-    return (80 + Math.random() * 70) / 60; // seconds
+  static getInterval(random) {
+    return (80 + random() * 70) / 60; // seconds
   }
 
   update(delta) {
@@ -25,7 +26,7 @@ export class Level1 {
       obstacle.coinAwarded = false;
       this.obstacles.push(obstacle);
       this.timer = 0;
-      this.interval = Level1.getInterval();
+      this.interval = Level1.getInterval(this.random);
     }
     this.obstacles.forEach(o => {
       o.update(this.game.speed * delta);
