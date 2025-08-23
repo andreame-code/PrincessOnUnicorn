@@ -4,6 +4,8 @@ import { Game } from './src/game.js';
 import { Obstacle } from './src/obstacle.js';
 import { Level2 } from './src/levels/level2.js';
 
+const FRAME = 1 / 60;
+
 function createStubGame() {
   const noop = () => {};
   const ctx = {
@@ -62,11 +64,11 @@ test('awards coin for passed obstacle and preserves coins in level 2', () => {
   obstacle.coinAwarded = false;
   game.level.obstacles.push(obstacle);
 
-  game.update(1);
+  game.update(FRAME);
   assert.strictEqual(game.coins, 1);
 
   game.score = 999;
-  game.update(1);
+  game.update(FRAME);
   assert.strictEqual(game.levelNumber, 2);
   assert.ok(game.level instanceof Level2);
   assert.strictEqual(game.coins, 1);

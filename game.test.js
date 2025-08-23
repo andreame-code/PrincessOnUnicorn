@@ -3,6 +3,8 @@ import assert from 'node:assert';
 import { Game } from './src/game.js';
 import { Level2 } from './src/levels/level2.js';
 
+const FRAME = 1 / 60;
+
 function createStubGame() {
   const noop = () => {};
   const ctx = {
@@ -58,10 +60,10 @@ function createStubGame() {
 test('advances to level 2 after reaching 1000 points', () => {
   const game = createStubGame();
   for (let i = 0; i < 999; i++) {
-    game.update(1);
+    game.update(FRAME);
   }
   assert.strictEqual(game.levelNumber, 1);
-  game.update(1);
+  game.update(FRAME);
   assert.strictEqual(game.levelNumber, 2);
   assert.ok(game.level instanceof Level2);
 });
