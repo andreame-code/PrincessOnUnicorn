@@ -1,9 +1,17 @@
+import {
+  PLAYER_WIDTH,
+  PLAYER_HEIGHT,
+  JUMP_FORCE,
+  SHIELD_DURATION,
+  SHIELD_COOLDOWN,
+} from './config.js';
+
 export class Player {
   constructor(x, groundY) {
     this.x = x;
     this.y = groundY; // bottom position
-    this.width = 40;
-    this.height = 40;
+    this.width = PLAYER_WIDTH;
+    this.height = PLAYER_HEIGHT;
     this.vy = 0;
     this.jumping = false;
     this.shieldActive = false;
@@ -30,12 +38,12 @@ export class Player {
 
   jump() {
     if (!this.jumping) {
-      this.vy = -12;
+      this.vy = JUMP_FORCE;
       this.jumping = true;
     }
   }
 
-  activateShield(duration = 15, cooldown = 60) {
+  activateShield(duration = SHIELD_DURATION, cooldown = SHIELD_COOLDOWN) {
     if (!this.shieldActive && this.shieldCooldown === 0) {
       this.shieldActive = true;
       this.shieldTimer = duration;
