@@ -97,6 +97,20 @@ export class Game {
     this.player.update(this.gravity, this.groundY);
     this.level.update();
     if (!this.gameOver) this.score++;
+
+    if (this.levelNumber === 1 && this.score >= 1000) {
+      this.levelNumber = 2;
+      this.player = new Player(50, this.groundY);
+      this.level = new Level2(this);
+      this.gamePaused = true;
+      this.showOverlay(this.storyText[1], () => {
+        this.showOverlay(this.instructionsText[2], () => {
+          this.gamePaused = false;
+          this.loop();
+        });
+      });
+    }
+
     if (this.gameOver) this.gamePaused = true;
   }
 
