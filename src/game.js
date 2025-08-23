@@ -9,6 +9,7 @@ import {
   GAME_SPEED,
   GRAVITY,
   LEVEL_UP_SCORE,
+  RESIZE_THROTTLE_MS,
 } from './config.js';
 
 export class Game {
@@ -30,7 +31,7 @@ export class Game {
     this.params = new URLSearchParams(window.location.search);
     this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
 
-    this.boundResize = this.throttle(() => this.resizeCanvas(), 200);
+    this.boundResize = this.throttle(() => this.resizeCanvas(), RESIZE_THROTTLE_MS);
     window.addEventListener('resize', this.boundResize);
     this.resizeCanvas();
 
@@ -157,5 +158,6 @@ export class Game {
 
   destroy() {
     window.removeEventListener('resize', this.boundResize);
+    this.boundResize = null;
   }
 }
