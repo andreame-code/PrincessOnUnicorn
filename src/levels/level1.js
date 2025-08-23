@@ -23,6 +23,7 @@ export class Level1 {
         20,
         40
       );
+      obstacle.imageIndex = Math.floor(this.random() * 3);
       obstacle.coinAwarded = false;
       this.obstacles.push(obstacle);
       this.timer = 0;
