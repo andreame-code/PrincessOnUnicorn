@@ -79,4 +79,4 @@ canvas {
   color: #f5e6c8;
   font-family: "Bellefair", serif;
 }
-.hidden { display: none; }
+.hidden { display: none !important; }
