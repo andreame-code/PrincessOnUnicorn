@@ -31,12 +31,12 @@ export class Player {
 
   jump() {
     if (!this.jumping) {
-      this.vy = -12;
+      this.vy = -720;
       this.jumping = true;
     }
   }
 
-  activateShield(duration = 15, cooldown = 60) {
+  activateShield(duration = 0.25, cooldown = 1) {
     if (!this.shieldActive && this.shieldCooldown === 0) {
       this.shieldActive = true;
       this.shieldTimer = duration;

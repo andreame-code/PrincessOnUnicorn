@@ -3,6 +3,8 @@ import assert from 'node:assert';
 import { Game } from './src/game.js';
 import { Level2 } from './src/levels/level2.js';
 
+const FRAME = 1 / 60;
+
 function createStubGame({ canvasWidth = 800, innerWidth = 800, search = '' } = {}) {
   const noop = () => {};
   const ctx = {
@@ -62,7 +64,7 @@ test('boss flees after player covers 70% of distance', () => {
   const threshold = initialDistance * 0.3;
 
   game.player.x = level.boss.x - threshold - game.player.width;
-  level.update(1);
+  level.update(FRAME);
   assert.ok(level.bossFlee);
 });
 
@@ -73,7 +75,7 @@ test('boss does not flee before player covers 70% of distance', () => {
   const almostThreshold = initialDistance * 0.31;
 
   game.player.x = level.boss.x - almostThreshold - game.player.width;
-  level.update(1);
+  level.update(FRAME);
   assert.ok(!level.bossFlee);
 });
 
@@ -88,7 +90,7 @@ test('shield deactivates even when input is spammed', () => {
   const player = game.player;
   for (let i = 0; i < 30; i++) {
     game.handleInput();
-    player.update(0, game.groundY, 1);
+    player.update(0, game.groundY, FRAME);
   }
   assert.strictEqual(player.shieldActive, false);
 });
@@ -98,7 +100,7 @@ test('shield can be reactivated after cooldown', () => {
   const player = game.player;
   game.handleInput();
   for (let i = 0; i < 60; i++) {
-    player.update(0, game.groundY, 1);
+    player.update(0, game.groundY, FRAME);
   }
   game.handleInput();
   assert.strictEqual(player.shieldActive, true);
