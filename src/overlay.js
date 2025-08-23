@@ -3,15 +3,22 @@ export class Overlay {
     this.element = document.getElementById('overlay');
     this.content = document.getElementById('overlay-content');
     this.button = document.getElementById('overlay-button');
+    this.defaultButtonText = this.button.textContent;
+    this.onClose = null;
+    this.button.addEventListener('click', () => this.hide());
   }
 
-  show(text, onClose) {
+  show(text, onClose, buttonText = this.defaultButtonText) {
     this.content.textContent = text;
+    this.button.textContent = buttonText;
+    this.onClose = onClose;
     this.element.classList.remove('hidden');
-    this.button.onclick = () => {
-      this.element.classList.add('hidden');
-      this.button.onclick = null;
-      if (onClose) onClose();
-    };
+  }
+
+  hide() {
+    this.element.classList.add('hidden');
+    const cb = this.onClose;
+    this.onClose = null;
+    if (cb) cb();
   }
 }
