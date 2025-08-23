@@ -26,7 +26,9 @@ export class Level2 extends BaseLevel {
   }
 
   createObstacle() {
-    return new Obstacle(this.boss.x, this.game.groundY, 30, 50);
+    // The knight's thrown wall should be half as thick
+    // Reduce obstacle width from 30 to 15
+    return new Obstacle(this.boss.x, this.game.groundY, 15, 50);
   }
 
   onObstaclePassed() {}
