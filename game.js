@@ -1,7 +1,8 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-const groundY = 150;
+canvas.height = 200;
+let groundY = canvas.height - 50;
 
 const unicorn = {
   x: 50,
@@ -12,22 +13,44 @@ const unicorn = {
   jumping: false
 };
 
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  groundY = canvas.height - 50;
+  if (!unicorn.jumping) {
+    unicorn.y = groundY;
+  }
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
 let obstacles = [];
 let score = 0;
 let speed = 6;
 let gravity = 0.6;
 let gameOver = false;
 
+function handleInput() {
+  if (gameOver) {
+    reset();
+  } else if (!unicorn.jumping) {
+    unicorn.vy = -12;
+    unicorn.jumping = true;
+  }
+}
+
 document.addEventListener('keydown', (e) => {
   if (e.code === 'Space') {
-    if (gameOver) {
-      reset();
-    } else if (!unicorn.jumping) {
-      unicorn.vy = -12;
-      unicorn.jumping = true;
-    }
+    handleInput();
   }
 });
+
+document.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  handleInput();
+}, { passive: false });
+
+document.addEventListener('mousedown', handleInput);
 
 function reset() {
   obstacles = [];
@@ -99,12 +122,14 @@ function draw() {
 
   ctx.fillStyle = '#000';
   ctx.font = '16px sans-serif';
-  ctx.fillText(`Punteggio: ${score}`, 650, 20);
+  ctx.fillText(`Punteggio: ${score}`, canvas.width - 150, 20);
 
   if (gameOver) {
     ctx.fillStyle = '#000';
     ctx.font = '24px sans-serif';
-    ctx.fillText('Game Over - premi Spazio per ricominciare', 120, 100);
+    const msg = 'Game Over - tocca o premi Spazio per ricominciare';
+    const msgWidth = ctx.measureText(msg).width;
+    ctx.fillText(msg, (canvas.width - msgWidth) / 2, 100);
   }
 }
 
