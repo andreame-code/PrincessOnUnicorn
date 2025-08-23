@@ -1,3 +1,5 @@
+import { JUMP_VELOCITY } from './config.js';
+
 export class Player {
   constructor(x, groundY) {
     this.x = x;
@@ -31,7 +33,7 @@ export class Player {
 
   jump() {
     if (!this.jumping) {
-      this.vy = -720;
+      this.vy = JUMP_VELOCITY;
       this.jumping = true;
     }
   }
