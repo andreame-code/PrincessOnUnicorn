@@ -31,6 +31,7 @@ export class Renderer {
         load('sprites/enemies/black_knight/run/02.png'),
         load('sprites/enemies/black_knight/run/03.png'),
       ];
+      this.wallSprite = load('sprites/projectiles/wall/00.png');
     }
     this.playerFrameIndex = 0;
     this.playerFrameTimer = 0;
@@ -121,10 +122,16 @@ export class Renderer {
   drawWalls() {
     const { game } = this;
     this.withContext(ctx => {
-      ctx.fillStyle = 'gray';
-      game.level.walls.forEach(w => {
-        ctx.fillRect(w.x, w.y - w.height, w.width, w.height);
-      });
+      if (this.wallSprite) {
+        game.level.walls.forEach(w => {
+          ctx.drawImage(this.wallSprite, w.x, w.y - w.height, w.width, w.height);
+        });
+      } else {
+        ctx.fillStyle = 'gray';
+        game.level.walls.forEach(w => {
+          ctx.fillRect(w.x, w.y - w.height, w.width, w.height);
+        });
+      }
       const b = game.level.boss;
       if (this.knightSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
