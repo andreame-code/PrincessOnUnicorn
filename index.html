@@ -7,6 +7,23 @@
   <style>
     body { text-align: center; font-family: sans-serif; }
     canvas { background: #f0f0f0; display: block; margin: 0 auto; width: 100%; }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .overlay button { margin-top: 20px; padding: 10px 20px; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -14,6 +31,10 @@
   <p>Premi la barra spaziatrice o tocca lo schermo per saltare.</p>
   <p>Raggiungi 1000 punti e supera il Cavaliere Nero per vincere!</p>
   <canvas id="game" height="200"></canvas>
+  <div id="overlay" class="overlay hidden">
+    <div id="overlay-content"></div>
+    <button id="overlay-button">Continua</button>
+  </div>
   <script src="collision.js"></script>
   <script src="game.js"></script>
 </body>
