@@ -30,7 +30,8 @@ export class Game {
     this.params = new URLSearchParams(window.location.search);
     this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
 
-    window.addEventListener('resize', () => this.resizeCanvas());
+    this.boundResize = this.throttle(() => this.resizeCanvas(), 200);
+    window.addEventListener('resize', this.boundResize);
     this.resizeCanvas();
 
     this.player = new Player(50, this.groundY);
@@ -49,6 +50,17 @@ export class Game {
 
   showOverlay(text, onClose) {
     this.overlay.show(text, onClose);
+  }
+
+  throttle(fn, delay) {
+    let timeoutId = null;
+    return (...args) => {
+      if (timeoutId !== null) return;
+      timeoutId = setTimeout(() => {
+        timeoutId = null;
+        fn(...args);
+      }, delay);
+    };
   }
 
   resizeCanvas() {
@@ -141,5 +153,9 @@ export class Game {
       this.input.detach();
       this.showOverlay(STORY_TEXT[2], () => { this.gamePaused = false; });
     }
+  }
+
+  destroy() {
+    window.removeEventListener('resize', this.boundResize);
   }
 }
