@@ -26,9 +26,11 @@ resizeCanvas();
 
 let obstacles = [];
 let score = 0;
-let speed = 6;
-let gravity = 0.6;
+// Slower game speed and lower gravity make the game easier
+let speed = 3;
+let gravity = 0.4;
 let gameOver = false;
+let win = false;
 
 function handleInput() {
   if (gameOver) {
@@ -51,6 +53,7 @@ function reset() {
   obstacles = [];
   score = 0;
   gameOver = false;
+  win = false;
   unicorn.y = groundY;
   unicorn.vy = 0;
   unicorn.jumping = false;
@@ -67,7 +70,8 @@ function update() {
     unicorn.jumping = false;
   }
 
-  if (Math.random() < 0.02) {
+  // Fewer obstacles to make gameplay easier
+  if (Math.random() < 0.01) {
     obstacles.push({x: canvas.width, width: 20, height: 40});
   }
 
@@ -83,6 +87,11 @@ function update() {
   });
 
   score++;
+
+  if (score >= 1000) {
+    gameOver = true;
+    win = true;
+  }
 }
 
 function drawUnicorn() {
@@ -122,7 +131,9 @@ function draw() {
   if (gameOver) {
     ctx.fillStyle = '#000';
     ctx.font = '24px sans-serif';
-    const msg = 'Game Over - tocca o premi Spazio per ricominciare';
+    const msg = win
+      ? 'Complimenti! Hai raggiunto 1000 punti!'
+      : 'Game Over - tocca o premi Spazio per ricominciare';
     const msgWidth = ctx.measureText(msg).width;
     ctx.fillText(msg, (canvas.width - msgWidth) / 2, 100);
   }
