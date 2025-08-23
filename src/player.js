@@ -8,6 +8,7 @@ export class Player {
     this.jumping = false;
     this.shieldActive = false;
     this.shieldTimer = 0;
+    this.shieldCooldown = 0;
   }
 
   update(gravity, groundY) {
@@ -22,6 +23,9 @@ export class Player {
       this.shieldTimer--;
       if (this.shieldTimer === 0) this.shieldActive = false;
     }
+    if (this.shieldCooldown > 0) {
+      this.shieldCooldown--;
+    }
   }
 
   jump() {
@@ -31,8 +35,11 @@ export class Player {
     }
   }
 
-  activateShield(duration = 15) {
-    this.shieldActive = true;
-    this.shieldTimer = duration;
+  activateShield(duration = 15, cooldown = 60) {
+    if (!this.shieldActive && this.shieldCooldown === 0) {
+      this.shieldActive = true;
+      this.shieldTimer = duration;
+      this.shieldCooldown = cooldown;
+    }
   }
 }
