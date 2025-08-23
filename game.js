@@ -31,6 +31,12 @@ let speed = 3;
 let gravity = 0.4;
 let gameOver = false;
 let win = false;
+let obstacleTimer = 0;
+let obstacleInterval = getObstacleInterval();
+
+function getObstacleInterval() {
+  return 80 + Math.random() * 70; // ensure obstacles are neither too close nor too far apart
+}
 
 function handleInput() {
   if (gameOver) {
@@ -57,6 +63,8 @@ function reset() {
   unicorn.y = groundY;
   unicorn.vy = 0;
   unicorn.jumping = false;
+  obstacleTimer = 0;
+  obstacleInterval = getObstacleInterval();
   requestAnimationFrame(loop);
 }
 
@@ -70,9 +78,12 @@ function update() {
     unicorn.jumping = false;
   }
 
-  // Fewer obstacles to make gameplay easier
-  if (Math.random() < 0.01) {
+  // Control obstacle spacing so jumps remain possible
+  obstacleTimer++;
+  if (obstacleTimer > obstacleInterval) {
     obstacles.push({x: canvas.width, width: 20, height: 40});
+    obstacleTimer = 0;
+    obstacleInterval = getObstacleInterval();
   }
 
   obstacles.forEach(o => o.x -= speed);
