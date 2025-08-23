@@ -55,22 +55,22 @@ function createStubGame({ canvasWidth = 800, innerWidth = 800, search = '' } = {
   return game;
 }
 
-test('boss flees after player covers 80% of distance', () => {
+test('boss flees after player covers 70% of distance', () => {
   const game = createStubGame();
   const level = new Level2(game);
   const initialDistance = level.boss.x - (game.player.x + game.player.width);
-  const threshold = initialDistance * 0.2;
+  const threshold = initialDistance * 0.3;
 
   game.player.x = level.boss.x - threshold - game.player.width;
   level.update();
   assert.ok(level.bossFlee);
 });
 
-test('boss does not flee before player covers 80% of distance', () => {
+test('boss does not flee before player covers 70% of distance', () => {
   const game = createStubGame();
   const level = new Level2(game);
   const initialDistance = level.boss.x - (game.player.x + game.player.width);
-  const almostThreshold = initialDistance * 0.21;
+  const almostThreshold = initialDistance * 0.31;
 
   game.player.x = level.boss.x - almostThreshold - game.player.width;
   level.update();
