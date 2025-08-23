@@ -56,9 +56,29 @@ export class Renderer {
       ctx.fillRect(b.x, b.y - b.height, b.width, b.height);
     }
 
+    if (game.level.coins) {
+      game.level.coins.forEach(c => {
+        ctx.fillStyle = 'gold';
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
     ctx.fillStyle = '#000';
     ctx.font = '16px sans-serif';
-    ctx.fillText(`Punteggio: ${game.score}`, game.canvas.width - 150, 20);
+    ctx.textAlign = 'left';
+    ctx.fillText(`Punteggio: ${game.score}`, 10, 20);
+
+    const coinX = game.canvas.width - 20;
+    ctx.fillStyle = 'gold';
+    ctx.beginPath();
+    ctx.arc(coinX, 15, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'right';
+    ctx.fillText(`x ${game.coins}`, coinX - 10, 20);
+    ctx.textAlign = 'left';
 
     if (game.gameOver) {
       ctx.fillStyle = '#000';

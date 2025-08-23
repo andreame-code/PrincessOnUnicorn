@@ -9,6 +9,7 @@ export class Level2 {
     this.wallInterval = 90;
     this.boss = { x: game.canvas.width - 100, y: game.groundY, width: 40, height: 50 };
     this.bossFlee = false;
+    this.coins = [];
   }
 
   update() {
@@ -26,6 +27,13 @@ export class Level2 {
       if (isColliding(this.game.player, w)) {
         if (this.game.player.shieldActive) {
           this.game.player.x += 20;
+          this.coins.push({
+            x: w.x + w.width / 2,
+            y: w.y - w.height / 2,
+            vy: -2,
+            life: 30
+          });
+          this.game.coins++;
           return false;
         }
         this.game.gameOver = true;
@@ -33,6 +41,14 @@ export class Level2 {
       }
       return true;
     });
+
+    this.coins.forEach(c => {
+      c.x -= speed;
+      c.y += c.vy;
+      c.vy += 0.1;
+      c.life--;
+    });
+    this.coins = this.coins.filter(c => c.life > 0 && c.x > -10);
 
     if (this.game.player.x + this.game.player.width >= this.boss.x - 20) {
       this.bossFlee = true;
