@@ -12,8 +12,8 @@ export class Game {
     this.overlayContent = document.getElementById('overlay-content');
     this.overlayButton = document.getElementById('overlay-button');
 
-    this.speed = 3;
-    this.gravity = 0.4;
+    this.speed = 180; // pixels per second
+    this.gravity = 24; // acceleration per second^2
     this.score = 0;
     this.coins = 0;
     this.gameOver = false;
@@ -104,7 +104,7 @@ export class Game {
   update(delta) {
     this.player.update(this.gravity, this.groundY, delta);
     this.level.update(delta);
-    if (!this.gameOver) this.score += delta;
+    if (!this.gameOver) this.score += delta * 60;
 
     if (this.levelNumber === 1 && this.score >= 1000) {
       this.levelNumber = 2;
@@ -129,7 +129,7 @@ export class Game {
 
   loop(timestamp) {
     if (!this.lastTime) this.lastTime = timestamp;
-    const delta = (timestamp - this.lastTime) / (1000 / 60);
+    const delta = (timestamp - this.lastTime) / 1000;
     this.lastTime = timestamp;
     this.update(delta);
     this.draw();

@@ -6,7 +6,7 @@ export class Level2 {
     this.game = game;
     this.walls = [];
     this.wallTimer = 0;
-    this.wallInterval = 90;
+    this.wallInterval = 90 / 60; // seconds
     this.boss = { x: game.canvas.width - 100, y: game.groundY, width: 40, height: 50 };
     this.bossFlee = false;
     this.coins = [];
@@ -15,15 +15,16 @@ export class Level2 {
   }
 
   update(delta) {
-    const speed = (this.game.speed + 2) * delta;
+    const speed = this.game.speed + 120; // px per second
+    const move = speed * delta;
     this.wallTimer += delta;
     if (this.wallTimer > this.wallInterval && !this.bossFlee) {
       this.walls.push(new Obstacle(this.boss.x, this.game.groundY, 30, 50));
       this.wallTimer = 0;
-      this.wallInterval = 60 + Math.random() * 60;
+      this.wallInterval = (60 + Math.random() * 60) / 60;
     }
 
-    this.walls.forEach(w => w.update(speed));
+    this.walls.forEach(w => w.update(move));
     this.walls = this.walls.filter(w => {
       if (w.x + w.width < 0) return false;
       if (isColliding(this.game.player, w)) {
@@ -32,8 +33,8 @@ export class Level2 {
           this.coins.push({
             x: w.x + w.width / 2,
             y: w.y - w.height / 2,
-            vy: -2,
-            life: 30
+            vy: -120,
+            life: 0.5
           });
           this.game.coins++;
           return false;
@@ -45,9 +46,9 @@ export class Level2 {
     });
 
     this.coins.forEach(c => {
-      c.x -= speed;
+      c.x -= move;
       c.y += c.vy * delta;
-      c.vy += 0.1 * delta;
+      c.vy += 6 * delta;
       c.life -= delta;
     });
     this.coins = this.coins.filter(c => c.life > 0 && c.x > -10);
@@ -58,7 +59,7 @@ export class Level2 {
       this.bossFlee = true;
     }
     if (this.bossFlee) {
-      this.boss.x += speed;
+      this.boss.x += move;
       if (this.boss.x > this.game.canvas.width) {
         this.game.gameOver = true;
         this.game.win = true;
