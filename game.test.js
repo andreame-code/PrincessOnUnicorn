@@ -49,6 +49,7 @@ function createStubGame() {
     removeEventListener: noop,
     requestAnimationFrame: noop,
   };
+  global.requestAnimationFrame = noop;
 
   const game = new Game(canvas);
   game.gamePaused = false;
@@ -78,4 +79,16 @@ test('resets when action is triggered after game over', () => {
   game.gamePaused = true;
   game.handleInput();
   assert.ok(resetCalled);
+});
+
+test('detaches and reattaches input listeners on reset', () => {
+  const game = createStubGame();
+  let detachCalls = 0;
+  let attachCalls = 0;
+  game.input.detach = () => { detachCalls++; };
+  game.input.attach = () => { attachCalls++; };
+  game.showOverlay = (_text, onClose) => { if (onClose) onClose(); };
+  game.reset();
+  assert.strictEqual(detachCalls, 1);
+  assert.strictEqual(attachCalls, 1);
 });
