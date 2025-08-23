@@ -20,11 +20,25 @@ export class Renderer {
           load('sprites/player/princess/run/03.png'),
         ],
       };
+      this.treeSprites = [
+        load('sprites/obstacles/trees/00.png'),
+        load('sprites/obstacles/trees/01.png'),
+        load('sprites/obstacles/trees/02.png'),
+      ];
+      this.knightSprites = [
+        load('sprites/enemies/black_knight/run/00.png'),
+        load('sprites/enemies/black_knight/run/01.png'),
+        load('sprites/enemies/black_knight/run/02.png'),
+        load('sprites/enemies/black_knight/run/03.png'),
+      ];
     }
     this.playerFrameIndex = 0;
     this.playerFrameTimer = 0;
     this.frameInterval = 0.1;
     this.lastSpriteTime = 0;
+    this.knightFrameIndex = 0;
+    this.knightFrameTimer = 0;
+    this.lastKnightTime = 0;
   }
 
   withContext(drawFn) {
@@ -92,9 +106,14 @@ export class Renderer {
   drawObstacles() {
     const { game } = this;
     this.withContext(ctx => {
-      ctx.fillStyle = 'green';
       game.level.obstacles.forEach(o => {
-        ctx.fillRect(o.x, o.y - o.height, o.width, o.height);
+        if (this.treeSprites) {
+          const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
+          ctx.drawImage(img, o.x, o.y - o.height, o.width, o.height);
+        } else {
+          ctx.fillStyle = 'green';
+          ctx.fillRect(o.x, o.y - o.height, o.width, o.height);
+        }
       });
     });
   }
@@ -106,9 +125,23 @@ export class Renderer {
       game.level.walls.forEach(w => {
         ctx.fillRect(w.x, w.y - w.height, w.width, w.height);
       });
-      ctx.fillStyle = 'black';
       const b = game.level.boss;
-      ctx.fillRect(b.x, b.y - b.height, b.width, b.height);
+      if (this.knightSprites) {
+        const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        if (!this.lastKnightTime) this.lastKnightTime = now;
+        const delta = (now - this.lastKnightTime) / 1000;
+        this.lastKnightTime = now;
+        this.knightFrameTimer += delta;
+        if (this.knightFrameTimer >= this.frameInterval) {
+          this.knightFrameTimer = 0;
+          this.knightFrameIndex = (this.knightFrameIndex + 1) % this.knightSprites.length;
+        }
+        const img = this.knightSprites[this.knightFrameIndex];
+        ctx.drawImage(img, b.x, b.y - b.height, b.width, b.height);
+      } else {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(b.x, b.y - b.height, b.width, b.height);
+      }
     });
   }
 
