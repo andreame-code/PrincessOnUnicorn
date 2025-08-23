@@ -43,12 +43,22 @@ export function createStubGame({
     addEventListener: noop,
     removeEventListener: noop,
   };
+  const eventListeners = {};
   global.window = {
     innerWidth,
     location: { search },
-    addEventListener: noop,
-    removeEventListener: noop,
+    addEventListener: (event, handler) => {
+      eventListeners[event] = handler;
+    },
+    removeEventListener: (event, handler) => {
+      if (eventListeners[event] === handler) delete eventListeners[event];
+    },
+    dispatchEvent: (event) => {
+      const handler = eventListeners[event.type];
+      if (handler) handler(event);
+    },
     requestAnimationFrame: noop,
+    _eventListeners: eventListeners,
   };
   global.requestAnimationFrame = noop;
 
