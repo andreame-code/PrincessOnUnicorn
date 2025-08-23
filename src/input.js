@@ -2,7 +2,7 @@ export class InputHandler {
   constructor(onAction) {
     this.onAction = onAction;
     this.keyListener = (e) => {
-      if (e.code === 'Space') this.onAction();
+      if (e.code === 'Space' && !e.repeat) this.onAction();
     };
     this.pointerListener = () => this.onAction();
   }
