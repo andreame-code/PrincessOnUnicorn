@@ -10,11 +10,15 @@ window.addEventListener('DOMContentLoaded', () => {
   const overlayContent = document.getElementById('overlay-content');
   const overlayButton = document.getElementById('overlay-button');
 
+  let game;
   playButton.addEventListener('click', () => {
     menu.classList.add('hidden');
     canvas.classList.remove('hidden');
-    canvas.height = 200;
-    new Game(canvas);
+    if (game) {
+      game.reset();
+    } else {
+      game = new Game(canvas);
+    }
   });
 
   const showSimpleOverlay = (text) => {
