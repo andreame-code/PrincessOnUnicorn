@@ -3,6 +3,11 @@ import { InputHandler } from './input.js';
 import { Level1 } from './levels/level1.js';
 import { Level2 } from './levels/level2.js';
 import { Renderer } from './renderer.js';
+import {
+  GAME_SPEED,
+  GRAVITY,
+  LEVEL_UP_SCORE,
+} from './config.js';
 
 export class Game {
   constructor(canvas) {
@@ -12,8 +17,8 @@ export class Game {
     this.overlayContent = document.getElementById('overlay-content');
     this.overlayButton = document.getElementById('overlay-button');
 
-    this.speed = 180; // pixels per second
-    this.gravity = 24; // acceleration per second^2
+    this.speed = GAME_SPEED; // pixels per second
+    this.gravity = GRAVITY; // acceleration per second^2
     this.score = 0;
     this.coins = 0;
     this.gameOver = false;
@@ -108,7 +113,7 @@ export class Game {
     this.level.update(delta);
     if (!this.gameOver) this.score += delta * 60;
 
-    if (this.levelNumber === 1 && this.score >= 1000) {
+    if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
       this.player = new Player(50, this.groundY);
       this.level = new Level2(this);
