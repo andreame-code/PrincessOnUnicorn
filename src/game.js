@@ -86,6 +86,7 @@ export class Game {
   }
 
   reset() {
+    this.input.detach();
     this.resizeCanvas();
     this.score = 0;
     this.coins = 0;
@@ -97,6 +98,7 @@ export class Game {
     this.showOverlay(this.instructionsText[this.levelNumber], () => {
       this.gamePaused = false;
       this.lastTime = 0;
+      this.input.attach();
       requestAnimationFrame(ts => this.loop(ts));
     });
   }
@@ -136,6 +138,7 @@ export class Game {
     if (!this.gameOver && !this.gamePaused) {
       requestAnimationFrame(ts => this.loop(ts));
     } else if (this.gameOver && this.win) {
+      this.input.detach();
       this.showOverlay(this.storyText[2], () => { this.gamePaused = false; });
     }
   }
