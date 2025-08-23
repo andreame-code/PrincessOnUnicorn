@@ -40,3 +40,23 @@ test('detaches and reattaches input listeners on reset', () => {
   assert.strictEqual(detachCalls, 1);
   assert.strictEqual(attachCalls, 1);
 });
+
+test('removes resize listener on destroy', () => {
+  const game = createStubGame({ skipLevelUpdate: true });
+  assert.ok(window._eventListeners.resize);
+  game.destroy();
+  assert.strictEqual(window._eventListeners.resize, undefined);
+});
+
+test('throttles resize events', async () => {
+  const game = createStubGame({ skipLevelUpdate: true });
+  let calls = 0;
+  game.resizeCanvas = () => { calls++; };
+  window.dispatchEvent({ type: 'resize' });
+  window.dispatchEvent({ type: 'resize' });
+  window.dispatchEvent({ type: 'resize' });
+  assert.strictEqual(calls, 0);
+  await new Promise(r => setTimeout(r, 250));
+  assert.strictEqual(calls, 1);
+  game.destroy();
+});
