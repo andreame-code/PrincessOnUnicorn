@@ -23,16 +23,15 @@ export class Game {
     this.params = new URLSearchParams(window.location.search);
     this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
 
-    this.groundY = canvas.height - 50;
+    window.addEventListener('resize', () => this.resizeCanvas());
+    this.resizeCanvas();
+
     this.player = new Player(50, this.groundY);
     this.level = this.levelNumber === 1 ? new Level1(this) : new Level2(this);
     this.renderer = new Renderer(this);
 
     this.input = new InputHandler(() => this.handleInput());
     this.input.attach();
-
-    window.addEventListener('resize', () => this.resizeCanvas());
-    this.resizeCanvas();
 
     this.showOverlay(this.instructionsText[this.levelNumber], () => {
       this.gamePaused = false;
@@ -63,7 +62,7 @@ export class Game {
   resizeCanvas() {
     this.canvas.width = window.innerWidth;
     this.groundY = this.canvas.height - 50;
-    if (!this.player.jumping) {
+    if (this.player && !this.player.jumping) {
       this.player.y = this.groundY;
     }
   }
