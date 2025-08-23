@@ -79,9 +79,7 @@ function update() {
   obstacles = obstacles.filter(o => o.x + o.width > 0);
 
   obstacles.forEach(o => {
-    if (unicorn.x < o.x + o.width &&
-        unicorn.x + unicorn.width > o.x &&
-        unicorn.y > groundY - o.height) {
+    if (isColliding(unicorn, o, groundY)) {
       gameOver = true;
     }
   });
