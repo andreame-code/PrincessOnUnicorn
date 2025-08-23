@@ -68,7 +68,7 @@ export class Renderer {
     ctx.fillStyle = '#000';
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`Punteggio: ${game.score}`, 10, 20);
+    ctx.fillText(`Punteggio: ${Math.floor(game.score)}`, 10, 20);
 
     const coinX = game.canvas.width - 20;
     ctx.fillStyle = 'gold';

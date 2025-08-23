@@ -13,8 +13,8 @@ export class Level1 {
     return 80 + Math.random() * 70;
   }
 
-  update() {
-    this.timer++;
+  update(delta) {
+    this.timer += delta;
     if (this.timer > this.interval) {
       const obstacle = new Obstacle(
         this.game.canvas.width,
@@ -28,7 +28,7 @@ export class Level1 {
       this.interval = Level1.getInterval();
     }
     this.obstacles.forEach(o => {
-      o.update(this.game.speed);
+      o.update(this.game.speed * delta);
       if (!o.coinAwarded && o.x + o.width < this.game.player.x) {
         this.game.coins++;
         o.coinAwarded = true;

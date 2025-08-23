@@ -19,6 +19,7 @@ export class Game {
     this.gameOver = false;
     this.win = false;
     this.gamePaused = true;
+    this.lastTime = 0;
 
     this.params = new URLSearchParams(window.location.search);
     this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
@@ -35,7 +36,8 @@ export class Game {
 
     this.showOverlay(this.instructionsText[this.levelNumber], () => {
       this.gamePaused = false;
-      this.loop();
+      this.lastTime = 0;
+      requestAnimationFrame(ts => this.loop(ts));
     });
   }
 
@@ -94,14 +96,15 @@ export class Game {
     this.gamePaused = true;
     this.showOverlay(this.instructionsText[this.levelNumber], () => {
       this.gamePaused = false;
-      this.loop();
+      this.lastTime = 0;
+      requestAnimationFrame(ts => this.loop(ts));
     });
   }
 
-  update() {
-    this.player.update(this.gravity, this.groundY);
-    this.level.update();
-    if (!this.gameOver) this.score++;
+  update(delta) {
+    this.player.update(this.gravity, this.groundY, delta);
+    this.level.update(delta);
+    if (!this.gameOver) this.score += delta;
 
     if (this.levelNumber === 1 && this.score >= 1000) {
       this.levelNumber = 2;
@@ -111,7 +114,8 @@ export class Game {
       this.showOverlay(this.storyText[1], () => {
         this.showOverlay(this.instructionsText[2], () => {
           this.gamePaused = false;
-          this.loop();
+          this.lastTime = 0;
+          requestAnimationFrame(ts => this.loop(ts));
         });
       });
     }
@@ -123,11 +127,14 @@ export class Game {
     this.renderer.draw();
   }
 
-  loop() {
-    this.update();
+  loop(timestamp) {
+    if (!this.lastTime) this.lastTime = timestamp;
+    const delta = (timestamp - this.lastTime) / (1000 / 60);
+    this.lastTime = timestamp;
+    this.update(delta);
     this.draw();
     if (!this.gameOver && !this.gamePaused) {
-      requestAnimationFrame(() => this.loop());
+      requestAnimationFrame(ts => this.loop(ts));
     } else if (this.gameOver && this.win) {
       this.showOverlay(this.storyText[2], () => { this.gamePaused = false; });
     }

@@ -62,11 +62,11 @@ test('awards coin for passed obstacle and preserves coins in level 2', () => {
   obstacle.coinAwarded = false;
   game.level.obstacles.push(obstacle);
 
-  game.update();
+  game.update(1);
   assert.strictEqual(game.coins, 1);
 
   game.score = 999;
-  game.update();
+  game.update(1);
   assert.strictEqual(game.levelNumber, 2);
   assert.ok(game.level instanceof Level2);
   assert.strictEqual(game.coins, 1);

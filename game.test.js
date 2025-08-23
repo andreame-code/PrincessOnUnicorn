@@ -58,10 +58,10 @@ function createStubGame() {
 test('advances to level 2 after reaching 1000 points', () => {
   const game = createStubGame();
   for (let i = 0; i < 999; i++) {
-    game.update();
+    game.update(1);
   }
   assert.strictEqual(game.levelNumber, 1);
-  game.update();
+  game.update(1);
   assert.strictEqual(game.levelNumber, 2);
   assert.ok(game.level instanceof Level2);
 });
