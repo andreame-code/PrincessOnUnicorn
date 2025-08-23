@@ -21,6 +21,10 @@ scudo: se un muro lo raggiunge mentre lo scudo è attivo il muro viene
 frantumato e l'unicorno avanza verso il nemico. Quando il cavaliere è
 abbastanza vicino fugge e la principessa vince.
 
+## Credits
+
+Gioco realizzato quasi interamente con l'aiuto di ChatGPT.
+
 ## Test
 
 Esegui i test unitari con:

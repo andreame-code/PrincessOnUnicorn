@@ -8,9 +8,12 @@
 </head>
 <body>
   <h1>Principessa sull'Unicorno Runner</h1>
-  <p>Premi la barra spaziatrice o tocca lo schermo per saltare.</p>
-  <p>Raggiungi 1000 punti e supera il Cavaliere Nero per vincere!</p>
-  <canvas id="game" height="200"></canvas>
+  <div id="menu">
+    <button id="play-button">Gioca</button>
+    <button id="instructions-button">Istruzioni</button>
+    <button id="credits-button">Credits</button>
+  </div>
+  <canvas id="game" class="hidden" height="200"></canvas>
   <div id="overlay" class="overlay hidden">
     <div id="overlay-content"></div>
     <button id="overlay-button">Continua</button>
