@@ -1,4 +1,5 @@
 import { Game } from './src/game.js';
+import { LEVEL_UP_SCORE } from './src/config.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('game');
@@ -32,7 +33,7 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   instructionsButton.addEventListener('click', () => {
-    showSimpleOverlay('Premi la barra spaziatrice o tocca lo schermo per saltare. Raggiungi 1000 punti e supera il Cavaliere Nero per vincere!');
+    showSimpleOverlay(`Premi la barra spaziatrice o tocca lo schermo per saltare. Raggiungi ${LEVEL_UP_SCORE} punti e supera il Cavaliere Nero per vincere!`);
   });
 
   creditsButton.addEventListener('click', () => {

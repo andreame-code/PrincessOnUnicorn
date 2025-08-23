@@ -1,0 +1,10 @@
+export const GAME_SPEED = 3;
+export const GRAVITY = 0.4;
+export const LEVEL_UP_SCORE = 1000;
+export const PLAYER_START_X = 50;
+export const GROUND_OFFSET = 50;
+export const PLAYER_WIDTH = 40;
+export const PLAYER_HEIGHT = 40;
+export const JUMP_FORCE = -12;
+export const SHIELD_DURATION = 15;
+export const SHIELD_COOLDOWN = 60;

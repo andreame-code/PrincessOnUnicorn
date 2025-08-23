@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { Game } from './src/game.js';
 import { Level2 } from './src/levels/level2.js';
+import { SHIELD_COOLDOWN, SHIELD_DURATION } from './src/config.js';
 
 function createStubGame({ canvasWidth = 800, innerWidth = 800, search = '' } = {}) {
   const noop = () => {};
@@ -86,7 +87,7 @@ test('boss initial position uses resized canvas width', () => {
 test('shield deactivates even when input is spammed', () => {
   const game = createStubGame({ search: '?level=2' });
   const player = game.player;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < SHIELD_DURATION * 2; i++) {
     game.handleInput();
     player.update(0, game.groundY);
   }
@@ -97,7 +98,7 @@ test('shield can be reactivated after cooldown', () => {
   const game = createStubGame({ search: '?level=2' });
   const player = game.player;
   game.handleInput();
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < SHIELD_COOLDOWN; i++) {
     player.update(0, game.groundY);
   }
   game.handleInput();

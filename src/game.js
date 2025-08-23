@@ -3,6 +3,13 @@ import { InputHandler } from './input.js';
 import { Level1 } from './levels/level1.js';
 import { Level2 } from './levels/level2.js';
 import { Renderer } from './renderer.js';
+import {
+  GAME_SPEED,
+  GRAVITY,
+  LEVEL_UP_SCORE,
+  PLAYER_START_X,
+  GROUND_OFFSET,
+} from './config.js';
 
 export class Game {
   constructor(canvas) {
@@ -12,8 +19,8 @@ export class Game {
     this.overlayContent = document.getElementById('overlay-content');
     this.overlayButton = document.getElementById('overlay-button');
 
-    this.speed = 3;
-    this.gravity = 0.4;
+    this.speed = GAME_SPEED;
+    this.gravity = GRAVITY;
     this.score = 0;
     this.coins = 0;
     this.gameOver = false;
@@ -26,7 +33,7 @@ export class Game {
     window.addEventListener('resize', () => this.resizeCanvas());
     this.resizeCanvas();
 
-    this.player = new Player(50, this.groundY);
+    this.player = new Player(PLAYER_START_X, this.groundY);
     this.level = this.levelNumber === 1 ? new Level1(this) : new Level2(this);
     this.renderer = new Renderer(this);
 
@@ -62,7 +69,7 @@ export class Game {
   resizeCanvas() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight || this.canvas.height;
-    this.groundY = this.canvas.height - 50;
+    this.groundY = this.canvas.height - GROUND_OFFSET;
     if (this.player && !this.player.jumping) {
       this.player.y = this.groundY;
     }
@@ -89,7 +96,7 @@ export class Game {
     this.coins = 0;
     this.gameOver = false;
     this.win = false;
-    this.player = new Player(50, this.groundY);
+    this.player = new Player(PLAYER_START_X, this.groundY);
     this.level = this.levelNumber === 1 ? new Level1(this) : new Level2(this);
     this.gamePaused = true;
     this.showOverlay(this.instructionsText[this.levelNumber], () => {
@@ -103,9 +110,9 @@ export class Game {
     this.level.update();
     if (!this.gameOver) this.score++;
 
-    if (this.levelNumber === 1 && this.score >= 1000) {
+    if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
-      this.player = new Player(50, this.groundY);
+      this.player = new Player(PLAYER_START_X, this.groundY);
       this.level = new Level2(this);
       this.gamePaused = true;
       this.showOverlay(this.storyText[1], () => {
