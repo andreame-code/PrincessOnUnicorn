@@ -16,13 +16,24 @@ export class Level1 {
   update() {
     this.timer++;
     if (this.timer > this.interval) {
-      this.obstacles.push(
-        new Obstacle(this.game.canvas.width, this.game.groundY, 20, 40)
+      const obstacle = new Obstacle(
+        this.game.canvas.width,
+        this.game.groundY,
+        20,
+        40
       );
+      obstacle.coinAwarded = false;
+      this.obstacles.push(obstacle);
       this.timer = 0;
       this.interval = Level1.getInterval();
     }
-    this.obstacles.forEach(o => o.update(this.game.speed));
+    this.obstacles.forEach(o => {
+      o.update(this.game.speed);
+      if (!o.coinAwarded && o.x + o.width < this.game.player.x) {
+        this.game.coins++;
+        o.coinAwarded = true;
+      }
+    });
     this.obstacles = this.obstacles.filter(o => o.x + o.width > 0);
 
     if (this.obstacles.some(o => isColliding(this.game.player, o))) {
