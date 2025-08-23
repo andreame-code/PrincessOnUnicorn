@@ -3,6 +3,8 @@ import { InputHandler } from './input.js';
 import { Level1 } from './levels/level1.js';
 import { Level2 } from './levels/level2.js';
 import { Renderer } from './renderer.js';
+import { Overlay } from './overlay.js';
+import { INSTRUCTIONS_TEXT, STORY_TEXT } from './texts.js';
 import {
   GAME_SPEED,
   GRAVITY,
@@ -13,9 +15,7 @@ export class Game {
   constructor(canvas, randomFn = Math.random) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.overlay = document.getElementById('overlay');
-    this.overlayContent = document.getElementById('overlay-content');
-    this.overlayButton = document.getElementById('overlay-button');
+    this.overlay = new Overlay();
     this.random = randomFn;
 
     this.speed = GAME_SPEED; // pixels per second
@@ -40,31 +40,15 @@ export class Game {
     this.input = new InputHandler(() => this.handleInput());
     this.input.attach();
 
-    this.showOverlay(this.instructionsText[this.levelNumber], () => {
+    this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
       this.gamePaused = false;
       this.lastTime = 0;
       requestAnimationFrame(ts => this.loop(ts));
     });
   }
 
-  instructionsText = {
-    1: 'Salta gli ostacoli premendo la barra spaziatrice o toccando lo schermo.',
-    2: 'Attiva lo scudo per rompere i muri del Cavaliere Nero premendo la barra spaziatrice o toccando lo schermo.'
-  };
-
-  storyText = {
-    1: 'La principessa supera la foresta e si avvicina al castello del Cavaliere Nero.',
-    2: 'Il Cavaliere Nero fugge e il regno è salvo!'
-  };
-
   showOverlay(text, onClose) {
-    this.overlayContent.textContent = text;
-    this.overlay.classList.remove('hidden');
-    this.overlayButton.onclick = () => {
-      this.overlay.classList.add('hidden');
-      this.overlayButton.onclick = null;
-      if (onClose) onClose();
-    };
+    this.overlay.show(text, onClose);
   }
 
   resizeCanvas() {
@@ -111,7 +95,7 @@ export class Game {
     this.player = new Player(50, this.groundY);
     this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
     this.gamePaused = true;
-    this.showOverlay(this.instructionsText[this.levelNumber], () => {
+    this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
       this.gamePaused = false;
       this.lastTime = 0;
       this.input.attach();
@@ -129,8 +113,8 @@ export class Game {
       this.player = new Player(50, this.groundY);
       this.level = new Level2(this, this.random);
       this.gamePaused = true;
-      this.showOverlay(this.storyText[1], () => {
-        this.showOverlay(this.instructionsText[2], () => {
+      this.showOverlay(STORY_TEXT[1], () => {
+        this.showOverlay(INSTRUCTIONS_TEXT[2], () => {
           this.gamePaused = false;
           this.lastTime = 0;
           requestAnimationFrame(ts => this.loop(ts));
@@ -155,7 +139,7 @@ export class Game {
       requestAnimationFrame(ts => this.loop(ts));
     } else if (this.gameOver && this.win) {
       this.input.detach();
-      this.showOverlay(this.storyText[2], () => { this.gamePaused = false; });
+      this.showOverlay(STORY_TEXT[2], () => { this.gamePaused = false; });
     }
   }
 }
