@@ -10,6 +10,8 @@ export class Level2 {
     this.boss = { x: game.canvas.width - 100, y: game.groundY, width: 40, height: 50 };
     this.bossFlee = false;
     this.coins = [];
+    this.initialDistance =
+      this.boss.x - (this.game.player.x + this.game.player.width);
   }
 
   update() {
@@ -50,7 +52,9 @@ export class Level2 {
     });
     this.coins = this.coins.filter(c => c.life > 0 && c.x > -10);
 
-    if (this.game.player.x + this.game.player.width >= this.boss.x - 20) {
+    const currentDistance =
+      this.boss.x - (this.game.player.x + this.game.player.width);
+    if (currentDistance <= this.initialDistance * 0.2) {
       this.bossFlee = true;
     }
     if (this.bossFlee) {
