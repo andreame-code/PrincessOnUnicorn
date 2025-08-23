@@ -1,5 +1,6 @@
 import { Game } from './src/game.js';
 import { LEVEL_UP_SCORE } from './src/config.js';
+import { Overlay } from './src/overlay.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('game');
@@ -7,9 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const playButton = document.getElementById('play-button');
   const instructionsButton = document.getElementById('instructions-button');
   const creditsButton = document.getElementById('credits-button');
-  const overlay = document.getElementById('overlay');
-  const overlayContent = document.getElementById('overlay-content');
-  const overlayButton = document.getElementById('overlay-button');
+  const overlay = new Overlay();
 
   let game;
   playButton.addEventListener('click', () => {
@@ -22,23 +21,19 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const showSimpleOverlay = (text) => {
-    overlayContent.textContent = text;
-    overlayButton.textContent = 'Indietro';
-    overlay.classList.remove('hidden');
-    overlayButton.onclick = () => {
-      overlay.classList.add('hidden');
-      overlayButton.onclick = null;
-    };
-  };
-
   instructionsButton.addEventListener('click', () => {
-    showSimpleOverlay(
-      `Premi la barra spaziatrice o tocca lo schermo per saltare. Raggiungi ${LEVEL_UP_SCORE} punti e supera il Cavaliere Nero per vincere!`
+    overlay.show(
+      `Premi la barra spaziatrice o tocca lo schermo per saltare. Raggiungi ${LEVEL_UP_SCORE} punti e supera il Cavaliere Nero per vincere!`,
+      null,
+      'Indietro'
     );
   });
 
   creditsButton.addEventListener('click', () => {
-    showSimpleOverlay("Gioco realizzato quasi interamente con l'aiuto di ChatGPT.");
+    overlay.show(
+      "Gioco realizzato quasi interamente con l'aiuto di ChatGPT.",
+      null,
+      'Indietro'
+    );
   });
 });
