@@ -24,14 +24,11 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Allow starting directly at the boss level via URL parameter ?level=2
 const params = new URLSearchParams(window.location.search);
-if (params.get('level') === '2') {
-  score = 1000;
-  boss = { x: canvas.width, width: 40, height: 60 };
-}
+let level = params.get('level') === '2' ? 2 : 1;
 
 let obstacles = [];
+let walls = [];
 let score = 0;
 // Slower game speed and lower gravity make the game easier
 let speed = 3;
@@ -41,6 +38,16 @@ let win = false;
 let obstacleTimer = 0;
 let obstacleInterval = getObstacleInterval();
 let boss = null;
+// Variables for level 2
+let wallTimer = 0;
+let wallInterval = 90;
+let shieldActive = false;
+let shieldTimer = 0;
+let bossFlee = false;
+
+if (level === 2) {
+  startLevel2();
+}
 
 function getObstacleInterval() {
   return 80 + Math.random() * 70; // ensure obstacles are neither too close nor too far apart
@@ -49,9 +56,12 @@ function getObstacleInterval() {
 function handleInput() {
   if (gameOver) {
     reset();
-  } else if (!unicorn.jumping) {
+  } else if (level === 1 && !unicorn.jumping) {
     unicorn.vy = -12;
     unicorn.jumping = true;
+  } else if (level === 2) {
+    shieldActive = true;
+    shieldTimer = 15;
   }
 }
 
@@ -65,19 +75,37 @@ window.addEventListener('pointerdown', handleInput);
 
 function reset() {
   obstacles = [];
+  walls = [];
   score = 0;
   gameOver = false;
   win = false;
+  unicorn.x = 50;
   unicorn.y = groundY;
   unicorn.vy = 0;
   unicorn.jumping = false;
   obstacleTimer = 0;
   obstacleInterval = getObstacleInterval();
   boss = null;
+  wallTimer = 0;
+  shieldActive = false;
+  shieldTimer = 0;
+  bossFlee = false;
+  level = params.get('level') === '2' ? 2 : 1;
+  if (level === 2) {
+    startLevel2();
+  }
   requestAnimationFrame(loop);
 }
 
-function update() {
+function startLevel2() {
+  boss = { x: canvas.width - 80, width: 40, height: 60 };
+  walls = [];
+  wallTimer = 0;
+  bossFlee = false;
+  unicorn.y = groundY;
+}
+
+function updateLevel1() {
   unicorn.y += unicorn.vy;
   if (unicorn.y < groundY) {
     unicorn.vy += gravity;
@@ -87,40 +115,83 @@ function update() {
     unicorn.jumping = false;
   }
 
-  if (!boss) {
-    // Control obstacle spacing so jumps remain possible
-    obstacleTimer++;
-    if (obstacleTimer > obstacleInterval) {
-      obstacles.push({ x: canvas.width, width: 20, height: 40 });
-      obstacleTimer = 0;
-      obstacleInterval = getObstacleInterval();
-    }
+  obstacleTimer++;
+  if (obstacleTimer > obstacleInterval) {
+    obstacles.push({ x: canvas.width, width: 20, height: 40 });
+    obstacleTimer = 0;
+    obstacleInterval = getObstacleInterval();
+  }
 
-    obstacles.forEach(o => o.x -= speed);
-    obstacles = obstacles.filter(o => o.x + o.width > 0);
+  obstacles.forEach(o => o.x -= speed);
+  obstacles = obstacles.filter(o => o.x + o.width > 0);
 
-    obstacles.forEach(o => {
-      if (isColliding(unicorn, o, groundY)) {
-        gameOver = true;
-      }
-    });
-
-    if (score >= 1000) {
-      boss = { x: canvas.width, width: 40, height: 60 };
-      obstacles = [];
-    }
-  } else {
-    boss.x -= speed + 1;
-    if (isColliding(unicorn, boss, groundY)) {
+  obstacles.forEach(o => {
+    if (isColliding(unicorn, o, groundY)) {
       gameOver = true;
     }
-    if (boss.x + boss.width < 0) {
+  });
+
+  if (score >= 1000) {
+    startLevel2();
+    level = 2;
+    obstacles = [];
+  }
+}
+
+function updateLevel2() {
+  unicorn.y = groundY;
+
+  if (shieldActive) {
+    shieldTimer--;
+    if (shieldTimer <= 0) {
+      shieldActive = false;
+    }
+  }
+
+  wallTimer++;
+  if (wallTimer > wallInterval && !bossFlee) {
+    walls.push({ x: boss.x, width: 30, height: 50 });
+    wallTimer = 0;
+    wallInterval = 60 + Math.random() * 60;
+  }
+
+  walls.forEach(w => w.x -= speed + 2);
+  walls = walls.filter(w => {
+    if (w.x + w.width < 0) return false;
+    if (w.x <= unicorn.x + unicorn.width) {
+      if (shieldActive) {
+        unicorn.x += 20;
+        return false;
+      } else {
+        gameOver = true;
+        return false;
+      }
+    }
+    return true;
+  });
+
+  if (unicorn.x + unicorn.width >= boss.x - 20) {
+    bossFlee = true;
+  }
+
+  if (bossFlee) {
+    boss.x += speed + 4;
+    if (boss.x > canvas.width) {
       gameOver = true;
       win = true;
     }
   }
+}
 
-  score++;
+function update() {
+  if (level === 1) {
+    updateLevel1();
+  } else {
+    updateLevel2();
+  }
+  if (!gameOver) {
+    score++;
+  }
 }
 
 function drawUnicorn() {
@@ -139,6 +210,13 @@ function drawUnicorn() {
   ctx.beginPath();
   ctx.arc(unicorn.x + 12.5, unicorn.y - unicorn.height - 30, 7, 0, Math.PI * 2);
   ctx.fill();
+  if (shieldActive && level === 2) {
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(unicorn.x + unicorn.width / 2, unicorn.y - unicorn.height / 2, unicorn.width, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 }
 
 function draw() {
@@ -148,12 +226,16 @@ function draw() {
 
   drawUnicorn();
 
-  ctx.fillStyle = 'green';
-  obstacles.forEach(o => {
-    ctx.fillRect(o.x, groundY - o.height, o.width, o.height);
-  });
-
-  if (boss) {
+  if (level === 1) {
+    ctx.fillStyle = 'green';
+    obstacles.forEach(o => {
+      ctx.fillRect(o.x, groundY - o.height, o.width, o.height);
+    });
+  } else {
+    ctx.fillStyle = 'gray';
+    walls.forEach(w => {
+      ctx.fillRect(w.x, groundY - w.height, w.width, w.height);
+    });
     ctx.fillStyle = 'black';
     ctx.fillRect(boss.x, groundY - boss.height, boss.width, boss.height);
   }
