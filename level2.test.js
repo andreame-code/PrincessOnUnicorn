@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Game } from './src/game.js';
 import { Level2 } from './src/levels/level2.js';
 
-function createStubGame() {
+function createStubGame({ canvasWidth = 800, innerWidth = 800, search = '' } = {}) {
   const noop = () => {};
   const ctx = {
     clearRect: noop,
@@ -17,10 +17,10 @@ function createStubGame() {
     fillText: noop,
     measureText: () => ({ width: 0 }),
   };
-  const canvas = { width: 800, height: 200, getContext: () => ctx };
+  const canvas = { width: canvasWidth, height: 200, getContext: () => ctx };
   const overlay = { classList: { add: noop, remove: noop } };
-  const overlayContent = {};
-  const overlayButton = {};
+  const overlayContent = { textContent: '' };
+  const overlayButton = { onclick: null };
 
   global.document = {
     getElementById: (id) => {
@@ -41,8 +41,8 @@ function createStubGame() {
     removeEventListener: noop,
   };
   global.window = {
-    innerWidth: 800,
-    location: { search: '' },
+    innerWidth,
+    location: { search },
     addEventListener: noop,
     removeEventListener: noop,
     requestAnimationFrame: noop,
@@ -75,4 +75,10 @@ test('boss does not flee before player covers 80% of distance', () => {
   game.player.x = level.boss.x - almostThreshold - game.player.width;
   level.update();
   assert.ok(!level.bossFlee);
+});
+
+test('boss initial position uses resized canvas width', () => {
+  const game = createStubGame({ canvasWidth: 300, innerWidth: 800, search: '?level=2' });
+  assert.strictEqual(game.canvas.width, 800);
+  assert.strictEqual(game.level.boss.x, 700);
 });
