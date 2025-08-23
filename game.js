@@ -1,5 +1,18 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const overlayContent = document.getElementById('overlay-content');
+const overlayButton = document.getElementById('overlay-button');
+
+function showOverlay(text, onClose) {
+  overlayContent.textContent = text;
+  overlay.classList.remove('hidden');
+  overlayButton.onclick = () => {
+    overlay.classList.add('hidden');
+    overlayButton.onclick = null;
+    if (onClose) onClose();
+  };
+}
 
 canvas.height = 200;
 let groundY = canvas.height - 50;
@@ -27,6 +40,18 @@ resizeCanvas();
 const params = new URLSearchParams(window.location.search);
 let level = params.get('level') === '2' ? 2 : 1;
 
+const instructionsText = {
+  1: 'Salta gli ostacoli premendo la barra spaziatrice o toccando lo schermo.',
+  2: 'Attiva lo scudo per rompere i muri del Cavaliere Nero premendo la barra spaziatrice o toccando lo schermo.'
+};
+
+const storyText = {
+  1: 'La principessa supera la foresta e si avvicina al castello del Cavaliere Nero.',
+  2: 'Il Cavaliere Nero fugge e il regno è salvo!'
+};
+
+let gamePaused = true;
+
 let obstacles = [];
 let walls = [];
 let score = 0;
@@ -45,15 +70,12 @@ let shieldActive = false;
 let shieldTimer = 0;
 let bossFlee = false;
 
-if (level === 2) {
-  startLevel2();
-}
-
 function getObstacleInterval() {
   return 80 + Math.random() * 70; // ensure obstacles are neither too close nor too far apart
 }
 
 function handleInput() {
+  if (gamePaused) return;
   if (gameOver) {
     reset();
   } else if (level === 1 && !unicorn.jumping) {
@@ -91,10 +113,14 @@ function reset() {
   shieldTimer = 0;
   bossFlee = false;
   level = params.get('level') === '2' ? 2 : 1;
-  if (level === 2) {
-    startLevel2();
-  }
-  requestAnimationFrame(loop);
+  gamePaused = true;
+  showOverlay(instructionsText[level], () => {
+    if (level === 2) {
+      startLevel2();
+    }
+    gamePaused = false;
+    requestAnimationFrame(loop);
+  });
 }
 
 function startLevel2() {
@@ -132,9 +158,16 @@ function updateLevel1() {
   });
 
   if (score >= 1000) {
-    startLevel2();
-    level = 2;
+    gamePaused = true;
     obstacles = [];
+    showOverlay(storyText[1], () => {
+      level = 2;
+      showOverlay(instructionsText[2], () => {
+        startLevel2();
+        gamePaused = false;
+        requestAnimationFrame(loop);
+      });
+    });
   }
 }
 
@@ -179,6 +212,8 @@ function updateLevel2() {
     if (boss.x > canvas.width) {
       gameOver = true;
       win = true;
+      gamePaused = true;
+      showOverlay(storyText[2], () => { gamePaused = false; });
     }
   }
 }
@@ -258,9 +293,15 @@ function draw() {
 function loop() {
   update();
   draw();
-  if (!gameOver) {
+  if (!gameOver && !gamePaused) {
     requestAnimationFrame(loop);
   }
 }
 
-requestAnimationFrame(loop);
+showOverlay(instructionsText[level], () => {
+  if (level === 2) {
+    startLevel2();
+  }
+  gamePaused = false;
+  requestAnimationFrame(loop);
+});
