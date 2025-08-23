@@ -1,38 +1,14 @@
+import { AssetManager } from './assetManager.js';
+
 export class Renderer {
   constructor(game) {
     this.game = game;
     this.ctx = game.ctx;
-    if (typeof Image !== 'undefined') {
-      const load = src => {
-        const img = new Image();
-        img.src = src;
-        return img;
-      };
-      this.playerSprites = {
-        idle: [
-          load('sprites/player/princess/idle/00.png'),
-          load('sprites/player/princess/idle/01.png'),
-        ],
-        run: [
-          load('sprites/player/princess/run/00.png'),
-          load('sprites/player/princess/run/01.png'),
-          load('sprites/player/princess/run/02.png'),
-          load('sprites/player/princess/run/03.png'),
-        ],
-      };
-      this.treeSprites = [
-        load('sprites/obstacles/trees/00.png'),
-        load('sprites/obstacles/trees/01.png'),
-        load('sprites/obstacles/trees/02.png'),
-      ];
-      this.knightSprites = [
-        load('sprites/enemies/black_knight/run/00.png'),
-        load('sprites/enemies/black_knight/run/01.png'),
-        load('sprites/enemies/black_knight/run/02.png'),
-        load('sprites/enemies/black_knight/run/03.png'),
-      ];
-      this.wallSprite = load('sprites/projectiles/wall/00.png');
-    }
+    this.assets = new AssetManager();
+    this.playerSprites = null;
+    this.treeSprites = null;
+    this.knightSprites = null;
+    this.wallSprite = null;
     this.playerFrameIndex = 0;
     this.playerFrameTimer = 0;
     this.frameInterval = 0.1;
@@ -40,6 +16,54 @@ export class Renderer {
     this.knightFrameIndex = 0;
     this.knightFrameTimer = 0;
     this.lastKnightTime = 0;
+  }
+
+  preload() {
+    if (typeof Image === 'undefined') {
+      return Promise.resolve();
+    }
+    const assets = [
+      { key: 'player_idle_0', src: 'sprites/player/princess/idle/00.png' },
+      { key: 'player_idle_1', src: 'sprites/player/princess/idle/01.png' },
+      { key: 'player_run_0', src: 'sprites/player/princess/run/00.png' },
+      { key: 'player_run_1', src: 'sprites/player/princess/run/01.png' },
+      { key: 'player_run_2', src: 'sprites/player/princess/run/02.png' },
+      { key: 'player_run_3', src: 'sprites/player/princess/run/03.png' },
+      { key: 'tree_0', src: 'sprites/obstacles/trees/00.png' },
+      { key: 'tree_1', src: 'sprites/obstacles/trees/01.png' },
+      { key: 'tree_2', src: 'sprites/obstacles/trees/02.png' },
+      { key: 'knight_0', src: 'sprites/enemies/black_knight/run/00.png' },
+      { key: 'knight_1', src: 'sprites/enemies/black_knight/run/01.png' },
+      { key: 'knight_2', src: 'sprites/enemies/black_knight/run/02.png' },
+      { key: 'knight_3', src: 'sprites/enemies/black_knight/run/03.png' },
+      { key: 'wall', src: 'sprites/projectiles/wall/00.png' },
+    ];
+    return this.assets.loadAll(assets).then(() => {
+      this.playerSprites = {
+        idle: [
+          this.assets.get('player_idle_0'),
+          this.assets.get('player_idle_1'),
+        ],
+        run: [
+          this.assets.get('player_run_0'),
+          this.assets.get('player_run_1'),
+          this.assets.get('player_run_2'),
+          this.assets.get('player_run_3'),
+        ],
+      };
+      this.treeSprites = [
+        this.assets.get('tree_0'),
+        this.assets.get('tree_1'),
+        this.assets.get('tree_2'),
+      ];
+      this.knightSprites = [
+        this.assets.get('knight_0'),
+        this.assets.get('knight_1'),
+        this.assets.get('knight_2'),
+        this.assets.get('knight_3'),
+      ];
+      this.wallSprite = this.assets.get('wall');
+    });
   }
 
   withContext(drawFn) {
