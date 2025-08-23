@@ -15,6 +15,7 @@ export class Game {
     this.speed = 3;
     this.gravity = 0.4;
     this.score = 0;
+    this.coins = 0;
     this.gameOver = false;
     this.win = false;
     this.gamePaused = true;
@@ -80,6 +81,7 @@ export class Game {
 
   reset() {
     this.score = 0;
+    this.coins = 0;
     this.gameOver = false;
     this.win = false;
     this.player = new Player(50, this.groundY);
