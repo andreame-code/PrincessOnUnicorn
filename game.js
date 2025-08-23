@@ -19,22 +19,29 @@ function resizeCanvas() {
   if (!unicorn.jumping) {
     unicorn.y = groundY;
   }
+  knight.x = canvas.width - 100;
 }
 
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 let obstacles = [];
+let walls = [];
 let score = 0;
 // Slower game speed and lower gravity make the game easier
 let speed = 3;
 let gravity = 0.4;
 let gameOver = false;
 let win = false;
+let bossFight = false;
+let knightEscaping = false;
+const knight = { x: 0, width: 40, height: 80 };
 
 function handleInput() {
   if (gameOver) {
     reset();
+  } else if (bossFight) {
+    attack();
   } else if (!unicorn.jumping) {
     unicorn.vy = -12;
     unicorn.jumping = true;
@@ -49,11 +56,27 @@ document.addEventListener('keydown', (e) => {
 
 window.addEventListener('pointerdown', handleInput);
 
+function attack() {
+  for (let i = 0; i < walls.length; i++) {
+    const w = walls[i];
+    if (w.x <= unicorn.x + unicorn.width + 10 &&
+        w.x >= unicorn.x + unicorn.width - 10) {
+      walls.splice(i, 1);
+      unicorn.x += 20;
+      break;
+    }
+  }
+}
+
 function reset() {
   obstacles = [];
+  walls = [];
   score = 0;
   gameOver = false;
   win = false;
+  bossFight = false;
+  knightEscaping = false;
+  unicorn.x = 50;
   unicorn.y = groundY;
   unicorn.vy = 0;
   unicorn.jumping = false;
@@ -70,25 +93,58 @@ function update() {
     unicorn.jumping = false;
   }
 
-  // Fewer obstacles to make gameplay easier
-  if (Math.random() < 0.01) {
-    obstacles.push({x: canvas.width, width: 20, height: 40});
-  }
-
-  obstacles.forEach(o => o.x -= speed);
-  obstacles = obstacles.filter(o => o.x + o.width > 0);
-
-  obstacles.forEach(o => {
-    if (isColliding(unicorn, o, groundY)) {
-      gameOver = true;
+  if (!bossFight) {
+    // Fewer obstacles to make gameplay easier
+    if (Math.random() < 0.01) {
+      obstacles.push({ x: canvas.width, width: 20, height: 40 });
     }
-  });
 
-  score++;
+    obstacles.forEach(o => o.x -= speed);
+    obstacles = obstacles.filter(o => o.x + o.width > 0);
 
-  if (score >= 1000) {
-    gameOver = true;
-    win = true;
+    obstacles.forEach(o => {
+      if (isColliding(unicorn, o, groundY)) {
+        gameOver = true;
+      }
+    });
+
+    score++;
+
+    if (score >= 1000) {
+      bossFight = true;
+      obstacles = [];
+      unicorn.x = 50;
+      unicorn.vy = 0;
+      unicorn.y = groundY;
+      unicorn.jumping = false;
+    }
+  } else {
+    score++;
+    if (!knightEscaping && Math.random() < 0.02) {
+      walls.push({ x: knight.x - 20, width: 20, height: 60 });
+    }
+
+    walls.forEach(w => w.x -= speed);
+    walls = walls.filter(w => w.x + w.width > 0);
+
+    walls.forEach(w => {
+      if (isColliding(unicorn, w, groundY)) {
+        gameOver = true;
+      }
+    });
+
+    if (!knightEscaping && unicorn.x + unicorn.width >= knight.x - 20) {
+      knightEscaping = true;
+      walls = [];
+    }
+
+    if (knightEscaping) {
+      knight.x += speed * 2;
+      if (knight.x > canvas.width) {
+        gameOver = true;
+        win = true;
+      }
+    }
   }
 }
 
@@ -116,11 +172,20 @@ function draw() {
   ctx.fillRect(0, groundY, canvas.width, 2);
 
   drawUnicorn();
-
-  ctx.fillStyle = 'green';
-  obstacles.forEach(o => {
-    ctx.fillRect(o.x, groundY - o.height, o.width, o.height);
-  });
+  if (bossFight) {
+    ctx.fillStyle = '#000';
+    walls.forEach(o => {
+      ctx.fillRect(o.x, groundY - o.height, o.width, o.height);
+    });
+    if (!win) {
+      ctx.fillRect(knight.x, groundY - knight.height, knight.width, knight.height);
+    }
+  } else {
+    ctx.fillStyle = 'green';
+    obstacles.forEach(o => {
+      ctx.fillRect(o.x, groundY - o.height, o.width, o.height);
+    });
+  }
 
   ctx.fillStyle = '#000';
   ctx.font = '16px sans-serif';
@@ -130,7 +195,7 @@ function draw() {
     ctx.fillStyle = '#000';
     ctx.font = '24px sans-serif';
     const msg = win
-      ? 'Complimenti! Hai raggiunto 1000 punti!'
+      ? 'Il cavaliere nero è scappato! Hai vinto!'
       : 'Game Over - tocca o premi Spazio per ricominciare';
     const msgWidth = ctx.measureText(msg).width;
     ctx.fillText(msg, (canvas.width - msgWidth) / 2, 100);
