@@ -61,6 +61,7 @@ export class Game {
 
   resizeCanvas() {
     this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight || this.canvas.height;
     this.groundY = this.canvas.height - 50;
     if (this.player && !this.player.jumping) {
       this.player.y = this.groundY;
@@ -83,6 +84,7 @@ export class Game {
   }
 
   reset() {
+    this.resizeCanvas();
     this.score = 0;
     this.coins = 0;
     this.gameOver = false;
