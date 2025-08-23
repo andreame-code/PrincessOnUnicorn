@@ -1,49 +1,84 @@
 {
   "princess_run": {
-    "src": "sprites/player/princess/run/*.png",
+    "frames": [
+      "sprites/player/princess/run/00.png",
+      "sprites/player/princess/run/01.png",
+      "sprites/player/princess/run/02.png",
+      "sprites/player/princess/run/03.png"
+    ],
     "fps": 10,
     "anchor": [0.5, 1.0]
   },
   "princess_idle": {
-    "src": "sprites/player/princess/idle/*.png",
+    "frames": [
+      "sprites/player/princess/idle/00.png",
+      "sprites/player/princess/idle/01.png"
+    ],
     "fps": 6,
     "anchor": [0.5, 1.0]
   },
   "princess_jump": {
-    "src": "sprites/player/princess/jump/*.png",
+    "frames": [
+      "sprites/player/princess/jump/00.png",
+      "sprites/player/princess/jump/01.png",
+      "sprites/player/princess/jump/02.png"
+    ],
     "fps": 8,
     "anchor": [0.5, 1.0]
   },
   "unicorn_run": {
-    "src": "sprites/player/unicorn/run/*.png",
+    "frames": [
+      "sprites/mounts/unicorn/run/00.png",
+      "sprites/mounts/unicorn/run/01.png",
+      "sprites/mounts/unicorn/run/02.png"
+    ],
     "fps": 12,
     "anchor": [0.5, 1.0]
   },
   "black_knight_run": {
-    "src": "sprites/enemies/black_knight/run/*.png",
+    "frames": [
+      "sprites/enemies/black_knight/run/00.png",
+      "sprites/enemies/black_knight/run/01.png",
+      "sprites/enemies/black_knight/run/02.png",
+      "sprites/enemies/black_knight/run/03.png"
+    ],
     "fps": 10,
     "anchor": [0.5, 1.0]
   },
   "black_knight_idle": {
-    "src": "sprites/enemies/black_knight/idle/*.png",
-    "fps": 8,
+    "frames": [
+      "sprites/enemies/black_knight/idle/00.png",
+      "sprites/enemies/black_knight/idle/01.png"
+    ],
+    "fps": 6,
     "anchor": [0.5, 1.0]
   },
   "black_knight_attack": {
-    "src": "sprites/enemies/black_knight/attack/*.png",
-    "fps": 8,
+    "frames": [
+      "sprites/enemies/black_knight/attack/00.png",
+      "sprites/enemies/black_knight/attack/01.png",
+      "sprites/enemies/black_knight/attack/02.png",
+      "sprites/enemies/black_knight/attack/03.png",
+      "sprites/enemies/black_knight/attack/04.png"
+    ],
+    "fps": 10,
     "anchor": [0.5, 1.0]
   },
   "trees": {
-    "src": "sprites/obstacles/trees/*.png",
-    "fps": 2,
-    "loop": true,
+    "frames": [
+      "sprites/obstacles/trees/00.png",
+      "sprites/obstacles/trees/01.png",
+      "sprites/obstacles/trees/02.png"
+    ],
     "anchor": [0.5, 1.0]
   },
   "wall": {
-    "src": "sprites/obstacles/wall/*.png",
+    "frames": [
+      "sprites/projectiles/wall/00.png"
+    ],
     "rotate": true,
     "deg_per_sec": 900,
     "anchor": [0.5, 0.5]
   }
 }
+
