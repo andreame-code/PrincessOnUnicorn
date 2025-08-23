@@ -65,3 +65,15 @@ test('advances to level 2 after reaching 1000 points', () => {
   assert.strictEqual(game.levelNumber, 2);
   assert.ok(game.level instanceof Level2);
 });
+
+test('resets when action is triggered after game over', () => {
+  const game = createStubGame();
+  let resetCalled = false;
+  game.reset = () => {
+    resetCalled = true;
+  };
+  game.gameOver = true;
+  game.gamePaused = true;
+  game.handleInput();
+  assert.ok(resetCalled);
+});

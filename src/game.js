@@ -69,10 +69,14 @@ export class Game {
   }
 
   handleInput() {
-    if (this.gamePaused) return;
     if (this.gameOver) {
       this.reset();
-    } else if (this.levelNumber === 1) {
+      return;
+    }
+
+    if (this.gamePaused) return;
+
+    if (this.levelNumber === 1) {
       this.player.jump();
     } else {
       this.player.activateShield();
