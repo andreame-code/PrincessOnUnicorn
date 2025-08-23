@@ -2,8 +2,9 @@ import { Obstacle } from '../obstacle.js';
 import { isColliding } from '../../collision.js';
 
 export class Level2 {
-  constructor(game) {
+  constructor(game, random = Math.random) {
     this.game = game;
+    this.random = random;
     this.walls = [];
     this.wallTimer = 0;
     this.wallInterval = 90 / 60; // seconds
@@ -21,7 +22,7 @@ export class Level2 {
     if (this.wallTimer > this.wallInterval && !this.bossFlee) {
       this.walls.push(new Obstacle(this.boss.x, this.game.groundY, 30, 50));
       this.wallTimer = 0;
-      this.wallInterval = (60 + Math.random() * 60) / 60;
+      this.wallInterval = (60 + this.random() * 60) / 60;
     }
 
     this.walls.forEach(w => w.update(move));

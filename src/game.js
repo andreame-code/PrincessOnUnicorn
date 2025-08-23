@@ -10,12 +10,13 @@ import {
 } from './config.js';
 
 export class Game {
-  constructor(canvas) {
+  constructor(canvas, randomFn = Math.random) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.overlay = document.getElementById('overlay');
     this.overlayContent = document.getElementById('overlay-content');
     this.overlayButton = document.getElementById('overlay-button');
+    this.random = randomFn;
 
     this.speed = GAME_SPEED; // pixels per second
     this.gravity = GRAVITY; // acceleration per second^2
@@ -33,7 +34,7 @@ export class Game {
     this.resizeCanvas();
 
     this.player = new Player(50, this.groundY);
-    this.level = this.levelNumber === 1 ? new Level1(this) : new Level2(this);
+    this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
     this.renderer = new Renderer(this);
 
     this.input = new InputHandler(() => this.handleInput());
@@ -98,7 +99,7 @@ export class Game {
     this.gameOver = false;
     this.win = false;
     this.player = new Player(50, this.groundY);
-    this.level = this.levelNumber === 1 ? new Level1(this) : new Level2(this);
+    this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
     this.gamePaused = true;
     this.showOverlay(this.instructionsText[this.levelNumber], () => {
       this.gamePaused = false;
@@ -116,7 +117,7 @@ export class Game {
     if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
       this.player = new Player(50, this.groundY);
-      this.level = new Level2(this);
+      this.level = new Level2(this, this.random);
       this.gamePaused = true;
       this.showOverlay(this.storyText[1], () => {
         this.showOverlay(this.instructionsText[2], () => {
