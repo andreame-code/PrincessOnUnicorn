@@ -45,12 +45,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-document.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  handleInput();
-}, { passive: false });
-
-document.addEventListener('mousedown', handleInput);
+window.addEventListener('pointerdown', handleInput);
 
 function reset() {
   obstacles = [];
