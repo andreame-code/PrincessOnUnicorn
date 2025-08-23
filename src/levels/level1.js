@@ -10,7 +10,7 @@ export class Level1 {
   }
 
   static getInterval() {
-    return 80 + Math.random() * 70;
+    return (80 + Math.random() * 70) / 60; // seconds
   }
 
   update(delta) {
