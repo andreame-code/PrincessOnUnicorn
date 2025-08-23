@@ -35,18 +35,27 @@ export class Game {
     window.addEventListener('resize', this.boundResize);
     this.resizeCanvas();
 
-    this.player = new Player(50, this.groundY);
-    this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
-    this.renderer = new Renderer(this);
+      this.player = new Player(50, this.groundY);
+      this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
+      this.renderer = new Renderer(this);
 
-    this.input = new InputHandler(() => this.handleInput());
-    this.input.attach();
+      this.input = new InputHandler(() => this.handleInput());
+      this.input.attach();
 
-    this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
-      this.gamePaused = false;
-      this.lastTime = 0;
-      requestAnimationFrame(ts => this.loop(ts));
-    });
+      this.renderer.preload().then(() => {
+        this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
+          this.gamePaused = false;
+          this.lastTime = 0;
+          requestAnimationFrame(ts => this.loop(ts));
+        });
+      }).catch(err => {
+        console.error(err);
+        this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
+          this.gamePaused = false;
+          this.lastTime = 0;
+          requestAnimationFrame(ts => this.loop(ts));
+        });
+      });
   }
 
   showOverlay(text, onClose) {
