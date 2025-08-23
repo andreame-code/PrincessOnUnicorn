@@ -54,7 +54,7 @@ export class Level2 {
 
     const currentDistance =
       this.boss.x - (this.game.player.x + this.game.player.width);
-    if (currentDistance <= this.initialDistance * 0.2) {
+    if (currentDistance <= this.initialDistance * 0.3) {
       this.bossFlee = true;
     }
     if (this.bossFlee) {
