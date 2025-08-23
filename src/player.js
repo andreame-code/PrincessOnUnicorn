@@ -11,20 +11,21 @@ export class Player {
     this.shieldCooldown = 0;
   }
 
-  update(gravity, groundY) {
-    this.vy += gravity;
-    this.y += this.vy;
+  update(gravity, groundY, delta) {
+    this.vy += gravity * delta;
+    this.y += this.vy * delta;
     if (this.y >= groundY) {
       this.y = groundY;
       this.vy = 0;
       this.jumping = false;
     }
     if (this.shieldTimer > 0) {
-      this.shieldTimer--;
-      if (this.shieldTimer === 0) this.shieldActive = false;
+      this.shieldTimer -= delta;
+      if (this.shieldTimer <= 0) this.shieldActive = false;
     }
     if (this.shieldCooldown > 0) {
-      this.shieldCooldown--;
+      this.shieldCooldown -= delta;
+      if (this.shieldCooldown < 0) this.shieldCooldown = 0;
     }
   }
 

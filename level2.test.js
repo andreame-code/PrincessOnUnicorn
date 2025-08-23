@@ -62,7 +62,7 @@ test('boss flees after player covers 70% of distance', () => {
   const threshold = initialDistance * 0.3;
 
   game.player.x = level.boss.x - threshold - game.player.width;
-  level.update();
+  level.update(1);
   assert.ok(level.bossFlee);
 });
 
@@ -73,7 +73,7 @@ test('boss does not flee before player covers 70% of distance', () => {
   const almostThreshold = initialDistance * 0.31;
 
   game.player.x = level.boss.x - almostThreshold - game.player.width;
-  level.update();
+  level.update(1);
   assert.ok(!level.bossFlee);
 });
 
@@ -88,7 +88,7 @@ test('shield deactivates even when input is spammed', () => {
   const player = game.player;
   for (let i = 0; i < 30; i++) {
     game.handleInput();
-    player.update(0, game.groundY);
+    player.update(0, game.groundY, 1);
   }
   assert.strictEqual(player.shieldActive, false);
 });
@@ -98,7 +98,7 @@ test('shield can be reactivated after cooldown', () => {
   const player = game.player;
   game.handleInput();
   for (let i = 0; i < 60; i++) {
-    player.update(0, game.groundY);
+    player.update(0, game.groundY, 1);
   }
   game.handleInput();
   assert.strictEqual(player.shieldActive, true);
