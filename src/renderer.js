@@ -2,6 +2,29 @@ export class Renderer {
   constructor(game) {
     this.game = game;
     this.ctx = game.ctx;
+    if (typeof Image !== 'undefined') {
+      const load = src => {
+        const img = new Image();
+        img.src = src;
+        return img;
+      };
+      this.playerSprites = {
+        idle: [
+          load('sprites/player/princess/idle/00.png'),
+          load('sprites/player/princess/idle/01.png'),
+        ],
+        run: [
+          load('sprites/player/princess/run/00.png'),
+          load('sprites/player/princess/run/01.png'),
+          load('sprites/player/princess/run/02.png'),
+          load('sprites/player/princess/run/03.png'),
+        ],
+      };
+    }
+    this.playerFrameIndex = 0;
+    this.playerFrameTimer = 0;
+    this.frameInterval = 0.1;
+    this.lastSpriteTime = 0;
   }
 
   withContext(drawFn) {
@@ -25,21 +48,37 @@ export class Renderer {
   drawPlayer() {
     const u = this.game.player;
     this.withContext(ctx => {
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(u.x, u.y - u.height, u.width, u.height);
-      ctx.fillRect(u.x + u.width - 10, u.y - u.height - 10, 10, 10);
-      ctx.fillStyle = 'gold';
-      ctx.beginPath();
-      ctx.moveTo(u.x + u.width, u.y - u.height - 10);
-      ctx.lineTo(u.x + u.width + 10, u.y - u.height - 30);
-      ctx.lineTo(u.x + u.width, u.y - u.height - 20);
-      ctx.fill();
-      ctx.fillStyle = 'pink';
-      ctx.fillRect(u.x + 5, u.y - u.height - 25, 15, 15);
-      ctx.fillStyle = '#f2d6cb';
-      ctx.beginPath();
-      ctx.arc(u.x + 12.5, u.y - u.height - 30, 7, 0, Math.PI * 2);
-      ctx.fill();
+      if (this.playerSprites) {
+        const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        if (!this.lastSpriteTime) this.lastSpriteTime = now;
+        const delta = (now - this.lastSpriteTime) / 1000;
+        this.lastSpriteTime = now;
+        this.playerFrameTimer += delta;
+        const anim = this.game.gamePaused || this.game.gameOver ? 'idle' : 'run';
+        const frames = this.playerSprites[anim];
+        if (this.playerFrameTimer >= this.frameInterval) {
+          this.playerFrameTimer = 0;
+          this.playerFrameIndex = (this.playerFrameIndex + 1) % frames.length;
+        }
+        const img = frames[this.playerFrameIndex];
+        ctx.drawImage(img, u.x, u.y - u.height, u.width, u.height);
+      } else {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(u.x, u.y - u.height, u.width, u.height);
+        ctx.fillRect(u.x + u.width - 10, u.y - u.height - 10, 10, 10);
+        ctx.fillStyle = 'gold';
+        ctx.beginPath();
+        ctx.moveTo(u.x + u.width, u.y - u.height - 10);
+        ctx.lineTo(u.x + u.width + 10, u.y - u.height - 30);
+        ctx.lineTo(u.x + u.width, u.y - u.height - 20);
+        ctx.fill();
+        ctx.fillStyle = 'pink';
+        ctx.fillRect(u.x + 5, u.y - u.height - 25, 15, 15);
+        ctx.fillStyle = '#f2d6cb';
+        ctx.beginPath();
+        ctx.arc(u.x + 12.5, u.y - u.height - 30, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
       if (u.shieldActive) {
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 3;
