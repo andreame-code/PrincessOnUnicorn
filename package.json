@@ -1,0 +1,13 @@
+{
+  "name": "princessonunicorn",
+  "version": "1.0.0",
+  "description": "A simple runner game inspired by the Chrome offline T-Rex, but featuring a princess riding a unicorn.",
+  "main": "game.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
