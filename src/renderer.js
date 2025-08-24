@@ -209,11 +209,18 @@ export class Renderer {
       if (game.gameOver) {
         ctx.fillStyle = '#000';
         ctx.font = '24px sans-serif';
-        const msg = game.win
-          ? 'Complimenti! Hai sconfitto il Cavaliere Nero!'
-          : 'Game Over - tocca o premi Spazio per ricominciare';
-        const msgWidth = ctx.measureText(msg).width;
-        ctx.fillText(msg, (game.canvas.width - msgWidth) / 2, 100);
+        const lines = game.win
+          ? ['Complimenti!', 'Hai sconfitto il Cavaliere Nero!']
+          : ['Game Over', 'Tocca o premi Spazio', 'per ricominciare'];
+        const lineHeight = 30;
+        lines.forEach((line, index) => {
+          const lineWidth = ctx.measureText(line).width;
+          ctx.fillText(
+            line,
+            (game.canvas.width - lineWidth) / 2,
+            80 + index * lineHeight
+          );
+        });
       }
     });
   }
