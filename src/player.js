@@ -4,8 +4,8 @@ export class Player {
   constructor(x, groundY, scale = 1) {
     this.x = x;
     this.y = groundY; // bottom position
-    this.baseWidth = 40;
-    this.baseHeight = 40;
+    this.baseWidth = 80;
+    this.baseHeight = 80;
     this.setScale(scale);
     this.vy = 0;
     this.jumping = false;
