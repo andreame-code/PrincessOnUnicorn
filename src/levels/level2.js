@@ -1,6 +1,7 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
 import { isColliding } from '../../collision.js';
+import { SHIELD_RANGE } from '../config.js';
 
 export class Level2 extends BaseLevel {
   constructor(game, random = Math.random) {
@@ -43,14 +44,20 @@ export class Level2 extends BaseLevel {
   onObstaclePassed() {}
 
   handleCollision(w) {
-    if (isColliding(this.game.player, w)) {
-      if (this.game.player.shieldActive) {
-        this.game.player.x += 20;
+    const player = this.game.player;
+    const range = player.shieldActive ? SHIELD_RANGE * this.game.scale : 0;
+    const collider = player.shieldActive
+      ? { x: player.x - range, y: player.y, width: player.width + range * 2, height: player.height }
+      : player;
+
+    if (isColliding(collider, w)) {
+      if (player.shieldActive) {
+        player.x += 20;
         this.coins.push({
           x: w.x + w.width / 2,
           y: w.y - w.height / 2,
           vy: -120,
-          life: 0.5
+          life: 0.5,
         });
         this.game.coins++;
         return false;
