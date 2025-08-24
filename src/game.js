@@ -36,34 +36,38 @@ export class Game {
     window.addEventListener('resize', this.boundResize);
     this.resizeCanvas();
 
-      this.player = new Player(50, this.groundY, this.scale);
-      this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
-      if (typeof this.level.setScale === 'function') {
-        this.level.setScale(this.scale);
-      }
-      this.renderer = new Renderer(this);
+    this.initializeLevel();
+    this.renderer = new Renderer(this);
 
-      this.input = new InputHandler(() => this.handleInput());
-      this.input.attach();
+    this.input = new InputHandler(() => this.handleInput());
+    this.input.attach();
 
-      this.renderer.preload().then(() => {
-        this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
-          this.gamePaused = false;
-          this.lastTime = 0;
-          requestAnimationFrame(ts => this.loop(ts));
-        });
-      }).catch(err => {
-        console.error(err);
-        this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
-          this.gamePaused = false;
-          this.lastTime = 0;
-          requestAnimationFrame(ts => this.loop(ts));
-        });
-      });
+    this.renderer
+      .preload()
+      .catch(err => console.error(err))
+      .finally(() => this.startGame());
   }
 
   showOverlay(text, onClose) {
     this.overlay.show(text, onClose);
+  }
+
+  initializeLevel() {
+    this.player = new Player(50, this.groundY, this.scale);
+    this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
+    if (typeof this.level.setScale === 'function') {
+      this.level.setScale(this.scale);
+    }
+  }
+
+  startLoop() {
+    this.gamePaused = false;
+    this.lastTime = 0;
+    requestAnimationFrame(ts => this.loop(ts));
+  }
+
+  startGame() {
+    this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => this.startLoop());
   }
 
   throttle(fn, delay) {
@@ -123,17 +127,11 @@ export class Game {
     this.coins = 0;
     this.gameOver = false;
     this.win = false;
-    this.player = new Player(50, this.groundY, this.scale);
-    this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
-    if (typeof this.level.setScale === 'function') {
-      this.level.setScale(this.scale);
-    }
+    this.initializeLevel();
     this.gamePaused = true;
     this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
-      this.gamePaused = false;
-      this.lastTime = 0;
       this.input.attach();
-      requestAnimationFrame(ts => this.loop(ts));
+      this.startLoop();
     });
   }
 
@@ -149,16 +147,10 @@ export class Game {
 
     if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
-      this.player = new Player(50, this.groundY, this.scale);
-      this.level = new Level2(this, this.random);
-      this.level.setScale(this.scale);
+      this.initializeLevel();
       this.gamePaused = true;
       this.showOverlay(STORY_TEXT[1], () => {
-        this.showOverlay(INSTRUCTIONS_TEXT[2], () => {
-          this.gamePaused = false;
-          this.lastTime = 0;
-          requestAnimationFrame(ts => this.loop(ts));
-        });
+        this.showOverlay(INSTRUCTIONS_TEXT[2], () => this.startLoop());
       });
     }
 
