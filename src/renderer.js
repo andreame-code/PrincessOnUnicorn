@@ -1,4 +1,5 @@
 import { AssetManager } from './assetManager.js';
+import { SHIELD_RANGE } from './config.js';
 
 export class Renderer {
   constructor(game) {
@@ -116,10 +117,11 @@ export class Renderer {
         ctx.fill();
       }
       if (u.shieldActive) {
+        const extra = SHIELD_RANGE * this.game.scale * 2;
         if (this.shieldSprite) {
           const img = this.shieldSprite;
-          const w = img.width || u.width;
-          const h = img.height || u.height;
+          const w = (img.width || u.width) + extra;
+          const h = (img.height || u.height) + extra;
           const sx = u.x + u.width / 2 - w / 2;
           const sy = u.y - u.height / 2 - h / 2;
           ctx.drawImage(img, sx, sy, w, h);
@@ -127,7 +129,13 @@ export class Renderer {
           ctx.strokeStyle = 'blue';
           ctx.lineWidth = 3;
           ctx.beginPath();
-          ctx.arc(u.x + u.width / 2, u.y - u.height / 2, u.width, 0, Math.PI * 2);
+          ctx.arc(
+            u.x + u.width / 2,
+            u.y - u.height / 2,
+            u.width + SHIELD_RANGE * this.game.scale,
+            0,
+            Math.PI * 2,
+          );
           ctx.stroke();
         }
       }
