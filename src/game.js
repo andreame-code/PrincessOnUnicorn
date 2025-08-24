@@ -126,8 +126,11 @@ export class Game {
   }
 
   update(delta) {
-    this.player.update(this.gravity, this.groundY, delta);
+    this.player.update(this.gameOver ? 0 : this.gravity, this.groundY, delta);
     this.level.update(delta);
+    if (this.gameOver && !this.player.dead && !this.win) {
+      this.player.die();
+    }
     if (!this.gameOver) this.score += delta * 60;
 
     if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
@@ -157,11 +160,15 @@ export class Game {
     this.lastTime = timestamp;
     this.update(delta);
     this.draw();
-    if (!this.gameOver && !this.gamePaused) {
+    if (this.gameOver) {
+      if (this.win) {
+        this.input.detach();
+        this.showOverlay(STORY_TEXT[2], () => { this.gamePaused = false; });
+      } else {
+        requestAnimationFrame(ts => this.loop(ts));
+      }
+    } else if (!this.gamePaused) {
       requestAnimationFrame(ts => this.loop(ts));
-    } else if (this.gameOver && this.win) {
-      this.input.detach();
-      this.showOverlay(STORY_TEXT[2], () => { this.gamePaused = false; });
     }
   }
 
