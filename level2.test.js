@@ -53,3 +53,19 @@ test('shield can be reactivated after cooldown', () => {
   game.handleInput();
   assert.strictEqual(player.shieldActive, true);
 });
+
+test('shield blocks obstacles slightly earlier', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const level = game.level;
+  const player = game.player;
+  const wall = level.createObstacle();
+  const gap = 5;
+  wall.x = player.x + player.width + gap;
+
+  // Without shield the obstacle should pass
+  assert.ok(level.handleCollision(wall));
+
+  // With shield active it should collide
+  player.activateShield();
+  assert.ok(!level.handleCollision(wall));
+});
