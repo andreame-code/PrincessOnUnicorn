@@ -11,7 +11,7 @@ export class BaseLevel {
   }
 
   static getInterval(random) {
-    return (80 + random() * 70) / 60; // seconds
+    return (100 + random() * 80) / 60; // seconds
   }
 
   createObstacle() {
