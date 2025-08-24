@@ -60,3 +60,14 @@ test('throttles resize events', async () => {
   assert.strictEqual(calls, 1);
   game.destroy();
 });
+
+test('player continues to fall after losing', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  // Simulate a game over scenario and trigger the death animation
+  game.gameOver = true;
+  game.player.die();
+  const initialVy = game.player.vy;
+  // After update, gravity should increase the vertical velocity
+  game.update(FRAME);
+  assert.ok(game.player.vy > initialVy);
+});
