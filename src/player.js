@@ -11,6 +11,7 @@ export class Player {
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
+    this.dead = false;
   }
 
   update(gravity, groundY, delta) {
@@ -44,5 +45,10 @@ export class Player {
       this.shieldTimer = duration;
       this.shieldCooldown = cooldown;
     }
+  }
+
+  die(speed = -200) {
+    this.dead = true;
+    this.vy = speed;
   }
 }
