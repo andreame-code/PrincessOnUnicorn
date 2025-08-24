@@ -9,7 +9,7 @@ const FRAME = 1 / 60;
 
 test('awards coin for passed obstacle and preserves coins in level 2', () => {
   const game = createStubGame();
-  const obstacle = new Obstacle(game.player.x - 30, game.groundY, 20, 40);
+  const obstacle = new Obstacle(game.player.x - 30, game.groundY, 40, 80);
   obstacle.coinAwarded = false;
   game.level.obstacles.push(obstacle);
 
