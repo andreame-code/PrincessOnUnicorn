@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprite Demo</title>
+</head>
+<body>
+  <canvas id="game" width="512" height="320"></canvas>
+
+  <script type="module">
+    import { loadSprites, Animator } from './js/preload.js';
+
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    let last = performance.now();
+    let knightAnim, princessAnim, shieldImg;
+
+    (async function start() {
+      const sprites = await loadSprites('assets/sprites/sprites.json');
+      knightAnim = new Animator(sprites.knight, 7);     // 7 FPS
+      princessAnim = new Animator(sprites.princess, 7); // 7 FPS
+      shieldImg = sprites.shield;
+      requestAnimationFrame(loop);
+    })();
+
+    function loop(t) {
+      const dt = (t - last) / 1000;
+      last = t;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (knightAnim) {
+        knightAnim.update(dt);
+        knightAnim.draw(ctx, 120, 160, -0.15, 1.0); // x,y,rotazione,scala
+      }
+      if (princessAnim) {
+        princessAnim.update(dt);
+        princessAnim.draw(ctx, 360, 160, 0.1, 1.0);
+      }
+      if (shieldImg) {
+        ctx.drawImage(shieldImg, 260, 140); // esempio: scudo statico
+      }
+
+      requestAnimationFrame(loop);
+    }
+  </script>
+</body>
+</html>
