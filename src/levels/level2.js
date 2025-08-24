@@ -6,7 +6,14 @@ export class Level2 extends BaseLevel {
   constructor(game, random = Math.random) {
     super(game, random);
     this.interval = 90 / 60; // seconds
-    this.boss = { x: game.canvas.width - 100, y: game.groundY, width: 40, height: 50 };
+    this.boss = {
+      x: game.canvas.width - 100,
+      y: game.groundY,
+      baseWidth: 40,
+      baseHeight: 50,
+    };
+    this.boss.width = this.boss.baseWidth * game.scale;
+    this.boss.height = this.boss.baseHeight * game.scale;
     this.bossFlee = false;
     this.coins = [];
     this.initialDistance =
@@ -28,7 +35,9 @@ export class Level2 extends BaseLevel {
   createObstacle() {
     // The knight's thrown wall should be half as thick
     // Reduce obstacle width from 30 to 15
-    return new Obstacle(this.boss.x, this.game.groundY, 15, 50);
+    const wall = new Obstacle(this.boss.x, this.game.groundY, 15, 50);
+    wall.setScale(this.game.scale);
+    return wall;
   }
 
   onObstaclePassed() {}
@@ -81,5 +90,11 @@ export class Level2 extends BaseLevel {
         this.game.win = true;
       }
     }
+  }
+
+  setScale(scale) {
+    super.setScale(scale);
+    this.boss.width = this.boss.baseWidth * scale;
+    this.boss.height = this.boss.baseHeight * scale;
   }
 }
