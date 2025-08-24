@@ -21,6 +21,7 @@ export class BaseLevel {
       20,
       40
     );
+    obstacle.setScale(this.game.scale);
     obstacle.imageIndex = Math.floor(this.random() * 3);
     obstacle.coinAwarded = false;
     return obstacle;
@@ -67,5 +68,9 @@ export class BaseLevel {
 
   update(delta) {
     this.updateObstacles(delta);
+  }
+
+  setScale(scale) {
+    this.obstacles.forEach(o => o.setScale(scale));
   }
 }

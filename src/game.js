@@ -27,6 +27,7 @@ export class Game {
     this.win = false;
     this.gamePaused = true;
     this.lastTime = 0;
+    this.scale = 1;
 
     this.params = new URLSearchParams(window.location.search);
     this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
@@ -35,8 +36,11 @@ export class Game {
     window.addEventListener('resize', this.boundResize);
     this.resizeCanvas();
 
-      this.player = new Player(50, this.groundY);
+      this.player = new Player(50, this.groundY, this.scale);
       this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
+      if (typeof this.level.setScale === 'function') {
+        this.level.setScale(this.scale);
+      }
       this.renderer = new Renderer(this);
 
       this.input = new InputHandler(() => this.handleInput());
@@ -87,8 +91,15 @@ export class Game {
     }
     this.canvas.height = availableHeight > 0 ? availableHeight : this.canvas.height;
     this.groundY = this.canvas.height - 50;
-    if (this.player && !this.player.jumping) {
-      this.player.y = this.groundY;
+    this.scale = Math.max(1, Math.min(window.innerWidth / 800, 2));
+    if (this.player) {
+      this.player.setScale(this.scale);
+      if (!this.player.jumping) {
+        this.player.y = this.groundY;
+      }
+    }
+    if (this.level && typeof this.level.setScale === 'function') {
+      this.level.setScale(this.scale);
     }
   }
 
@@ -114,8 +125,11 @@ export class Game {
     this.coins = 0;
     this.gameOver = false;
     this.win = false;
-    this.player = new Player(50, this.groundY);
+    this.player = new Player(50, this.groundY, this.scale);
     this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
+    if (typeof this.level.setScale === 'function') {
+      this.level.setScale(this.scale);
+    }
     this.gamePaused = true;
     this.showOverlay(INSTRUCTIONS_TEXT[this.levelNumber], () => {
       this.gamePaused = false;
@@ -137,8 +151,9 @@ export class Game {
 
     if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
-      this.player = new Player(50, this.groundY);
+      this.player = new Player(50, this.groundY, this.scale);
       this.level = new Level2(this, this.random);
+      this.level.setScale(this.scale);
       this.gamePaused = true;
       this.showOverlay(STORY_TEXT[1], () => {
         this.showOverlay(INSTRUCTIONS_TEXT[2], () => {
