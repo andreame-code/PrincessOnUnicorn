@@ -9,8 +9,8 @@ export class Level2 extends BaseLevel {
     this.boss = {
       x: game.canvas.width - 100,
       y: game.groundY,
-      baseWidth: 40,
-      baseHeight: 50,
+      baseWidth: 80,
+      baseHeight: 100,
     };
     this.boss.width = this.boss.baseWidth * game.scale;
     this.boss.height = this.boss.baseHeight * game.scale;
@@ -34,8 +34,8 @@ export class Level2 extends BaseLevel {
 
   createObstacle() {
     // The knight's thrown wall should be half as thick
-    // Reduce obstacle width from 30 to 15
-    const wall = new Obstacle(this.boss.x, this.game.groundY, 15, 50);
+    // Width reduced from 60 to 30 before scaling
+    const wall = new Obstacle(this.boss.x, this.game.groundY, 30, 100);
     wall.setScale(this.game.scale);
     return wall;
   }
