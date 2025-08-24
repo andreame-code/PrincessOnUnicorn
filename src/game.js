@@ -84,7 +84,7 @@ export class Game {
     // height, expand the canvas instead of letting the character leave the
     // field of view.
     const availableHeight = window.innerHeight || this.canvas.height;
-    const minHeight = 640; // jump arc (~400) + max player height (~160) + ground
+    const minHeight = 480; // jump arc (~300) + max player height (~160) + ground
     this.canvas.height = Math.max(availableHeight, minHeight);
     this.groundY = this.canvas.height - 50;
     const widthScale = window.innerWidth / 800;
