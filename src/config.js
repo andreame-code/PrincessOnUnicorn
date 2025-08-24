@@ -5,3 +5,5 @@ export const LEVEL_UP_SCORE = 1000;
 export const JUMP_VELOCITY = -720;
 // Delay between canvas resize adjustments (ms)
 export const RESIZE_THROTTLE_MS = 200;
+// Maximum width of the canvas to ensure consistent gameplay across devices
+export const MAX_CANVAS_WIDTH = 800;

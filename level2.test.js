@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { Level2 } from './src/levels/level2.js';
+import { MAX_CANVAS_WIDTH } from './src/config.js';
 
 const FRAME = 1 / 60;
 
@@ -31,6 +32,13 @@ test('boss initial position uses resized canvas width', () => {
   const game = createStubGame({ canvasWidth: 300, innerWidth: 800, search: '?level=2', skipLevelUpdate: true });
   assert.strictEqual(game.canvas.width, 800);
   assert.strictEqual(game.level.boss.x, 700);
+});
+
+test('boss position clamps when screen is wider than maximum', () => {
+  const wide = MAX_CANVAS_WIDTH + 500;
+  const game = createStubGame({ canvasWidth: 300, innerWidth: wide, search: '?level=2', skipLevelUpdate: true });
+  assert.strictEqual(game.canvas.width, MAX_CANVAS_WIDTH);
+  assert.strictEqual(game.level.boss.x, MAX_CANVAS_WIDTH - 100);
 });
 
 test('shield deactivates even when input is spammed', () => {
