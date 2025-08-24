@@ -18,8 +18,8 @@ export class BaseLevel {
     const obstacle = new Obstacle(
       this.game.canvas.width,
       this.game.groundY,
-      20,
-      40
+      40,
+      80
     );
     obstacle.setScale(this.game.scale);
     obstacle.imageIndex = Math.floor(this.random() * 3);
