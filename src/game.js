@@ -10,6 +10,7 @@ import {
   GRAVITY,
   LEVEL_UP_SCORE,
   RESIZE_THROTTLE_MS,
+  MAX_CANVAS_WIDTH,
 } from './config.js';
 
 export class Game {
@@ -74,7 +75,7 @@ export class Game {
   }
 
   resizeCanvas() {
-    this.canvas.width = window.innerWidth;
+    this.canvas.width = Math.min(window.innerWidth, MAX_CANVAS_WIDTH);
     // Ensure the canvas fits in the remaining viewport height so the
     // player is visible without scrolling, especially on mobile devices.
     let availableHeight = window.innerHeight || this.canvas.height;

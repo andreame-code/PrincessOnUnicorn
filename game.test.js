@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { Level2 } from './src/levels/level2.js';
-import { LEVEL_UP_SCORE } from './src/config.js';
+import { LEVEL_UP_SCORE, MAX_CANVAS_WIDTH } from './src/config.js';
 
 const FRAME = 1 / 60;
 
@@ -59,6 +59,11 @@ test('throttles resize events', async () => {
   await new Promise(r => setTimeout(r, 250));
   assert.strictEqual(calls, 1);
   game.destroy();
+});
+
+test('caps canvas width at maximum value', () => {
+  const game = createStubGame({ innerWidth: MAX_CANVAS_WIDTH + 500, skipLevelUpdate: true });
+  assert.strictEqual(game.canvas.width, MAX_CANVAS_WIDTH);
 });
 
 test('player continues to fall after losing', () => {
