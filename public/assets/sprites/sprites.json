@@ -1,0 +1,13 @@
+{
+  "knight": [
+    "assets/sprites/cavaliere_nero/knight_0.png",
+    "assets/sprites/cavaliere_nero/knight_1.png",
+    "assets/sprites/cavaliere_nero/knight_2.png"
+  ],
+  "princess": [
+    "assets/sprites/principessa/princess_0.png",
+    "assets/sprites/principessa/princess_1.png",
+    "assets/sprites/principessa/princess_2.png"
+  ],
+  "shield": "assets/sprites/shield.png"
+}
