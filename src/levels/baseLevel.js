@@ -58,7 +58,7 @@ export class BaseLevel {
       o.update(move);
     });
     this.obstacles = this.obstacles.filter(o => {
-      if (o.x + o.width < this.game.player.x + this.game.player.width) {
+      if (o.x + o.width < this.game.player.x) {
         this.onObstaclePassed(o);
         return false;
       }
