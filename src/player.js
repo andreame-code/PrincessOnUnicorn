@@ -1,17 +1,23 @@
 import { JUMP_VELOCITY } from './config.js';
 
 export class Player {
-  constructor(x, groundY) {
+  constructor(x, groundY, scale = 1) {
     this.x = x;
     this.y = groundY; // bottom position
-    this.width = 40;
-    this.height = 40;
+    this.baseWidth = 40;
+    this.baseHeight = 40;
+    this.setScale(scale);
     this.vy = 0;
     this.jumping = false;
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
     this.dead = false;
+  }
+
+  setScale(scale) {
+    this.width = this.baseWidth * scale;
+    this.height = this.baseHeight * scale;
   }
 
   update(gravity, groundY, delta) {
