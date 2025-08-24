@@ -7,7 +7,7 @@ const FRAME = 1 / 60;
 // Ensure that jumping early over an obstacle no longer causes a collision
 // once the obstacle has been cleared.
 test('player can jump early without landing on obstacle', () => {
-  const game = createStubGame();
+  const game = createStubGame({ canvasHeight: 600, innerHeight: 600 });
   const obstacle = game.level.createObstacle();
   obstacle.x = 174; // far enough that player previously landed on it
   obstacle.y = game.groundY;

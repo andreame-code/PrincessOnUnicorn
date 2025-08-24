@@ -23,6 +23,10 @@ export class Player {
   update(gravity, groundY, delta) {
     this.vy += gravity * delta;
     this.y += this.vy * delta;
+    if (this.y - this.height < 0) {
+      this.y = this.height;
+      if (this.vy < 0) this.vy = 0;
+    }
     if (this.y >= groundY) {
       this.y = groundY;
       this.vy = 0;

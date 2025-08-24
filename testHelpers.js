@@ -3,7 +3,9 @@ import { Game } from './src/game.js';
 export function createStubGame({
   rng,
   canvasWidth = 800,
+  canvasHeight = 200,
   innerWidth = 800,
+  innerHeight = canvasHeight,
   search = '',
   skipLevelUpdate = false,
 } = {}) {
@@ -20,7 +22,7 @@ export function createStubGame({
     fillText: noop,
     measureText: () => ({ width: 0 }),
   };
-  const canvas = { width: canvasWidth, height: 200, getContext: () => ctx };
+  const canvas = { width: canvasWidth, height: canvasHeight, getContext: () => ctx };
   const overlay = { classList: { add: noop, remove: noop } };
   const overlayContent = { textContent: '' };
   const overlayButton = { onclick: null, textContent: '', addEventListener: noop };
@@ -46,6 +48,7 @@ export function createStubGame({
   const eventListeners = {};
   global.window = {
     innerWidth,
+    innerHeight,
     location: { search },
     addEventListener: (event, handler) => {
       eventListeners[event] = handler;
