@@ -11,7 +11,8 @@ export class BaseLevel {
   }
 
   static getInterval(random) {
-    return (100 + random() * 80) / 60; // seconds
+    // Obstacles move faster, so shorten spawn intervals to keep spacing consistent.
+    return (75 + random() * 60) / 60; // seconds
   }
 
   createObstacle() {
