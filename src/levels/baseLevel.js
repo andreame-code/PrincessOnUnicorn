@@ -56,12 +56,12 @@ export class BaseLevel {
     const move = this.getMoveSpeed() * delta;
     this.obstacles.forEach(o => {
       o.update(move);
-      if (o.x + o.width < this.game.player.x) {
-        this.onObstaclePassed(o);
-      }
     });
     this.obstacles = this.obstacles.filter(o => {
-      if (o.x + o.width < 0) return false;
+      if (o.x + o.width < this.game.player.x + this.game.player.width) {
+        this.onObstaclePassed(o);
+        return false;
+      }
       return this.handleCollision(o);
     });
   }
