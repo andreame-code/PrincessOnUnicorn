@@ -9,6 +9,7 @@ export class Renderer {
     this.treeSprites = null;
     this.knightSprites = null;
     this.wallSprite = null;
+    this.shieldSprite = null;
     this.playerFrameIndex = 0;
     this.playerFrameTimer = 0;
     this.frameInterval = 0.1;
@@ -23,32 +24,28 @@ export class Renderer {
       return Promise.resolve();
     }
     const assets = [
-      { key: 'player_idle_0', src: 'sprites/player/princess/idle/00.png' },
-      { key: 'player_idle_1', src: 'sprites/player/princess/idle/01.png' },
-      { key: 'player_run_0', src: 'sprites/player/princess/run/00.png' },
-      { key: 'player_run_1', src: 'sprites/player/princess/run/01.png' },
-      { key: 'player_run_2', src: 'sprites/player/princess/run/02.png' },
-      { key: 'player_run_3', src: 'sprites/player/princess/run/03.png' },
+      { key: 'player_0', src: 'public/assets/sprites/principessa/princess_0.png' },
+      { key: 'player_1', src: 'public/assets/sprites/principessa/princess_1.png' },
+      { key: 'player_2', src: 'public/assets/sprites/principessa/princess_2.png' },
       { key: 'tree_0', src: 'sprites/obstacles/trees/00.png' },
       { key: 'tree_1', src: 'sprites/obstacles/trees/01.png' },
       { key: 'tree_2', src: 'sprites/obstacles/trees/02.png' },
-      { key: 'knight_0', src: 'sprites/enemies/black_knight/run/00.png' },
-      { key: 'knight_1', src: 'sprites/enemies/black_knight/run/01.png' },
-      { key: 'knight_2', src: 'sprites/enemies/black_knight/run/02.png' },
-      { key: 'knight_3', src: 'sprites/enemies/black_knight/run/03.png' },
+      { key: 'knight_0', src: 'public/assets/sprites/cavaliere_nero/knight_0.png' },
+      { key: 'knight_1', src: 'public/assets/sprites/cavaliere_nero/knight_1.png' },
+      { key: 'knight_2', src: 'public/assets/sprites/cavaliere_nero/knight_2.png' },
       { key: 'wall', src: 'sprites/projectiles/wall/00.png' },
+      { key: 'shield', src: 'public/assets/sprites/shield.png' },
     ];
     return this.assets.loadAll(assets).then(() => {
       this.playerSprites = {
         idle: [
-          this.assets.get('player_idle_0'),
-          this.assets.get('player_idle_1'),
+          this.assets.get('player_0'),
+          this.assets.get('player_1'),
         ],
         run: [
-          this.assets.get('player_run_0'),
-          this.assets.get('player_run_1'),
-          this.assets.get('player_run_2'),
-          this.assets.get('player_run_3'),
+          this.assets.get('player_0'),
+          this.assets.get('player_1'),
+          this.assets.get('player_2'),
         ],
       };
       this.treeSprites = [
@@ -60,9 +57,9 @@ export class Renderer {
         this.assets.get('knight_0'),
         this.assets.get('knight_1'),
         this.assets.get('knight_2'),
-        this.assets.get('knight_3'),
       ];
       this.wallSprite = this.assets.get('wall');
+      this.shieldSprite = this.assets.get('shield');
     });
   }
 
@@ -119,11 +116,20 @@ export class Renderer {
         ctx.fill();
       }
       if (u.shieldActive) {
-        ctx.strokeStyle = 'blue';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(u.x + u.width / 2, u.y - u.height / 2, u.width, 0, Math.PI * 2);
-        ctx.stroke();
+        if (this.shieldSprite) {
+          const img = this.shieldSprite;
+          const w = img.width || u.width;
+          const h = img.height || u.height;
+          const sx = u.x + u.width / 2 - w / 2;
+          const sy = u.y - u.height / 2 - h / 2;
+          ctx.drawImage(img, sx, sy, w, h);
+        } else {
+          ctx.strokeStyle = 'blue';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(u.x + u.width / 2, u.y - u.height / 2, u.width, 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
     });
   }
