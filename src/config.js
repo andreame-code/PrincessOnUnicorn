@@ -14,7 +14,7 @@ export const JUMP_VELOCITY = -6.2; // world units per second
 // Delay between canvas resize adjustments (ms)
 export const RESIZE_THROTTLE_MS = 200;
 // Extra reach for the level 2 shield in world units
-export const SHIELD_RANGE = 0.1;
+export const SHIELD_RANGE = 0.3;
 // Default shield cooldown duration in seconds
 export const SHIELD_COOLDOWN = 0.5;
 // Duration the shield stays active in seconds
