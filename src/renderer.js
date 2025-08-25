@@ -1,6 +1,8 @@
 import { AssetManager } from './assetManager.js';
 import { SHIELD_RANGE } from './config.js';
 
+const SPRITE_SCALE = 2;
+
 export class Renderer {
   constructor(game) {
     this.game = game;
@@ -87,10 +89,11 @@ export class Renderer {
     const u = this.game.player;
     this.withContext(ctx => {
       const scale = this.game.scale;
-      const scaledWidth = u.width * scale;
-      const scaledHeight = u.height * scale;
-      const left = (u.x - u.width / 2) * scale;
-      const top = (u.y - u.height / 2) * scale;
+      const scaledWidth = u.width * scale * SPRITE_SCALE;
+      const scaledHeight = u.height * scale * SPRITE_SCALE;
+      const bottom = (u.y + u.height / 2) * scale;
+      const left = u.x * scale - scaledWidth / 2;
+      const top = bottom - scaledHeight;
 
       if (this.playerSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -162,16 +165,17 @@ export class Renderer {
     this.withContext(ctx => {
       const scale = this.game.scale;
       game.level.obstacles.forEach(o => {
-        const w = o.width * scale;
-        const h = o.height * scale;
-        const x = (o.x - o.width / 2) * scale;
-        const y = (o.y - o.height / 2) * scale;
+        const w = o.width * scale * SPRITE_SCALE;
+        const h = o.height * scale * SPRITE_SCALE;
+        const left = o.x * scale - w / 2;
+        const bottom = (o.y + o.height / 2) * scale;
+        const top = bottom - h;
         if (this.treeSprites) {
           const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
-          ctx.drawImage(img, x, y, w, h);
+          ctx.drawImage(img, left, top, w, h);
         } else {
           ctx.fillStyle = 'green';
-          ctx.fillRect(x, y, w, h);
+          ctx.fillRect(left, top, w, h);
         }
       });
     });
@@ -183,23 +187,30 @@ export class Renderer {
       const scale = this.game.scale;
       if (this.wallSprite) {
         game.level.walls.forEach(w => {
-          const wWidth = w.width * scale;
-          const wHeight = w.height * scale;
-          ctx.drawImage(this.wallSprite, (w.x - w.width / 2) * scale, (w.y - w.height / 2) * scale, wWidth, wHeight);
+          const wWidth = w.width * scale * SPRITE_SCALE;
+          const wHeight = w.height * scale * SPRITE_SCALE;
+          const left = w.x * scale - wWidth / 2;
+          const bottom = (w.y + w.height / 2) * scale;
+          const top = bottom - wHeight;
+          ctx.drawImage(this.wallSprite, left, top, wWidth, wHeight);
         });
       } else {
         ctx.fillStyle = 'gray';
         game.level.walls.forEach(w => {
-          const wWidth = w.width * scale;
-          const wHeight = w.height * scale;
-          ctx.fillRect((w.x - w.width / 2) * scale, (w.y - w.height / 2) * scale, wWidth, wHeight);
+          const wWidth = w.width * scale * SPRITE_SCALE;
+          const wHeight = w.height * scale * SPRITE_SCALE;
+          const left = w.x * scale - wWidth / 2;
+          const bottom = (w.y + w.height / 2) * scale;
+          const top = bottom - wHeight;
+          ctx.fillRect(left, top, wWidth, wHeight);
         });
       }
       const b = game.level.boss;
-      const bw = b.width * scale;
-      const bh = b.height * scale;
-      const bx = (b.x - b.width / 2) * scale;
-      const by = (b.y - b.height / 2) * scale;
+      const bw = b.width * scale * SPRITE_SCALE;
+      const bh = b.height * scale * SPRITE_SCALE;
+      const bx = b.x * scale - bw / 2;
+      const bottom = (b.y + b.height / 2) * scale;
+      const by = bottom - bh;
       if (this.knightSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
         if (!this.lastKnightTime) this.lastKnightTime = now;
