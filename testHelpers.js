@@ -1,5 +1,24 @@
 import { Game } from './src/game.js';
 
+const localStorageStub = (() => {
+  let store = {};
+  return {
+    getItem(key) {
+      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+    },
+    setItem(key, value) {
+      store[key] = String(value);
+    },
+    removeItem(key) {
+      delete store[key];
+    },
+    clear() {
+      store = {};
+    },
+  };
+})();
+global.localStorage = localStorageStub;
+
 export function createStubGame({
   rng,
   canvasWidth = 1600,

@@ -250,6 +250,7 @@ export class Renderer {
       ctx.font = '16px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(`Punteggio: ${Math.floor(game.score)}`, 10, 20);
+      ctx.fillText(`High Score: ${Math.floor(game.highScore)}`, 10, 40);
 
       const coinX = game.canvas.width - 20;
       ctx.fillStyle = 'gold';
@@ -263,16 +264,17 @@ export class Renderer {
 
       const p = game.player;
       const iconSize = 16;
+      const iconY = 48;
       if (this.shieldSprite) {
-        ctx.drawImage(this.shieldSprite, 10, 28, iconSize, iconSize);
+        ctx.drawImage(this.shieldSprite, 10, iconY, iconSize, iconSize);
       } else {
         ctx.strokeStyle = 'blue';
         ctx.beginPath();
-        ctx.arc(18, 36, 8, 0, Math.PI * 2);
+        ctx.arc(18, iconY + 8, 8, 0, Math.PI * 2);
         ctx.stroke();
       }
       const barX = 10 + iconSize + 5;
-      const barY = 30;
+      const barY = iconY + 2;
       const barWidth = 80;
       const barHeight = 10;
       ctx.strokeStyle = '#000';
