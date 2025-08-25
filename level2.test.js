@@ -43,8 +43,24 @@ test('boss initial position uses resized canvas width', () => {
 test('shield deactivates even when input is spammed', () => {
   const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
   const player = game.player;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 31; i++) {
     game.handleInput();
+    player.update(0, game.groundY, FRAME);
+  }
+  assert.strictEqual(player.shieldActive, false);
+});
+
+test('shield remains active for about half a second', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const player = game.player;
+  game.handleInput();
+  let frames = Math.floor(0.4 / FRAME);
+  for (let i = 0; i < frames; i++) {
+    player.update(0, game.groundY, FRAME);
+  }
+  assert.strictEqual(player.shieldActive, true);
+  frames = Math.ceil(0.2 / FRAME);
+  for (let i = 0; i < frames; i++) {
     player.update(0, game.groundY, FRAME);
   }
   assert.strictEqual(player.shieldActive, false);
@@ -84,4 +100,37 @@ test('shield cooldown bar uses latest cooldown value', () => {
   assert.strictEqual(player.shieldCooldownMax, SHIELD_COOLDOWN);
   player.activateShield(0.25, 2);
   assert.strictEqual(player.shieldCooldownMax, 2);
+});
+
+test('shield activation within grace window blocks attack', () => {
+  const game = createStubGame({ search: '?level=2' });
+  const level = game.level;
+  const player = game.player;
+  const wall = level.createObstacle();
+  wall.x = player.x;
+  level.handleCollision(wall);
+  for (let i = 0; i < 6; i++) {
+    player.update(0, game.groundY, FRAME);
+    level.update(FRAME);
+  }
+  game.handleInput();
+  player.update(0, game.groundY, FRAME);
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, false);
+  assert.strictEqual(game.coins, 1);
+});
+
+test('missing grace window results in game over', () => {
+  const game = createStubGame({ search: '?level=2' });
+  const level = game.level;
+  const player = game.player;
+  const wall = level.createObstacle();
+  wall.x = player.x;
+  level.handleCollision(wall);
+  const frames = Math.ceil(0.17 / FRAME);
+  for (let i = 0; i < frames; i++) {
+    player.update(0, game.groundY, FRAME);
+    level.update(FRAME);
+  }
+  assert.strictEqual(game.gameOver, true);
 });
