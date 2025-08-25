@@ -69,3 +69,11 @@ test('shield blocks obstacles slightly earlier', () => {
   player.activateShield();
   assert.ok(!level.handleCollision(wall));
 });
+
+test('shield cooldown bar uses latest cooldown value', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const player = game.player;
+  assert.strictEqual(player.shieldCooldownMax, 1);
+  player.activateShield(0.25, 2);
+  assert.strictEqual(player.shieldCooldownMax, 2);
+});
