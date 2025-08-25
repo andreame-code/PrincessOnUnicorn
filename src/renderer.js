@@ -134,6 +134,12 @@ export class Renderer {
           const sx = u.x * scale - w / 2;
           const sy = u.y * scale - h / 2;
           ctx.drawImage(img, sx, sy, w, h);
+          // Disegna un anello azzurro di supporto intorno allo scudo
+          ctx.strokeStyle = 'rgba(0, 128, 255, 0.7)';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(u.x * scale, u.y * scale, (scaledWidth + extra * 2), 0, Math.PI * 2);
+          ctx.stroke();
         } else {
           ctx.strokeStyle = 'blue';
           ctx.lineWidth = 3;
