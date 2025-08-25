@@ -76,6 +76,10 @@ export class Level2 extends BaseLevel {
           life: 0.5,
         });
         this.game.coins++;
+        if (this.game.renderer && this.game.renderer.playSound) {
+          this.game.renderer.playSound('shield');
+          this.game.renderer.playSound('coin');
+        }
         return false;
       }
       if (!this.pendingHit) {
@@ -148,6 +152,10 @@ export class Level2 extends BaseLevel {
           life: 0.5,
         });
         this.game.coins++;
+        if (this.game.renderer && this.game.renderer.playSound) {
+          this.game.renderer.playSound('shield');
+          this.game.renderer.playSound('coin');
+        }
         this.pendingHit = null;
         this.pendingGrace = 0;
       } else {

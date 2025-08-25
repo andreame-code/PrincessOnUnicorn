@@ -39,6 +39,9 @@ export class BaseLevel {
     if (!o.coinAwarded) {
       this.game.coins++;
       o.coinAwarded = true;
+      if (this.game.renderer && this.game.renderer.playSound) {
+        this.game.renderer.playSound('coin');
+      }
     }
   }
 
