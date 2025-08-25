@@ -36,7 +36,6 @@ export class Game {
     this.boundResize = this.throttle(() => this.resizeCanvas(), RESIZE_THROTTLE_MS);
     window.addEventListener('resize', this.boundResize);
 
-    this.resizeCanvas();
     this.initializeLevel();
 
     this.renderer = new Renderer(this);
