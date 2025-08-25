@@ -74,6 +74,8 @@ export function createStubGame({
   global.requestAnimationFrame = noop;
 
   const game = new Game(canvas, rng);
+  game.resizeCanvas();
+  game.initializeLevel();
   game.showOverlay = noop;
   game.gamePaused = false;
   if (skipLevelUpdate) {
