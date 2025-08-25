@@ -3,13 +3,13 @@ import { JUMP_VELOCITY, SHIELD_COOLDOWN } from './config.js';
 export class Player {
   constructor(x, groundY, scale = 1) {
     this.x = x;
-    this.y = groundY; // bottom position
     this.baseWidth = 0.8;
     this.baseHeight = 0.8;
     // Physical hitbox dimensions remain in world units, independent of the
     // sprite scale used for rendering.
     this.width = this.baseWidth;
     this.height = this.baseHeight;
+    this.y = groundY - this.height / 2;
     this.spriteScale = scale;
     this.vy = 0;
     this.jumping = false;
@@ -27,8 +27,8 @@ export class Player {
   update(gravity, groundY, delta) {
     this.vy += gravity * delta;
     this.y += this.vy * delta;
-    if (this.y >= groundY) {
-      this.y = groundY;
+    if (this.y + this.height / 2 >= groundY) {
+      this.y = groundY - this.height / 2;
       this.vy = 0;
       this.jumping = false;
     }

@@ -17,6 +17,6 @@ test('player lands within expected time after jumping', () => {
     game.update(FRAME);
   }
 
-  assert.strictEqual(player.y, groundY);
+  assert.strictEqual(player.y, groundY - player.height / 2);
   assert.ok(!player.jumping);
 });
