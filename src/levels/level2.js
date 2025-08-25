@@ -1,7 +1,7 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
 import { isColliding } from '../../collision.js';
-import { SHIELD_RANGE } from '../config.js';
+import { SHIELD_RANGE, SHIELD_GRACE } from '../config.js';
 
 export class Level2 extends BaseLevel {
   constructor(game, random = Math.random) {
@@ -19,6 +19,8 @@ export class Level2 extends BaseLevel {
     this.initialDistance =
       (this.boss.x - this.boss.width / 2) -
       (this.game.player.x + this.game.player.width / 2);
+    this.pendingHit = null;
+    this.pendingGrace = 0;
   }
 
   static getInterval(random) {
@@ -72,7 +74,10 @@ export class Level2 extends BaseLevel {
         this.game.coins++;
         return false;
       }
-      this.game.gameOver = true;
+      if (!this.pendingHit) {
+        this.pendingHit = { x: w.x, y: w.y };
+        this.pendingGrace = SHIELD_GRACE;
+      }
       return false;
     }
     return true;
@@ -106,6 +111,27 @@ export class Level2 extends BaseLevel {
       if (this.boss.x - this.boss.width / 2 > this.game.worldWidth) {
         this.game.gameOver = true;
         this.game.win = true;
+      }
+    }
+
+    if (this.pendingHit) {
+      if (this.game.player.shieldActive) {
+        this.game.player.x += 0.2;
+        this.coins.push({
+          x: this.pendingHit.x,
+          y: this.pendingHit.y,
+          vy: -1.2,
+          life: 0.5,
+        });
+        this.game.coins++;
+        this.pendingHit = null;
+        this.pendingGrace = 0;
+      } else {
+        this.pendingGrace -= delta;
+        if (this.pendingGrace <= 0) {
+          this.game.gameOver = true;
+          this.pendingHit = null;
+        }
       }
     }
   }
