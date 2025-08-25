@@ -5,9 +5,11 @@
   <title>Sprite Demo</title>
 </head>
 <body>
-  <canvas id="game" width="512" height="320"></canvas>
+    <canvas id="game" width="512" height="320"></canvas>
 
-  <script type="module">
+    <script src="../custom-elements-patch.js"></script>
+
+    <script type="module">
     import { loadSprites, Animator } from './js/preload.js';
 
     const canvas = document.getElementById('game');
