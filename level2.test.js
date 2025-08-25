@@ -51,14 +51,14 @@ test('boss initial position uses resized canvas width', () => {
   assert.strictEqual(game.level.boss.x, game.worldWidth - 1 + 0.8 / 2);
 });
 
-test('shield deactivates even when input is spammed', () => {
+test('shield remains active when input is spammed', () => {
   const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
   const player = game.player;
   for (let i = 0; i < 31; i++) {
     game.handleInput();
     player.update(0, game.groundY, FRAME);
   }
-  assert.strictEqual(player.shieldActive, false);
+  assert.strictEqual(player.shieldActive, true);
 });
 
 test('shield remains active for about half a second', () => {

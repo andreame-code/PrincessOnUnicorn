@@ -15,8 +15,8 @@ export const JUMP_VELOCITY = -7; // world units per second
 export const RESIZE_THROTTLE_MS = 200;
 // Extra reach for the level 2 shield in world units
 export const SHIELD_RANGE = 0.3;
-// Default shield cooldown duration in seconds
-export const SHIELD_COOLDOWN = 1;
+// Default shield cooldown duration in seconds (10% faster recharge)
+export const SHIELD_COOLDOWN = 0.9;
 // Duration the shield stays active in seconds
 export const SHIELD_DURATION = 0.5;
 // Grace window after an attack where the shield can still be activated (seconds)
