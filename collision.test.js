@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { isColliding } from './collision.js';
+import { Obstacle } from './src/obstacle.js';
 
 const groundY = 150;
 
@@ -37,4 +38,13 @@ test('detects collision while jumping into obstacle', () => {
   const unicorn = createEntity(50, groundY - 30, 80, 80); // mid-air
   const obstacle = createEntity(60, groundY, 40, 60);
   assert.strictEqual(isColliding(unicorn, obstacle), true);
+});
+
+test('sprite scaling does not affect collision result', () => {
+  const unicorn = createEntity(50, groundY, 80, 80);
+  const obstacle = new Obstacle(60, groundY, 40, 80);
+  const before = isColliding(unicorn, obstacle);
+  obstacle.setScale(2); // scale only affects rendering
+  const after = isColliding(unicorn, obstacle);
+  assert.strictEqual(before, after);
 });
