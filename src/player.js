@@ -12,6 +12,7 @@ export class Player {
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
+    this.shieldCooldownMax = 1;
     this.dead = false;
   }
 
@@ -50,6 +51,7 @@ export class Player {
       this.shieldActive = true;
       this.shieldTimer = duration;
       this.shieldCooldown = cooldown;
+      this.shieldCooldownMax = cooldown;
     }
   }
 

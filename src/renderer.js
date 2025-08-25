@@ -220,6 +220,28 @@ export class Renderer {
       ctx.fillText(`x ${game.coins}`, coinX - 10, 20);
       ctx.textAlign = 'left';
 
+      const p = game.player;
+      const iconSize = 16;
+      if (this.shieldSprite) {
+        ctx.drawImage(this.shieldSprite, 10, 28, iconSize, iconSize);
+      } else {
+        ctx.strokeStyle = 'blue';
+        ctx.beginPath();
+        ctx.arc(18, 36, 8, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      const barX = 10 + iconSize + 5;
+      const barY = 30;
+      const barWidth = 80;
+      const barHeight = 10;
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+      const progress = p.shieldCooldownMax
+        ? (p.shieldCooldownMax - p.shieldCooldown) / p.shieldCooldownMax
+        : 1;
+      ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+      ctx.fillRect(barX, barY, barWidth * progress, barHeight);
+
       if (game.gameOver) {
         ctx.fillStyle = '#000';
         ctx.font = '24px sans-serif';
