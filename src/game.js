@@ -95,7 +95,14 @@ export class Game {
 
     // Determine the on-screen size of the canvas to compute the current
     // scaling factor used for player and obstacle dimensions.
-    const { width, height } = this.canvas.getBoundingClientRect();
+    let { width, height } = this.canvas.getBoundingClientRect();
+    if (width === 0 || height === 0) {
+      // If called before the canvas is visible, its bounding box may report
+      // zero dimensions. Fall back to the window size so that scaling never
+      // becomes zero and sprites render correctly on first load.
+      width = window.innerWidth;
+      height = window.innerHeight;
+    }
     const widthScale = width / BASE_WIDTH;
     const heightScale = height / BASE_HEIGHT;
     this.scale = Math.min(widthScale, heightScale, 2);
