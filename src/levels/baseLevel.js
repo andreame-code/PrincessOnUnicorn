@@ -16,11 +16,13 @@ export class BaseLevel {
   }
 
   createObstacle() {
+    const width = 0.4;
+    const height = 0.8;
     const obstacle = new Obstacle(
-      this.game.worldWidth,
-      this.game.groundY,
-      0.4,
-      0.8
+      this.game.worldWidth + width / 2,
+      this.game.groundY - height / 2,
+      width,
+      height
     );
     obstacle.setScale(this.game.scale);
     obstacle.imageIndex = Math.floor(this.random() * 3);
@@ -59,7 +61,9 @@ export class BaseLevel {
       o.update(move);
     });
     this.obstacles = this.obstacles.filter(o => {
-      if (o.x + o.width < this.game.player.x) {
+      const obstacleRight = o.x + o.width / 2;
+      const playerLeft = this.game.player.x - this.game.player.width / 2;
+      if (obstacleRight < playerLeft) {
         this.onObstaclePassed(o);
         return false;
       }

@@ -8,11 +8,11 @@ const FRAME = 1 / 60;
 function simulate(innerWidth) {
   const innerHeight = innerWidth * 9 / 16;
   const game = createStubGame({ innerWidth, innerHeight, skipLevelUpdate: true });
-  const { player, groundY } = game;
+  const { player } = game;
   const jumpDuration = (-2 * JUMP_VELOCITY) / GRAVITY;
   const framesToLand = Math.ceil(jumpDuration / FRAME);
   player.jump();
-  let minY = groundY;
+  let minY = player.y;
   for (let i = 0; i < framesToLand; i++) {
     game.update(FRAME);
     if (player.y < minY) minY = player.y;
