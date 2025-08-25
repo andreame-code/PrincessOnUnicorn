@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
+import { Game } from './src/game.js';
 import { Level2 } from './src/levels/level2.js';
 import { LEVEL_UP_SCORE } from './src/config.js';
 
@@ -70,4 +71,28 @@ test('player continues to fall after losing', () => {
   // After update, gravity should increase the vertical velocity
   game.update(FRAME);
   assert.ok(game.player.vy > initialVy);
+});
+
+test('toggles pause when pause key is pressed', () => {
+  const game = createStubGame({ skipLevelUpdate: true });
+  game.showOverlay = Game.prototype.showOverlay.bind(game);
+  let showed = false;
+  let hid = false;
+  const origShow = game.overlay.show.bind(game.overlay);
+  game.overlay.show = (text, cb) => {
+    showed = true;
+    origShow(text, cb);
+  };
+  const origHide = game.overlay.hide.bind(game.overlay);
+  game.overlay.hide = () => {
+    hid = true;
+    origHide();
+  };
+  game.gamePaused = false;
+  game.input.keyListener({ code: 'KeyP', repeat: false });
+  assert.ok(game.gamePaused);
+  assert.ok(showed);
+  game.input.keyListener({ code: 'KeyP', repeat: false });
+  assert.ok(!game.gamePaused);
+  assert.ok(hid);
 });
