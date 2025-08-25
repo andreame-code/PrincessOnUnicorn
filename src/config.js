@@ -8,3 +8,5 @@ export const JUMP_VELOCITY = -620;
 export const RESIZE_THROTTLE_MS = 200;
 // Extra reach for the level 2 shield in pixels (before scaling)
 export const SHIELD_RANGE = 10;
+// Default shield cooldown duration in seconds
+export const SHIELD_COOLDOWN = 0.5;

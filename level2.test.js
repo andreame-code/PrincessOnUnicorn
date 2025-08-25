@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { Level2 } from './src/levels/level2.js';
+import { SHIELD_COOLDOWN } from './src/config.js';
 
 const FRAME = 1 / 60;
 
@@ -47,7 +48,8 @@ test('shield can be reactivated after cooldown', () => {
   const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
   const player = game.player;
   game.handleInput();
-  for (let i = 0; i < 60; i++) {
+  const frames = Math.ceil(SHIELD_COOLDOWN / FRAME);
+  for (let i = 0; i <= frames; i++) {
     player.update(0, game.groundY, FRAME);
   }
   game.handleInput();
@@ -73,7 +75,7 @@ test('shield blocks obstacles slightly earlier', () => {
 test('shield cooldown bar uses latest cooldown value', () => {
   const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
   const player = game.player;
-  assert.strictEqual(player.shieldCooldownMax, 1);
+  assert.strictEqual(player.shieldCooldownMax, SHIELD_COOLDOWN);
   player.activateShield(0.25, 2);
   assert.strictEqual(player.shieldCooldownMax, 2);
 });
