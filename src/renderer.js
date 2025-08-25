@@ -86,8 +86,9 @@ export class Renderer {
   drawPlayer() {
     const u = this.game.player;
     this.withContext(ctx => {
-      const scaledWidth = u.width * u.spriteScale;
-      const scaledHeight = u.height * u.spriteScale;
+      const spriteScale = u.spriteScale || 1;
+      const scaledWidth = u.width * spriteScale;
+      const scaledHeight = u.height * spriteScale;
 
       if (this.playerSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -121,7 +122,7 @@ export class Renderer {
         ctx.fill();
       }
       if (u.shieldActive) {
-        const extra = SHIELD_RANGE * u.spriteScale;
+        const extra = SHIELD_RANGE * spriteScale;
         if (this.shieldSprite) {
           const img = this.shieldSprite;
           const w = (img.width || scaledWidth) + extra * 2;
@@ -150,8 +151,9 @@ export class Renderer {
     const { game } = this;
     this.withContext(ctx => {
       game.level.obstacles.forEach(o => {
-        const w = o.width * o.spriteScale;
-        const h = o.height * o.spriteScale;
+        const scale = o.spriteScale || 1;
+        const w = o.width * scale;
+        const h = o.height * scale;
         if (this.treeSprites) {
           const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
           ctx.drawImage(img, o.x, o.y - h, w, h);
@@ -168,15 +170,17 @@ export class Renderer {
     this.withContext(ctx => {
       if (this.wallSprite) {
         game.level.walls.forEach(w => {
-          const wWidth = w.width * w.spriteScale;
-          const wHeight = w.height * w.spriteScale;
+          const scale = w.spriteScale || 1;
+          const wWidth = w.width * scale;
+          const wHeight = w.height * scale;
           ctx.drawImage(this.wallSprite, w.x, w.y - wHeight, wWidth, wHeight);
         });
       } else {
         ctx.fillStyle = 'gray';
         game.level.walls.forEach(w => {
-          const wWidth = w.width * w.spriteScale;
-          const wHeight = w.height * w.spriteScale;
+          const scale = w.spriteScale || 1;
+          const wWidth = w.width * scale;
+          const wHeight = w.height * scale;
           ctx.fillRect(w.x, w.y - wHeight, wWidth, wHeight);
         });
       }
