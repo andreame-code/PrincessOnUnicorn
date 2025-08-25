@@ -1,13 +1,13 @@
 export function isColliding(a, b) {
-  const aLeft = a.x;
-  const aRight = a.x + a.width;
-  const aTop = a.y - a.height;
-  const aBottom = a.y;
+  const aLeft = a.x - a.width / 2;
+  const aRight = a.x + a.width / 2;
+  const aTop = a.y - a.height / 2;
+  const aBottom = a.y + a.height / 2;
 
-  const bLeft = b.x;
-  const bRight = b.x + b.width;
-  const bTop = b.y - b.height;
-  const bBottom = b.y;
+  const bLeft = b.x - b.width / 2;
+  const bRight = b.x + b.width / 2;
+  const bTop = b.y - b.height / 2;
+  const bBottom = b.y + b.height / 2;
 
   return (
     aLeft < bRight &&

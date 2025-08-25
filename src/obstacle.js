@@ -1,7 +1,8 @@
 export class Obstacle {
   constructor(x, y, width, height) {
+    // x and y represent the center of the hitbox in world units.
     this.x = x;
-    this.y = y; // bottom position
+    this.y = y;
     // Store both the physical hitbox size (width/height) and the scale used
     // only for rendering. The hitbox stays in world units regardless of the
     // sprite size.
