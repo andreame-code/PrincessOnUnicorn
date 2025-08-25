@@ -24,18 +24,19 @@ export class Renderer {
     if (typeof Image === 'undefined') {
       return Promise.resolve();
     }
+    const resolve = path => new URL(`../${path}`, import.meta.url).href;
     const assets = [
-      { key: 'player_0', src: 'public/assets/sprites/principessa/princess_0.png' },
-      { key: 'player_1', src: 'public/assets/sprites/principessa/princess_1.png' },
-      { key: 'player_2', src: 'public/assets/sprites/principessa/princess_2.png' },
-      { key: 'tree_0', src: 'sprites/obstacles/trees/00.png' },
-      { key: 'tree_1', src: 'sprites/obstacles/trees/01.png' },
-      { key: 'tree_2', src: 'sprites/obstacles/trees/02.png' },
-      { key: 'knight_0', src: 'public/assets/sprites/cavaliere_nero/knight_0.png' },
-      { key: 'knight_1', src: 'public/assets/sprites/cavaliere_nero/knight_1.png' },
-      { key: 'knight_2', src: 'public/assets/sprites/cavaliere_nero/knight_2.png' },
-      { key: 'wall', src: 'sprites/projectiles/wall/00.png' },
-      { key: 'shield', src: 'public/assets/sprites/shield.png' },
+      { key: 'player_0', src: resolve('public/assets/sprites/principessa/princess_0.png') },
+      { key: 'player_1', src: resolve('public/assets/sprites/principessa/princess_1.png') },
+      { key: 'player_2', src: resolve('public/assets/sprites/principessa/princess_2.png') },
+      { key: 'tree_0', src: resolve('sprites/obstacles/trees/00.png') },
+      { key: 'tree_1', src: resolve('sprites/obstacles/trees/01.png') },
+      { key: 'tree_2', src: resolve('sprites/obstacles/trees/02.png') },
+      { key: 'knight_0', src: resolve('public/assets/sprites/cavaliere_nero/knight_0.png') },
+      { key: 'knight_1', src: resolve('public/assets/sprites/cavaliere_nero/knight_1.png') },
+      { key: 'knight_2', src: resolve('public/assets/sprites/cavaliere_nero/knight_2.png') },
+      { key: 'wall', src: resolve('sprites/projectiles/wall/00.png') },
+      { key: 'shield', src: resolve('public/assets/sprites/shield.png') },
     ];
     return this.assets.loadAll(assets).then(() => {
       this.playerSprites = {
