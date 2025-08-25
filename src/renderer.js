@@ -79,16 +79,16 @@ export class Renderer {
     const { game } = this;
     this.withContext(ctx => {
       ctx.fillStyle = '#555';
-      ctx.fillRect(0, game.groundY, game.canvas.width, 2);
+      ctx.fillRect(0, game.groundY * game.scale, game.canvas.width, 2);
     });
   }
 
   drawPlayer() {
     const u = this.game.player;
     this.withContext(ctx => {
-      const spriteScale = u.spriteScale || 1;
-      const scaledWidth = u.width * spriteScale;
-      const scaledHeight = u.height * spriteScale;
+      const scale = this.game.scale;
+      const scaledWidth = u.width * scale;
+      const scaledHeight = u.height * scale;
 
       if (this.playerSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -103,40 +103,40 @@ export class Renderer {
           this.playerFrameIndex = (this.playerFrameIndex + 1) % frames.length;
         }
         const img = frames[this.playerFrameIndex];
-        ctx.drawImage(img, u.x, u.y - scaledHeight, scaledWidth, scaledHeight);
+        ctx.drawImage(img, u.x * scale, (u.y - u.height) * scale, scaledWidth, scaledHeight);
       } else {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(u.x, u.y - scaledHeight, scaledWidth, scaledHeight);
-        ctx.fillRect(u.x + scaledWidth - 10, u.y - scaledHeight - 10, 10, 10);
+        ctx.fillRect(u.x * scale, (u.y - u.height) * scale, scaledWidth, scaledHeight);
+        ctx.fillRect(u.x * scale + scaledWidth - 10, (u.y - u.height) * scale - 10, 10, 10);
         ctx.fillStyle = 'gold';
         ctx.beginPath();
-        ctx.moveTo(u.x + scaledWidth, u.y - scaledHeight - 10);
-        ctx.lineTo(u.x + scaledWidth + 10, u.y - scaledHeight - 30);
-        ctx.lineTo(u.x + scaledWidth, u.y - scaledHeight - 20);
+        ctx.moveTo(u.x * scale + scaledWidth, (u.y - u.height) * scale - 10);
+        ctx.lineTo(u.x * scale + scaledWidth + 10, (u.y - u.height) * scale - 30);
+        ctx.lineTo(u.x * scale + scaledWidth, (u.y - u.height) * scale - 20);
         ctx.fill();
         ctx.fillStyle = 'pink';
-        ctx.fillRect(u.x + 5, u.y - scaledHeight - 25, 15, 15);
+        ctx.fillRect(u.x * scale + 5, (u.y - u.height) * scale - 25, 15, 15);
         ctx.fillStyle = '#f2d6cb';
         ctx.beginPath();
-        ctx.arc(u.x + 12.5, u.y - scaledHeight - 30, 7, 0, Math.PI * 2);
+        ctx.arc(u.x * scale + 12.5, (u.y - u.height) * scale - 30, 7, 0, Math.PI * 2);
         ctx.fill();
       }
       if (u.shieldActive) {
-        const extra = SHIELD_RANGE * spriteScale;
+        const extra = SHIELD_RANGE * scale;
         if (this.shieldSprite) {
           const img = this.shieldSprite;
           const w = (img.width || scaledWidth) + extra * 2;
           const h = (img.height || scaledHeight) + extra * 2;
-          const sx = u.x + scaledWidth / 2 - w / 2;
-          const sy = u.y - scaledHeight / 2 - h / 2;
+          const sx = u.x * scale + scaledWidth / 2 - w / 2;
+          const sy = (u.y - u.height) * scale + scaledHeight / 2 - h / 2;
           ctx.drawImage(img, sx, sy, w, h);
         } else {
           ctx.strokeStyle = 'blue';
           ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.arc(
-            u.x + scaledWidth / 2,
-            u.y - scaledHeight / 2,
+            u.x * scale + scaledWidth / 2,
+            (u.y - u.height) * scale + scaledHeight / 2,
             scaledWidth + extra,
             0,
             Math.PI * 2,
@@ -150,16 +150,18 @@ export class Renderer {
   drawObstacles() {
     const { game } = this;
     this.withContext(ctx => {
+      const scale = this.game.scale;
       game.level.obstacles.forEach(o => {
-        const scale = o.spriteScale || 1;
         const w = o.width * scale;
         const h = o.height * scale;
+        const x = o.x * scale;
+        const y = (o.y - o.height) * scale;
         if (this.treeSprites) {
           const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
-          ctx.drawImage(img, o.x, o.y - h, w, h);
+          ctx.drawImage(img, x, y, w, h);
         } else {
           ctx.fillStyle = 'green';
-          ctx.fillRect(o.x, o.y - h, w, h);
+          ctx.fillRect(x, y, w, h);
         }
       });
     });
@@ -168,25 +170,24 @@ export class Renderer {
   drawWalls() {
     const { game } = this;
     this.withContext(ctx => {
+      const scale = this.game.scale;
       if (this.wallSprite) {
         game.level.walls.forEach(w => {
-          const scale = w.spriteScale || 1;
           const wWidth = w.width * scale;
           const wHeight = w.height * scale;
-          ctx.drawImage(this.wallSprite, w.x, w.y - wHeight, wWidth, wHeight);
+          ctx.drawImage(this.wallSprite, w.x * scale, (w.y - w.height) * scale, wWidth, wHeight);
         });
       } else {
         ctx.fillStyle = 'gray';
         game.level.walls.forEach(w => {
-          const scale = w.spriteScale || 1;
           const wWidth = w.width * scale;
           const wHeight = w.height * scale;
-          ctx.fillRect(w.x, w.y - wHeight, wWidth, wHeight);
+          ctx.fillRect(w.x * scale, (w.y - w.height) * scale, wWidth, wHeight);
         });
       }
       const b = game.level.boss;
-      const bw = b.width * (b.spriteScale || 1);
-      const bh = b.height * (b.spriteScale || 1);
+      const bw = b.width * scale;
+      const bh = b.height * scale;
       if (this.knightSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
         if (!this.lastKnightTime) this.lastKnightTime = now;
@@ -198,10 +199,10 @@ export class Renderer {
           this.knightFrameIndex = (this.knightFrameIndex + 1) % this.knightSprites.length;
         }
         const img = this.knightSprites[this.knightFrameIndex];
-        ctx.drawImage(img, b.x, b.y - bh, bw, bh);
+        ctx.drawImage(img, b.x * scale, (b.y - b.height) * scale, bw, bh);
       } else {
         ctx.fillStyle = 'black';
-        ctx.fillRect(b.x, b.y - bh, bw, bh);
+        ctx.fillRect(b.x * scale, (b.y - b.height) * scale, bw, bh);
       }
     });
   }
@@ -210,9 +211,10 @@ export class Renderer {
     const { game } = this;
     this.withContext(ctx => {
       ctx.fillStyle = 'gold';
+      const scale = this.game.scale;
       game.level.coins.forEach(c => {
         ctx.beginPath();
-        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+        ctx.arc(c.x * scale, c.y * scale, 0.05 * scale, 0, Math.PI * 2);
         ctx.fill();
       });
     });

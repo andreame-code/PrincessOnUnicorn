@@ -4,8 +4,8 @@ export class Player {
   constructor(x, groundY, scale = 1) {
     this.x = x;
     this.y = groundY; // bottom position
-    this.baseWidth = 80;
-    this.baseHeight = 80;
+    this.baseWidth = 0.8;
+    this.baseHeight = 0.8;
     // Physical hitbox dimensions remain in world units, independent of the
     // sprite scale used for rendering.
     this.width = this.baseWidth;
@@ -58,7 +58,7 @@ export class Player {
     }
   }
 
-  die(speed = -200) {
+  die(speed = -2) {
     this.dead = true;
     this.vy = speed;
   }
