@@ -9,8 +9,8 @@ const FRAME = 1 / 60;
 
 test('awards coin for passed obstacle and preserves coins in level 2', () => {
   const game = createStubGame();
-  const width = 0.4;
-  const height = 0.8;
+  const width = 0.32;
+  const height = 0.64;
   const obstacleLeft = (game.player.x - game.player.width / 2) - 0.5;
   const obstacle = new Obstacle(
     obstacleLeft + width / 2,
