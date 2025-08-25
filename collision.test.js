@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { isColliding } from './collision.js';
 
-const groundY = 150;
+const groundY = 1.5;
 
 // helper to create unicorn/obstacle with bottom-based y coordinate
 function createEntity(x, y, width, height) {
@@ -10,31 +10,31 @@ function createEntity(x, y, width, height) {
 }
 
 test('detects collision when overlapping at ground', () => {
-  const unicorn = createEntity(50, groundY, 80, 80);
-  const obstacle = createEntity(60, groundY, 40, 80);
+  const unicorn = createEntity(0.5, groundY, 0.8, 0.8);
+  const obstacle = createEntity(0.6, groundY, 0.4, 0.8);
   assert.strictEqual(isColliding(unicorn, obstacle), true);
 });
 
 test('no collision when apart horizontally', () => {
-  const unicorn = createEntity(50, groundY, 80, 80);
-  const obstacle = createEntity(200, groundY, 40, 80);
+  const unicorn = createEntity(0.5, groundY, 0.8, 0.8);
+  const obstacle = createEntity(2, groundY, 0.4, 0.8);
   assert.strictEqual(isColliding(unicorn, obstacle), false);
 });
 
 test('no collision with vertical separation', () => {
-  const unicorn = createEntity(50, groundY - 120, 80, 80); // jump high
-  const obstacle = createEntity(50, groundY, 40, 80);
+  const unicorn = createEntity(0.5, groundY - 1.2, 0.8, 0.8); // jump high
+  const obstacle = createEntity(0.5, groundY, 0.4, 0.8);
   assert.strictEqual(isColliding(unicorn, obstacle), false);
 });
 
 test('detects collision on partial overlap', () => {
-  const unicorn = createEntity(55, groundY, 80, 80);
-  const obstacle = createEntity(80, groundY, 60, 80);
+  const unicorn = createEntity(0.55, groundY, 0.8, 0.8);
+  const obstacle = createEntity(0.8, groundY, 0.6, 0.8);
   assert.strictEqual(isColliding(unicorn, obstacle), true);
 });
 
 test('detects collision while jumping into obstacle', () => {
-  const unicorn = createEntity(50, groundY - 30, 80, 80); // mid-air
-  const obstacle = createEntity(60, groundY, 40, 60);
+  const unicorn = createEntity(0.5, groundY - 0.3, 0.8, 0.8); // mid-air
+  const obstacle = createEntity(0.6, groundY, 0.4, 0.6);
   assert.strictEqual(isColliding(unicorn, obstacle), true);
 });

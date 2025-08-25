@@ -29,9 +29,9 @@ test('boss does not flee before player covers 70% of distance', () => {
 });
 
 test('boss initial position uses resized canvas width', () => {
-  const game = createStubGame({ canvasWidth: 300, innerWidth: 800, search: '?level=2', skipLevelUpdate: true });
+  const game = createStubGame({ canvasWidth: 300, innerWidth: 800, innerHeight: 450, search: '?level=2', skipLevelUpdate: true });
   assert.strictEqual(game.canvas.width, 800);
-  assert.strictEqual(game.level.boss.x, 700);
+  assert.strictEqual(game.level.boss.x, game.worldWidth - 1);
 });
 
 test('shield deactivates even when input is spammed', () => {
@@ -61,7 +61,7 @@ test('shield blocks obstacles slightly earlier', () => {
   const level = game.level;
   const player = game.player;
   const wall = level.createObstacle();
-  const gap = 5;
+  const gap = 0.05;
   wall.x = player.x + player.width + gap;
 
   // Without shield the obstacle should pass

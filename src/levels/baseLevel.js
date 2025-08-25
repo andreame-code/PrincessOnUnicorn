@@ -17,10 +17,10 @@ export class BaseLevel {
 
   createObstacle() {
     const obstacle = new Obstacle(
-      this.game.canvas.width,
+      this.game.worldWidth,
       this.game.groundY,
-      40,
-      80
+      0.4,
+      0.8
     );
     obstacle.setScale(this.game.scale);
     obstacle.imageIndex = Math.floor(this.random() * 3);

@@ -8,10 +8,10 @@ export class Level2 extends BaseLevel {
     super(game, random);
     this.interval = 90 / 60; // seconds
     this.boss = {
-      x: game.canvas.width - 100,
+      x: game.worldWidth - 1,
       y: game.groundY,
-      width: 80,
-      height: 100,
+      width: 0.8,
+      height: 1,
       spriteScale: game.scale,
     };
     this.bossFlee = false;
@@ -35,7 +35,7 @@ export class Level2 extends BaseLevel {
   createObstacle() {
     // The knight's thrown wall should be half as thick
     // Width reduced from 60 to 30 before scaling
-    const wall = new Obstacle(this.boss.x, this.game.groundY, 30, 100);
+    const wall = new Obstacle(this.boss.x, this.game.groundY, 0.3, 1);
     wall.setScale(this.game.scale);
     return wall;
   }
@@ -54,11 +54,11 @@ export class Level2 extends BaseLevel {
 
     if (isColliding(collider, w)) {
       if (player.shieldActive) {
-        player.x += 20;
+        player.x += 0.2;
         this.coins.push({
           x: w.x + w.width / 2,
           y: w.y - w.height / 2,
-          vy: -120,
+          vy: -1.2,
           life: 0.5,
         });
         this.game.coins++;
@@ -82,10 +82,10 @@ export class Level2 extends BaseLevel {
     this.coins.forEach(c => {
       c.x -= move;
       c.y += c.vy * delta;
-      c.vy += 6 * delta;
+      c.vy += 0.06 * delta;
       c.life -= delta;
     });
-    this.coins = this.coins.filter(c => c.life > 0 && c.x > -10);
+    this.coins = this.coins.filter(c => c.life > 0 && c.x > -0.1);
 
     const currentDistance =
       this.boss.x - (this.game.player.x + this.game.player.width);
@@ -94,7 +94,7 @@ export class Level2 extends BaseLevel {
     }
     if (this.bossFlee) {
       this.boss.x += move;
-      if (this.boss.x > this.game.canvas.width) {
+      if (this.boss.x > this.game.worldWidth) {
         this.game.gameOver = true;
         this.game.win = true;
       }

@@ -2,8 +2,9 @@ import { Game } from './src/game.js';
 
 export function createStubGame({
   rng,
-  canvasWidth = 800,
-  innerWidth = 800,
+  canvasWidth = 1600,
+  innerWidth = 1600,
+  innerHeight = 900,
   search = '',
   skipLevelUpdate = false,
 } = {}) {
@@ -23,13 +24,14 @@ export function createStubGame({
   const canvas = {
     width: canvasWidth,
     height: 200,
+    style: { width: `${innerWidth}px`, height: `${innerHeight}px` },
     getContext: () => ctx,
     // Simulate how the canvas would be displayed in the browser so that
     // resize logic relying on its on-screen dimensions behaves consistently
     // in tests.
     getBoundingClientRect: () => ({
       width: innerWidth,
-      height: innerWidth * 0.75, // maintain 4:3 ratio
+      height: innerHeight,
     }),
   };
   const overlay = { classList: { add: noop, remove: noop } };
@@ -57,6 +59,7 @@ export function createStubGame({
   const eventListeners = {};
   global.window = {
     innerWidth,
+    innerHeight,
     location: { search },
     addEventListener: (event, handler) => {
       eventListeners[event] = handler;
