@@ -6,7 +6,11 @@ export class Player {
     this.y = groundY; // bottom position
     this.baseWidth = 80;
     this.baseHeight = 80;
-    this.setScale(scale);
+    // Physical hitbox dimensions remain in world units, independent of the
+    // sprite scale used for rendering.
+    this.width = this.baseWidth;
+    this.height = this.baseHeight;
+    this.spriteScale = scale;
     this.vy = 0;
     this.jumping = false;
     this.shieldActive = false;
@@ -17,8 +21,7 @@ export class Player {
   }
 
   setScale(scale) {
-    this.width = this.baseWidth * scale;
-    this.height = this.baseHeight * scale;
+    this.spriteScale = scale;
   }
 
   update(gravity, groundY, delta) {

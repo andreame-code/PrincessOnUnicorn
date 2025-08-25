@@ -10,11 +10,10 @@ export class Level2 extends BaseLevel {
     this.boss = {
       x: game.canvas.width - 100,
       y: game.groundY,
-      baseWidth: 80,
-      baseHeight: 100,
+      width: 80,
+      height: 100,
+      spriteScale: game.scale,
     };
-    this.boss.width = this.boss.baseWidth * game.scale;
-    this.boss.height = this.boss.baseHeight * game.scale;
     this.bossFlee = false;
     this.coins = [];
     this.initialDistance =
@@ -45,7 +44,10 @@ export class Level2 extends BaseLevel {
 
   handleCollision(w) {
     const player = this.game.player;
-    const range = player.shieldActive ? SHIELD_RANGE * this.game.scale : 0;
+    // Shield range is defined in world units and should not scale with the
+    // sprite size so that collisions remain consistent regardless of
+    // rendering scale.
+    const range = player.shieldActive ? SHIELD_RANGE : 0;
     const collider = player.shieldActive
       ? { x: player.x - range, y: player.y, width: player.width + range * 2, height: player.height }
       : player;
@@ -101,7 +103,6 @@ export class Level2 extends BaseLevel {
 
   setScale(scale) {
     super.setScale(scale);
-    this.boss.width = this.boss.baseWidth * scale;
-    this.boss.height = this.boss.baseHeight * scale;
+    this.boss.spriteScale = scale;
   }
 }
