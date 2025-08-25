@@ -20,7 +20,18 @@ export function createStubGame({
     fillText: noop,
     measureText: () => ({ width: 0 }),
   };
-  const canvas = { width: canvasWidth, height: 200, getContext: () => ctx };
+  const canvas = {
+    width: canvasWidth,
+    height: 200,
+    getContext: () => ctx,
+    // Simulate how the canvas would be displayed in the browser so that
+    // resize logic relying on its on-screen dimensions behaves consistently
+    // in tests.
+    getBoundingClientRect: () => ({
+      width: innerWidth,
+      height: innerWidth * 0.75, // maintain 4:3 ratio
+    }),
+  };
   const overlay = { classList: { add: noop, remove: noop } };
   const overlayContent = { textContent: '' };
   const overlayButton = { onclick: null, textContent: '', addEventListener: noop };
