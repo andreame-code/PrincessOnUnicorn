@@ -1,9 +1,12 @@
 import { Game } from './src/game.js';
 import { LEVEL_UP_SCORE } from './src/config.js';
 import { Overlay } from './src/overlay.js';
+import { attachViewport } from './src/render/viewport.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('game');
+  const viewport = attachViewport(canvas);
+  // usa viewport.getView(), worldToScreen, screenToWorld
   const menu = document.getElementById('menu');
   const playButton = document.getElementById('play-button');
   const instructionsButton = document.getElementById('instructions-button');
