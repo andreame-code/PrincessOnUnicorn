@@ -1,50 +1,44 @@
 # PrincessOnUnicorn
 
-A simple runner game inspired by the Chrome offline T-Rex, but featuring a princess riding a unicorn.
+PrincessOnUnicorn is a side-scrolling runner inspired by the Chrome offline T‑Rex game, starring a brave princess riding a unicorn.
 
-## Funzionalità
+## Features
+- Medieval themed interface.
+- Start menu disappears once the game begins.
+- Two levels, including a boss fight against the Black Knight.
 
-- Interfaccia a tema medievale.
-- Il menu iniziale scompare automaticamente durante la partita.
-- Due livelli di gioco, inclusa una boss fight contro il Cavaliere Nero.
+## Play
+Open `index.html` in a modern browser. Press the spacebar or tap the screen to jump over obstacles. Reach **1000 points** to face the Black Knight.
 
-## Avvio
-
-Apri `index.html` in un browser moderno e premi la barra spaziatrice o tocca lo schermo per saltare gli ostacoli. L'obiettivo è raggiungere 1000 punti e superare il Cavaliere Nero; il gioco è stato reso più semplice per essere adatto anche ai più piccoli.
-
-Per accedere direttamente al secondo livello (la sfida con il Cavaliere Nero) senza passare dal primo, apri:
+To skip directly to the boss fight, open:
 
 ```
 index.html?level=2
 ```
 
-Questo URL salta il primo livello e avvia subito il boss fight.
+In Level 2 the Black Knight throws walls at you. Press the spacebar or tap again to activate a shield. If a wall hits while the shield is active it shatters and the unicorn advances. When the knight runs out of space he flees and the princess wins.
 
-Nel secondo livello il Cavaliere Nero lancia dei muri contro l'unicorno. Premi di nuovo la barra spaziatrice o tocca lo schermo per attivare uno scudo: se un muro lo raggiunge mentre lo scudo è attivo il muro viene frantumato e l'unicorno avanza verso il nemico. Quando il cavaliere è abbastanza vicino fugge e la principessa vince.
+## Development
+The project has no external dependencies; a recent Node.js installation is sufficient to run the tests and develop new features.
 
-## Credits
-
-Gioco realizzato quasi interamente con l'aiuto di ChatGPT.
-
-## Sviluppo
-
-Il progetto non richiede dipendenze esterne; è sufficiente un ambiente Node.js recente per eseguire i test e sviluppare nuove funzionalità.
-
-## Test
-
-Assicurati di avere Node.js installato ed esegui i test unitari con:
+## Testing
+Make sure Node.js is installed, then run the unit tests with:
 
 ```
 npm test
 ```
 
-Durante lo sviluppo puoi attivare la modalità watch per rieseguire automaticamente i test ad ogni modifica con:
+During development you can enable watch mode to automatically rerun tests on file changes:
 
 ```
 npm test -- --watch
 ```
 
-## Contribuire
+## Contributing
+Pull requests are welcome! If you'd like to propose changes, open an issue or submit a PR describing your updates.
 
-Le pull request sono benvenute! Se desideri proporre modifiche, apri una issue o invia una pull request descrivendo i cambiamenti.
+For more details about the game, see the [wiki](docs/WIKI.md).
+
+## Credits
+Game created primarily with the help of ChatGPT.
 
