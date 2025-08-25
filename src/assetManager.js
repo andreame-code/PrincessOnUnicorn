@@ -23,8 +23,36 @@ export class AssetManager {
     });
   }
 
+  loadAudio(key, src) {
+    return new Promise((resolve, reject) => {
+      if (typeof Audio === 'undefined') {
+        const audio = { src, play: () => {}, volume: 1, currentTime: 0 };
+        this.assets.set(key, audio);
+        resolve(audio);
+        return;
+      }
+      const audio = new Audio();
+      audio.addEventListener(
+        'canplaythrough',
+        () => {
+          this.assets.set(key, audio);
+          resolve(audio);
+        },
+        { once: true }
+      );
+      audio.addEventListener('error', () => {
+        reject(new Error(`Failed to load audio: ${src}`));
+      });
+      audio.src = src;
+    });
+  }
+
   loadAll(list) {
-    return Promise.all(list.map(({ key, src }) => this.loadImage(key, src)));
+    return Promise.all(
+      list.map(({ key, src, type }) =>
+        type === 'audio' ? this.loadAudio(key, src) : this.loadImage(key, src)
+      )
+    );
   }
 
   get(key) {
