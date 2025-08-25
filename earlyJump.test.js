@@ -9,8 +9,8 @@ const FRAME = 1 / 60;
 test('player can jump early without landing on obstacle', () => {
   const game = createStubGame();
   const obstacle = game.level.createObstacle();
-  obstacle.x = 1.74; // far enough that player previously landed on it
-  obstacle.y = game.groundY;
+  obstacle.x = 1.74 + obstacle.width / 2; // position by left edge
+  obstacle.y = game.groundY - obstacle.height / 2;
   game.level.obstacles = [obstacle];
 
   game.player.jump();

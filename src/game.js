@@ -59,7 +59,8 @@ export class Game {
   }
 
   initializeLevel() {
-    this.player = new Player(0.5, this.groundY, this.scale);
+    const startX = 0.5 + 0.8 / 2;
+    this.player = new Player(startX, this.groundY, this.scale);
     this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
     if (typeof this.level.setScale === 'function') {
       this.level.setScale(this.scale);
@@ -115,7 +116,7 @@ export class Game {
     if (this.player) {
       this.player.setScale(this.scale);
       if (!this.player.jumping) {
-        this.player.y = this.groundY;
+        this.player.y = this.groundY - this.player.height / 2;
       }
     }
     if (this.level && typeof this.level.setScale === 'function') {

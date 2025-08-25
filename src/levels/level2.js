@@ -8,8 +8,8 @@ export class Level2 extends BaseLevel {
     super(game, random);
     this.interval = 90 / 60; // seconds
     this.boss = {
-      x: game.worldWidth - 1,
-      y: game.groundY,
+      x: game.worldWidth - 1 + 0.8 / 2,
+      y: game.groundY - 1 / 2,
       width: 0.8,
       height: 1,
       spriteScale: game.scale,
@@ -17,7 +17,8 @@ export class Level2 extends BaseLevel {
     this.bossFlee = false;
     this.coins = [];
     this.initialDistance =
-      this.boss.x - (this.game.player.x + this.game.player.width);
+      (this.boss.x - this.boss.width / 2) -
+      (this.game.player.x + this.game.player.width / 2);
   }
 
   static getInterval(random) {
@@ -35,7 +36,14 @@ export class Level2 extends BaseLevel {
   createObstacle() {
     // The knight's thrown wall should be half as thick
     // Width reduced from 60 to 30 before scaling
-    const wall = new Obstacle(this.boss.x, this.game.groundY, 0.3, 1);
+    const width = 0.3;
+    const height = 1;
+    const wall = new Obstacle(
+      this.boss.x - this.boss.width / 2 + width / 2,
+      this.game.groundY - height / 2,
+      width,
+      height
+    );
     wall.setScale(this.game.scale);
     return wall;
   }
@@ -49,15 +57,15 @@ export class Level2 extends BaseLevel {
     // rendering scale.
     const range = player.shieldActive ? SHIELD_RANGE : 0;
     const collider = player.shieldActive
-      ? { x: player.x - range, y: player.y, width: player.width + range * 2, height: player.height }
+      ? { x: player.x, y: player.y, width: player.width + range * 2, height: player.height }
       : player;
 
     if (isColliding(collider, w)) {
       if (player.shieldActive) {
         player.x += 0.2;
         this.coins.push({
-          x: w.x + w.width / 2,
-          y: w.y - w.height / 2,
+          x: w.x,
+          y: w.y,
           vy: -1.2,
           life: 0.5,
         });
@@ -76,7 +84,7 @@ export class Level2 extends BaseLevel {
       super.updateObstacles(delta);
     } else {
       this.obstacles.forEach(w => w.update(move));
-      this.obstacles = this.obstacles.filter(w => w.x + w.width > 0);
+      this.obstacles = this.obstacles.filter(w => w.x + w.width / 2 > 0);
     }
 
     this.coins.forEach(c => {
@@ -88,13 +96,14 @@ export class Level2 extends BaseLevel {
     this.coins = this.coins.filter(c => c.life > 0 && c.x > -0.1);
 
     const currentDistance =
-      this.boss.x - (this.game.player.x + this.game.player.width);
+      (this.boss.x - this.boss.width / 2) -
+      (this.game.player.x + this.game.player.width / 2);
     if (currentDistance <= this.initialDistance * 0.3) {
       this.bossFlee = true;
     }
     if (this.bossFlee) {
       this.boss.x += move;
-      if (this.boss.x > this.game.worldWidth) {
+      if (this.boss.x - this.boss.width / 2 > this.game.worldWidth) {
         this.game.gameOver = true;
         this.game.win = true;
       }

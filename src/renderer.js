@@ -89,6 +89,8 @@ export class Renderer {
       const scale = this.game.scale;
       const scaledWidth = u.width * scale;
       const scaledHeight = u.height * scale;
+      const left = (u.x - u.width / 2) * scale;
+      const top = (u.y - u.height / 2) * scale;
 
       if (this.playerSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -103,22 +105,22 @@ export class Renderer {
           this.playerFrameIndex = (this.playerFrameIndex + 1) % frames.length;
         }
         const img = frames[this.playerFrameIndex];
-        ctx.drawImage(img, u.x * scale, (u.y - u.height) * scale, scaledWidth, scaledHeight);
+        ctx.drawImage(img, left, top, scaledWidth, scaledHeight);
       } else {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(u.x * scale, (u.y - u.height) * scale, scaledWidth, scaledHeight);
-        ctx.fillRect(u.x * scale + scaledWidth - 10, (u.y - u.height) * scale - 10, 10, 10);
+        ctx.fillRect(left, top, scaledWidth, scaledHeight);
+        ctx.fillRect(left + scaledWidth - 10, top - 10, 10, 10);
         ctx.fillStyle = 'gold';
         ctx.beginPath();
-        ctx.moveTo(u.x * scale + scaledWidth, (u.y - u.height) * scale - 10);
-        ctx.lineTo(u.x * scale + scaledWidth + 10, (u.y - u.height) * scale - 30);
-        ctx.lineTo(u.x * scale + scaledWidth, (u.y - u.height) * scale - 20);
+        ctx.moveTo(left + scaledWidth, top - 10);
+        ctx.lineTo(left + scaledWidth + 10, top - 30);
+        ctx.lineTo(left + scaledWidth, top - 20);
         ctx.fill();
         ctx.fillStyle = 'pink';
-        ctx.fillRect(u.x * scale + 5, (u.y - u.height) * scale - 25, 15, 15);
+        ctx.fillRect(left + 5, top - 25, 15, 15);
         ctx.fillStyle = '#f2d6cb';
         ctx.beginPath();
-        ctx.arc(u.x * scale + 12.5, (u.y - u.height) * scale - 30, 7, 0, Math.PI * 2);
+        ctx.arc(left + 12.5, top - 30, 7, 0, Math.PI * 2);
         ctx.fill();
       }
       if (u.shieldActive) {
@@ -127,17 +129,17 @@ export class Renderer {
           const img = this.shieldSprite;
           const w = (img.width || scaledWidth) + extra * 2;
           const h = (img.height || scaledHeight) + extra * 2;
-          const sx = u.x * scale + scaledWidth / 2 - w / 2;
-          const sy = (u.y - u.height) * scale + scaledHeight / 2 - h / 2;
+          const sx = u.x * scale - w / 2;
+          const sy = u.y * scale - h / 2;
           ctx.drawImage(img, sx, sy, w, h);
         } else {
           ctx.strokeStyle = 'blue';
           ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.arc(
-            u.x * scale + scaledWidth / 2,
-            (u.y - u.height) * scale + scaledHeight / 2,
-            scaledWidth + extra,
+            u.x * scale,
+            u.y * scale,
+            scaledWidth / 2 + extra,
             0,
             Math.PI * 2,
           );
@@ -154,8 +156,8 @@ export class Renderer {
       game.level.obstacles.forEach(o => {
         const w = o.width * scale;
         const h = o.height * scale;
-        const x = o.x * scale;
-        const y = (o.y - o.height) * scale;
+        const x = (o.x - o.width / 2) * scale;
+        const y = (o.y - o.height / 2) * scale;
         if (this.treeSprites) {
           const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
           ctx.drawImage(img, x, y, w, h);
@@ -175,19 +177,21 @@ export class Renderer {
         game.level.walls.forEach(w => {
           const wWidth = w.width * scale;
           const wHeight = w.height * scale;
-          ctx.drawImage(this.wallSprite, w.x * scale, (w.y - w.height) * scale, wWidth, wHeight);
+          ctx.drawImage(this.wallSprite, (w.x - w.width / 2) * scale, (w.y - w.height / 2) * scale, wWidth, wHeight);
         });
       } else {
         ctx.fillStyle = 'gray';
         game.level.walls.forEach(w => {
           const wWidth = w.width * scale;
           const wHeight = w.height * scale;
-          ctx.fillRect(w.x * scale, (w.y - w.height) * scale, wWidth, wHeight);
+          ctx.fillRect((w.x - w.width / 2) * scale, (w.y - w.height / 2) * scale, wWidth, wHeight);
         });
       }
       const b = game.level.boss;
       const bw = b.width * scale;
       const bh = b.height * scale;
+      const bx = (b.x - b.width / 2) * scale;
+      const by = (b.y - b.height / 2) * scale;
       if (this.knightSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
         if (!this.lastKnightTime) this.lastKnightTime = now;
@@ -199,10 +203,10 @@ export class Renderer {
           this.knightFrameIndex = (this.knightFrameIndex + 1) % this.knightSprites.length;
         }
         const img = this.knightSprites[this.knightFrameIndex];
-        ctx.drawImage(img, b.x * scale, (b.y - b.height) * scale, bw, bh);
+        ctx.drawImage(img, bx, by, bw, bh);
       } else {
         ctx.fillStyle = 'black';
-        ctx.fillRect(b.x * scale, (b.y - b.height) * scale, bw, bh);
+        ctx.fillRect(bx, by, bw, bh);
       }
     });
   }

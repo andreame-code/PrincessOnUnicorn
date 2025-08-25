@@ -9,10 +9,13 @@ const FRAME = 1 / 60;
 test('boss flees after player covers 70% of distance', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const level = new Level2(game);
-  const initialDistance = level.boss.x - (game.player.x + game.player.width);
+  const initialDistance =
+    (level.boss.x - level.boss.width / 2) -
+    (game.player.x + game.player.width / 2);
   const threshold = initialDistance * 0.3;
 
-  game.player.x = level.boss.x - threshold - game.player.width;
+  game.player.x =
+    level.boss.x - level.boss.width / 2 - threshold - game.player.width / 2;
   level.update(FRAME);
   assert.ok(level.bossFlee);
 });
@@ -20,10 +23,13 @@ test('boss flees after player covers 70% of distance', () => {
 test('boss does not flee before player covers 70% of distance', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const level = new Level2(game);
-  const initialDistance = level.boss.x - (game.player.x + game.player.width);
+  const initialDistance =
+    (level.boss.x - level.boss.width / 2) -
+    (game.player.x + game.player.width / 2);
   const almostThreshold = initialDistance * 0.31;
 
-  game.player.x = level.boss.x - almostThreshold - game.player.width;
+  game.player.x =
+    level.boss.x - level.boss.width / 2 - almostThreshold - game.player.width / 2;
   level.update(FRAME);
   assert.ok(!level.bossFlee);
 });
@@ -31,7 +37,7 @@ test('boss does not flee before player covers 70% of distance', () => {
 test('boss initial position uses resized canvas width', () => {
   const game = createStubGame({ canvasWidth: 300, innerWidth: 800, innerHeight: 450, search: '?level=2', skipLevelUpdate: true });
   assert.strictEqual(game.canvas.width, 800);
-  assert.strictEqual(game.level.boss.x, game.worldWidth - 1);
+  assert.strictEqual(game.level.boss.x, game.worldWidth - 1 + 0.8 / 2);
 });
 
 test('shield deactivates even when input is spammed', () => {
@@ -62,7 +68,7 @@ test('shield blocks obstacles slightly earlier', () => {
   const player = game.player;
   const wall = level.createObstacle();
   const gap = 0.05;
-  wall.x = player.x + player.width + gap;
+  wall.x = player.x + player.width / 2 + gap + wall.width / 2;
 
   // Without shield the obstacle should pass
   assert.ok(level.handleCollision(wall));

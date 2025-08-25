@@ -4,9 +4,15 @@ import { isColliding } from './collision.js';
 
 const groundY = 1.5;
 
-// helper to create unicorn/obstacle with bottom-based y coordinate
+// Helper to create entities using left/bottom coordinates for convenience
+// while the collision system operates on center-based coordinates.
 function createEntity(x, y, width, height) {
-  return { x, y, width, height };
+  return {
+    x: x + width / 2,
+    y: y - height / 2,
+    width,
+    height,
+  };
 }
 
 test('detects collision when overlapping at ground', () => {
