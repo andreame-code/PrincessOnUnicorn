@@ -6,11 +6,10 @@ import { createStubGame } from './testHelpers.js';
 // resizeCanvas should fall back to window dimensions so the scale isn't 0.
 test('resizeCanvas falls back to window size when bounding rect is zero', () => {
   const game = createStubGame();
-  // define window height for fallback
-  window.innerHeight = 600;
-  // simulate zero-sized bounding box
+  window.innerWidth = 1000;
+  window.innerHeight = 500;
   game.canvas.getBoundingClientRect = () => ({ width: 0, height: 0 });
   game.resizeCanvas();
   assert.ok(game.scale > 0);
-  assert.strictEqual(game.player.spriteScale, game.scale);
+  assert.ok(Math.abs(game.canvas.width / game.canvas.height - 16 / 9) < 1e-6);
 });

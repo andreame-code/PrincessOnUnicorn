@@ -6,7 +6,8 @@ import { JUMP_VELOCITY, GRAVITY } from './src/config.js';
 const FRAME = 1 / 60;
 
 function simulate(innerWidth) {
-  const game = createStubGame({ innerWidth, skipLevelUpdate: true });
+  const innerHeight = innerWidth * 9 / 16;
+  const game = createStubGame({ innerWidth, innerHeight, skipLevelUpdate: true });
   const { player, groundY } = game;
   const jumpDuration = (-2 * JUMP_VELOCITY) / GRAVITY;
   const framesToLand = Math.ceil(jumpDuration / FRAME);
@@ -20,8 +21,8 @@ function simulate(innerWidth) {
 }
 
 test('jump height and timing unaffected by sprite scale', () => {
-  const normal = simulate(800); // scale ~1
-  const scaled = simulate(1600); // scale ~2
+  const normal = simulate(1600); // scale ~1
+  const scaled = simulate(3200); // scale ~2
   assert.ok(Math.abs(normal.finalY - scaled.finalY) < 1e-6);
   assert.ok(Math.abs(normal.minY - scaled.minY) < 1e-6);
 });

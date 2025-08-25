@@ -10,6 +10,8 @@ import {
   GRAVITY,
   LEVEL_UP_SCORE,
   RESIZE_THROTTLE_MS,
+  WORLD_WIDTH,
+  WORLD_HEIGHT,
 } from './config.js';
 
 export class Game {
@@ -19,7 +21,7 @@ export class Game {
     this.overlay = new Overlay();
     this.random = randomFn;
 
-    this.speed = GAME_SPEED; // pixels per second
+    this.speed = GAME_SPEED; // world units per second
     this.gravity = GRAVITY; // acceleration per second^2
     this.score = 0;
     this.coins = 0;
@@ -28,7 +30,10 @@ export class Game {
     this.gamePaused = true;
     this.lastTime = null;
     this.accumulator = 0;
-    this.scale = 1;
+    this.scale = 1; // pixels per world unit
+
+    this.worldWidth = WORLD_WIDTH;
+    this.worldHeight = WORLD_HEIGHT;
 
     this.params = new URLSearchParams(window.location.search);
     this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
@@ -54,7 +59,7 @@ export class Game {
   }
 
   initializeLevel() {
-    this.player = new Player(50, this.groundY, this.scale);
+    this.player = new Player(0.5, this.groundY, this.scale);
     this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
     if (typeof this.level.setScale === 'function') {
       this.level.setScale(this.scale);
@@ -84,30 +89,28 @@ export class Game {
   }
 
   resizeCanvas() {
-    // Use a fixed internal resolution so that gameplay timings (like the
-    // distance an obstacle travels before reaching the player) remain
-    // consistent across devices. The canvas is visually scaled via CSS,
-    // while in-game coordinates always assume this base size.
-    const BASE_WIDTH = 800;
-    const BASE_HEIGHT = 600;
+    const WORLD_ASPECT = this.worldWidth / this.worldHeight;
 
-    this.canvas.width = BASE_WIDTH;
-    this.canvas.height = BASE_HEIGHT;
-    this.groundY = BASE_HEIGHT - 50;
-
-    // Determine the on-screen size of the canvas to compute the current
-    // scaling factor used for player and obstacle dimensions.
     let { width, height } = this.canvas.getBoundingClientRect();
     if (width === 0 || height === 0) {
-      // If called before the canvas is visible, its bounding box may report
-      // zero dimensions. Fall back to the window size so that scaling never
-      // becomes zero and sprites render correctly on first load.
       width = window.innerWidth;
       height = window.innerHeight;
     }
-    const widthScale = width / BASE_WIDTH;
-    const heightScale = height / BASE_HEIGHT;
-    this.scale = Math.min(widthScale, heightScale, 2);
+
+    if (width / height > WORLD_ASPECT) {
+      width = height * WORLD_ASPECT; // pillarbox
+    } else {
+      height = width / WORLD_ASPECT; // letterbox
+    }
+
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
+
+    this.canvas.width = width;
+    this.canvas.height = height;
+
+    this.scale = width / this.worldWidth;
+    this.groundY = this.worldHeight - 0.5;
 
     if (this.player) {
       this.player.setScale(this.scale);
