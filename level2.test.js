@@ -6,32 +6,43 @@ import { SHIELD_COOLDOWN } from './src/config.js';
 
 const FRAME = 1 / 60;
 
-test('boss flees after player covers 70% of distance', () => {
+test('player covers 80% of distance after destroying 15 walls', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const level = new Level2(game);
+  const player = game.player;
   const initialDistance =
     (level.boss.x - level.boss.width / 2) -
-    (game.player.x + game.player.width / 2);
-  const threshold = initialDistance * 0.3;
-
-  game.player.x =
-    level.boss.x - level.boss.width / 2 - threshold - game.player.width / 2;
-  level.update(FRAME);
-  assert.ok(level.bossFlee);
+    (player.x + player.width / 2);
+  player.shieldActive = true;
+  for (let i = 0; i < 15; i++) {
+    const wall = level.createObstacle();
+    wall.x = player.x;
+    level.wallCount++;
+    level.handleCollision(wall);
+  }
+  const currentDistance =
+    (level.boss.x - level.boss.width / 2) -
+    (player.x + player.width / 2);
+  assert.ok(Math.abs(currentDistance - initialDistance * 0.2) < 1e-6);
 });
 
-test('boss does not flee before player covers 70% of distance', () => {
+test('boss flees after princess destroys all 15 walls', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const level = new Level2(game);
-  const initialDistance =
-    (level.boss.x - level.boss.width / 2) -
-    (game.player.x + game.player.width / 2);
-  const almostThreshold = initialDistance * 0.31;
-
-  game.player.x =
-    level.boss.x - level.boss.width / 2 - almostThreshold - game.player.width / 2;
+  const player = game.player;
+  player.shieldActive = true;
+  for (let i = 0; i < 15; i++) {
+    const wall = level.createObstacle();
+    wall.x = player.x;
+    level.wallCount++;
+    level.handleCollision(wall);
+  }
   level.update(FRAME);
-  assert.ok(!level.bossFlee);
+  assert.ok(level.bossFlee);
+  level.timer = 100;
+  level.update(FRAME);
+  assert.strictEqual(level.wallCount, 15);
+  assert.strictEqual(level.obstacles.length, 0);
 });
 
 test('boss initial position uses resized canvas width', () => {

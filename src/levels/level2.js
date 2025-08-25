@@ -19,6 +19,9 @@ export class Level2 extends BaseLevel {
     this.initialDistance =
       (this.boss.x - this.boss.width / 2) -
       (this.game.player.x + this.game.player.width / 2);
+    this.wallLimit = 15;
+    this.wallCount = 0;
+    this.pushDistance = (this.initialDistance * 0.8) / this.wallLimit;
     this.pendingHit = null;
     this.pendingGrace = 0;
   }
@@ -65,7 +68,7 @@ export class Level2 extends BaseLevel {
 
     if (isColliding(collider, w)) {
       if (player.shieldActive) {
-        player.x += 0.2;
+        player.x += this.pushDistance;
         this.coins.push({
           x: w.x,
           y: w.y,
@@ -84,10 +87,33 @@ export class Level2 extends BaseLevel {
     return true;
   }
 
+  updateObstacles(delta) {
+    this.timer += delta;
+    if (this.wallCount < this.wallLimit && this.timer > this.interval) {
+      this.obstacles.push(this.createObstacle());
+      this.wallCount++;
+      this.timer = 0;
+      this.interval = this.constructor.getInterval(this.random);
+    }
+    const move = this.getMoveSpeed() * delta;
+    this.obstacles.forEach(o => {
+      o.update(move);
+    });
+    this.obstacles = this.obstacles.filter(o => {
+      const obstacleRight = o.x + o.width / 2;
+      const playerLeft = this.game.player.x - this.game.player.width / 2;
+      if (obstacleRight < playerLeft) {
+        this.onObstaclePassed(o);
+        return false;
+      }
+      return this.handleCollision(o);
+    });
+  }
+
   update(delta) {
     const move = this.getMoveSpeed() * delta;
     if (!this.bossFlee) {
-      super.updateObstacles(delta);
+      this.updateObstacles(delta);
     } else {
       this.obstacles.forEach(w => w.update(move));
       this.obstacles = this.obstacles.filter(w => w.x + w.width / 2 > 0);
@@ -101,10 +127,7 @@ export class Level2 extends BaseLevel {
     });
     this.coins = this.coins.filter(c => c.life > 0 && c.x > -0.1);
 
-    const currentDistance =
-      (this.boss.x - this.boss.width / 2) -
-      (this.game.player.x + this.game.player.width / 2);
-    if (currentDistance <= this.initialDistance * 0.3) {
+    if (!this.bossFlee && this.wallCount >= this.wallLimit && this.obstacles.length === 0) {
       this.bossFlee = true;
     }
     if (this.bossFlee) {
@@ -117,7 +140,7 @@ export class Level2 extends BaseLevel {
 
     if (this.pendingHit) {
       if (this.game.player.shieldActive) {
-        this.game.player.x += 0.2;
+        this.game.player.x += this.pushDistance;
         this.coins.push({
           x: this.pendingHit.x,
           y: this.pendingHit.y,
