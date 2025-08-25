@@ -16,8 +16,9 @@ export class BaseLevel {
   }
 
   createObstacle() {
-    const width = 0.4;
-    const height = 0.8;
+    // Reduce tree size by 20% to make them less intrusive.
+    const width = 0.32;
+    const height = 0.64;
     const obstacle = new Obstacle(
       this.game.worldWidth + width / 2,
       this.game.groundY - height / 2,
