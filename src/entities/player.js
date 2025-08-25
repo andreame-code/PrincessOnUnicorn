@@ -1,4 +1,4 @@
-import { GRAVITY } from '../config/physics.js';
+import { GRAVITY } from '../config.js';
 
 export class Player {
   constructor({ x=2, y=0, width=0.6, height=1.0 }) {

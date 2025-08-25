@@ -1,4 +1,4 @@
-import { SPAWN_EVERY_S, FIRST_SPAWN_DELAY_S, WORLD_SPEED } from '../config/spawn.js';
+import { SPAWN_EVERY_S, FIRST_SPAWN_DELAY_S, WORLD_SPEED } from '../config.js';
 
 export class Spawner {
   constructor(world) {
