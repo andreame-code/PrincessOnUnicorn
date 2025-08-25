@@ -32,7 +32,8 @@ export class Level2 extends BaseLevel {
   }
 
   getMoveSpeed() {
-    return this.game.speed + 120;
+    // Slow down the knight's thrown walls for young players.
+    return this.game.speed + 0.4;
   }
 
   createObstacle() {
