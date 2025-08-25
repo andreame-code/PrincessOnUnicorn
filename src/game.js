@@ -26,7 +26,8 @@ export class Game {
     this.gameOver = false;
     this.win = false;
     this.gamePaused = true;
-    this.lastTime = 0;
+    this.lastTime = null;
+    this.accumulator = 0;
     this.scale = 1;
 
     this.params = new URLSearchParams(window.location.search);
@@ -62,7 +63,8 @@ export class Game {
 
   startLoop() {
     this.gamePaused = false;
-    this.lastTime = 0;
+    this.lastTime = null;
+    this.accumulator = 0;
     requestAnimationFrame(ts => this.loop(ts));
   }
 
@@ -168,11 +170,29 @@ export class Game {
   }
 
   loop(timestamp) {
-    if (!this.lastTime) this.lastTime = timestamp;
-    const delta = (timestamp - this.lastTime) / 1000;
+    if (this.lastTime === null) {
+      this.lastTime = timestamp;
+      return;
+    }
+    let delta = (timestamp - this.lastTime) / 1000;
     this.lastTime = timestamp;
-    this.update(delta);
+    // Prevent spiral of death in case of frame drops
+    if (delta > 0.25) delta = 0.25;
+    this.accumulator += delta;
+
+    const STEP = 1 / 60;
+    if (!this.gamePaused) {
+      while (this.accumulator >= STEP) {
+        this.update(STEP);
+        this.accumulator -= STEP;
+      }
+    } else {
+      // Avoid large catch-up after pause
+      this.accumulator = 0;
+    }
+
     this.draw();
+
     if (this.gameOver) {
       if (this.win) {
         this.input.detach();
