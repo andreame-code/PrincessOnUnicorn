@@ -17,3 +17,7 @@ export const RESIZE_THROTTLE_MS = 200;
 export const SHIELD_RANGE = 0.1;
 // Default shield cooldown duration in seconds
 export const SHIELD_COOLDOWN = 0.5;
+// Duration the shield stays active in seconds
+export const SHIELD_DURATION = 0.5;
+// Grace window after an attack where the shield can still be activated (seconds)
+export const SHIELD_GRACE = 0.16;
