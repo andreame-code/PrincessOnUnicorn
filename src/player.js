@@ -1,4 +1,4 @@
-import { JUMP_VELOCITY } from './config.js';
+import { JUMP_VELOCITY, SHIELD_COOLDOWN } from './config.js';
 
 export class Player {
   constructor(x, groundY, scale = 1) {
@@ -12,7 +12,7 @@ export class Player {
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
-    this.shieldCooldownMax = 1;
+    this.shieldCooldownMax = SHIELD_COOLDOWN;
     this.dead = false;
   }
 
@@ -46,7 +46,7 @@ export class Player {
     }
   }
 
-  activateShield(duration = 0.25, cooldown = 1) {
+  activateShield(duration = 0.25, cooldown = SHIELD_COOLDOWN) {
     if (!this.shieldActive && this.shieldCooldown === 0) {
       this.shieldActive = true;
       this.shieldTimer = duration;
