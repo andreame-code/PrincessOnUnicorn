@@ -25,6 +25,8 @@ export class Game {
     this.gravity = GRAVITY; // acceleration per second^2
     this.score = 0;
     this.coins = 0;
+    const storedHigh = typeof localStorage !== 'undefined' ? localStorage.getItem('highScore') : null;
+    this.highScore = storedHigh ? parseInt(storedHigh, 10) : 0;
     this.gameOver = false;
     this.win = false;
     this.gamePaused = true;
@@ -167,6 +169,13 @@ export class Game {
       this.player.die();
     }
     if (!this.gameOver) this.score += delta * 60;
+    const current = Math.floor(this.score);
+    if (current > this.highScore) {
+      this.highScore = current;
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('highScore', this.highScore.toString());
+      }
+    }
 
     if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
