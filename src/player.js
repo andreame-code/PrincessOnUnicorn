@@ -57,7 +57,9 @@ export class Player {
     duration = SHIELD_DURATION,
     cooldown = SHIELD_COOLDOWN
   ) {
-    if (!this.shieldActive && this.shieldCooldown === 0) {
+    if (this.shieldActive) {
+      this.shieldTimer = duration;
+    } else if (this.shieldCooldown === 0) {
       this.shieldActive = true;
       this.shieldTimer = duration;
       this.shieldCooldown = cooldown;
