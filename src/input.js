@@ -1,17 +1,21 @@
 export class InputHandler {
   constructor(
-    onAction,
-    { keys = ['Space'], pointerEvent = 'pointerdown', passive = true } = {}
+    keyMap = {},
+    { pointerEvent = 'pointerdown', pointerCallback, passive = true } = {},
   ) {
-    this.onAction = onAction;
-    this.keys = keys;
+    this.keyMap = keyMap;
     this.pointerEvent = pointerEvent;
+    this.pointerCallback = pointerCallback;
     this.eventOptions = passive ? { passive: true } : undefined;
 
     this.keyListener = (e) => {
-      if (this.keys.includes(e.code) && !e.repeat) this.onAction();
+      const cb = this.keyMap[e.code];
+      if (cb && !e.repeat) cb();
     };
-    this.pointerListener = () => this.onAction();
+
+    this.pointerListener = () => {
+      if (this.pointerCallback) this.pointerCallback();
+    };
   }
 
   attach() {
@@ -26,7 +30,8 @@ export class InputHandler {
       window.removeEventListener(
         this.pointerEvent,
         this.pointerListener,
-        this.eventOptions
+        this.eventOptions,
       );
   }
 }
+

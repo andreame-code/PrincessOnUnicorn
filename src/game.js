@@ -51,7 +51,14 @@ export class Game {
 
     this.renderer = new Renderer(this);
 
-    this.input = new InputHandler(() => this.handleInput());
+    const keyMap = {
+      Space: () => this.handleInput('Space'),
+      KeyP: () => this.handleInput('KeyP'),
+      Escape: () => this.handleInput('Escape'),
+    };
+    this.input = new InputHandler(keyMap, {
+      pointerCallback: () => this.handleInput('Space'),
+    });
     this.input.attach();
 
     this.renderer
@@ -130,9 +137,26 @@ export class Game {
     }
   }
 
-  handleInput() {
+  togglePause() {
+    this.gamePaused = !this.gamePaused;
+    if (this.gamePaused) {
+      this.showOverlay('Game Paused', () => this.togglePause());
+    } else {
+      this.overlay.onClose = null;
+      this.overlay.hide();
+      this.lastTime = null;
+      requestAnimationFrame(ts => this.loop(ts));
+    }
+  }
+
+  handleInput(code = 'Space') {
     if (this.gameOver) {
       this.reset();
+      return;
+    }
+
+    if (code === 'KeyP' || code === 'Escape') {
+      this.togglePause();
       return;
     }
 
