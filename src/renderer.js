@@ -1,6 +1,10 @@
 import { AssetManager } from './assetManager.js';
 import { SHIELD_RANGE } from './config.js';
 
+const JUMP_SOUND = 'data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YcgAAACA/K4UKcryYAFw+L0eHr34cAFg8sopFK78fwNR69Y1DZ/+jwdC4eFCB4/+nw011utRA4D8rhQpyvJgAXD4vR4evfhwAWDyyikUrvyAA1Hr1jUNn/6PB0Lh4UIHj/6fDTXW61EDgPyuFCnK8mABcPi9Hh69+HABYPLKKRSu/H8DUevWNQ2f/o8HQuHhQgeP/p8NNdbrUQN//K4UKcryYAFw+L0eHr34cAFg8sopFK78fwNR69Y1DZ/+jwdC4eFCB4/+nw011utRAw==';
+const COIN_SOUND = 'data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YcgAAACA7e+DFA546fKLGQtw5PaTHgho3/ibIwZg2fujKQRY0/yrLwJRzf2yNQFJx/65OwFCwP/AQgE7uf7HSQE1sv3NUQIvq/zTWAQpo/vZYAYjm/jfaAgek/bkcAsZi/LpeA4Ug+/tgBIQfOvxhxYNdOb0jxsJbOH3lyAHZNz5nyYEXNb7pywDVND9rjICTcr+tjgBRsT+vT8BP73+xEYBOLb+yk0CMq790FQDLKf71lwEJp/53GQHIJf34WwJG4/05nQNFofx63wQEg==';
+const SHIELD_SOUND = 'data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YcgAAACA0PzvrlgUAil4yvvytmAZASNwxPj2vWgeAR5ovfb4xHAjARlgtvL7yngpAhRYru/80H8vAxBRp+v91oc1BA1Jn+b+3I87BwlCl+H/4ZdCCQc7j9z+5p9JDQQ1h9b966dREAMvgND8765YFAIpeMr78rZgGQEjcMT49r1oHgEeaL32+MRwIwEZYLby+8p4KQIUWK7v/NCALwMQUafr/daHNQQNSZ/m/tyPOwcJQpfh/+GXQgkHO4/c/uafSQ0ENYfW/eunURADLw==';
+
 const SPRITE_SCALE = 2;
 
 export class Renderer {
@@ -20,12 +24,10 @@ export class Renderer {
     this.knightFrameIndex = 0;
     this.knightFrameTimer = 0;
     this.lastKnightTime = 0;
+    this.sounds = {};
   }
 
   preload() {
-    if (typeof Image === 'undefined') {
-      return Promise.resolve();
-    }
     const resolve = path => new URL(`../${path}`, import.meta.url).href;
     const assets = [
       { key: 'player_0', src: resolve('public/assets/sprites/principessa/princess_0.png') },
@@ -39,6 +41,9 @@ export class Renderer {
       { key: 'knight_2', src: resolve('public/assets/sprites/cavaliere_nero/knight_2.png') },
       { key: 'wall', src: resolve('sprites/projectiles/wall/00.png') },
       { key: 'shield', src: resolve('public/assets/sprites/shield.png') },
+      { key: 'jump', src: JUMP_SOUND, type: 'audio' },
+      { key: 'coin', src: COIN_SOUND, type: 'audio' },
+      { key: 'shield_hit', src: SHIELD_SOUND, type: 'audio' },
     ];
     return this.assets.loadAll(assets).then(() => {
       this.playerSprites = {
@@ -64,7 +69,21 @@ export class Renderer {
       ];
       this.wallSprite = this.assets.get('wall');
       this.shieldSprite = this.assets.get('shield');
+      this.sounds.jump = this.assets.get('jump');
+      this.sounds.coin = this.assets.get('coin');
+      this.sounds.shield = this.assets.get('shield_hit');
+      Object.values(this.sounds).forEach(s => {
+        if (s) s.volume = 0.5;
+      });
     });
+  }
+
+  playSound(key) {
+    const audio = this.sounds[key];
+    if (audio && typeof audio.play === 'function') {
+      audio.currentTime = 0;
+      audio.play();
+    }
   }
 
   withContext(drawFn) {

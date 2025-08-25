@@ -164,8 +164,10 @@ export class Game {
 
     if (this.levelNumber === 1) {
       this.player.jump();
+      this.renderer.playSound('jump');
     } else {
       this.player.activateShield();
+      this.renderer.playSound('shield');
     }
   }
 
