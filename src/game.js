@@ -180,6 +180,7 @@ export class Game {
   loop(timestamp) {
     if (this.lastTime === null) {
       this.lastTime = timestamp;
+      requestAnimationFrame(ts => this.loop(ts));
       return;
     }
     let delta = (timestamp - this.lastTime) / 1000;
