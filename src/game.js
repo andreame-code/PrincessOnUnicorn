@@ -41,6 +41,10 @@ export class Game {
     this.boundResize = this.throttle(() => this.resizeCanvas(), RESIZE_THROTTLE_MS);
     window.addEventListener('resize', this.boundResize);
 
+    // Ensure world dimensions like groundY are set before creating the level
+    // so entities that depend on them (e.g., the boss in Level2) initialize
+    // with correct positions.
+    this.resizeCanvas();
     this.initializeLevel();
 
     this.renderer = new Renderer(this);
