@@ -8,7 +8,7 @@ PrincessOnUnicorn is a lightweight JavaScript runner game. The player controls a
 
 ### Controls
 - **Jump** – press `Space` or tap the screen.
-- **Shield (Level 2)** – press `Space` or tap again to activate a temporary shield that shatters incoming walls.
+- **Shield (Level 2)** – press `Space` or tap again repeatedly to maintain a temporary shield that shatters incoming walls. The shield now recharges 10% faster.
 
 ### Scoring
 Points increase with distance. Reach 1000 to encounter the Black Knight.
