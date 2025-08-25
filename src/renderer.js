@@ -85,6 +85,9 @@ export class Renderer {
   drawPlayer() {
     const u = this.game.player;
     this.withContext(ctx => {
+      const scaledWidth = u.width * u.spriteScale;
+      const scaledHeight = u.height * u.spriteScale;
+
       if (this.playerSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
         if (!this.lastSpriteTime) this.lastSpriteTime = now;
@@ -98,41 +101,41 @@ export class Renderer {
           this.playerFrameIndex = (this.playerFrameIndex + 1) % frames.length;
         }
         const img = frames[this.playerFrameIndex];
-        ctx.drawImage(img, u.x, u.y - u.height, u.width, u.height);
+        ctx.drawImage(img, u.x, u.y - scaledHeight, scaledWidth, scaledHeight);
       } else {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(u.x, u.y - u.height, u.width, u.height);
-        ctx.fillRect(u.x + u.width - 10, u.y - u.height - 10, 10, 10);
+        ctx.fillRect(u.x, u.y - scaledHeight, scaledWidth, scaledHeight);
+        ctx.fillRect(u.x + scaledWidth - 10, u.y - scaledHeight - 10, 10, 10);
         ctx.fillStyle = 'gold';
         ctx.beginPath();
-        ctx.moveTo(u.x + u.width, u.y - u.height - 10);
-        ctx.lineTo(u.x + u.width + 10, u.y - u.height - 30);
-        ctx.lineTo(u.x + u.width, u.y - u.height - 20);
+        ctx.moveTo(u.x + scaledWidth, u.y - scaledHeight - 10);
+        ctx.lineTo(u.x + scaledWidth + 10, u.y - scaledHeight - 30);
+        ctx.lineTo(u.x + scaledWidth, u.y - scaledHeight - 20);
         ctx.fill();
         ctx.fillStyle = 'pink';
-        ctx.fillRect(u.x + 5, u.y - u.height - 25, 15, 15);
+        ctx.fillRect(u.x + 5, u.y - scaledHeight - 25, 15, 15);
         ctx.fillStyle = '#f2d6cb';
         ctx.beginPath();
-        ctx.arc(u.x + 12.5, u.y - u.height - 30, 7, 0, Math.PI * 2);
+        ctx.arc(u.x + 12.5, u.y - scaledHeight - 30, 7, 0, Math.PI * 2);
         ctx.fill();
       }
       if (u.shieldActive) {
-        const extra = SHIELD_RANGE * this.game.scale * 2;
+        const extra = SHIELD_RANGE * u.spriteScale;
         if (this.shieldSprite) {
           const img = this.shieldSprite;
-          const w = (img.width || u.width) + extra;
-          const h = (img.height || u.height) + extra;
-          const sx = u.x + u.width / 2 - w / 2;
-          const sy = u.y - u.height / 2 - h / 2;
+          const w = (img.width || scaledWidth) + extra * 2;
+          const h = (img.height || scaledHeight) + extra * 2;
+          const sx = u.x + scaledWidth / 2 - w / 2;
+          const sy = u.y - scaledHeight / 2 - h / 2;
           ctx.drawImage(img, sx, sy, w, h);
         } else {
           ctx.strokeStyle = 'blue';
           ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.arc(
-            u.x + u.width / 2,
-            u.y - u.height / 2,
-            u.width + SHIELD_RANGE * this.game.scale,
+            u.x + scaledWidth / 2,
+            u.y - scaledHeight / 2,
+            scaledWidth + extra,
             0,
             Math.PI * 2,
           );
@@ -146,12 +149,14 @@ export class Renderer {
     const { game } = this;
     this.withContext(ctx => {
       game.level.obstacles.forEach(o => {
+        const w = o.width * o.spriteScale;
+        const h = o.height * o.spriteScale;
         if (this.treeSprites) {
           const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
-          ctx.drawImage(img, o.x, o.y - o.height, o.width, o.height);
+          ctx.drawImage(img, o.x, o.y - h, w, h);
         } else {
           ctx.fillStyle = 'green';
-          ctx.fillRect(o.x, o.y - o.height, o.width, o.height);
+          ctx.fillRect(o.x, o.y - h, w, h);
         }
       });
     });
@@ -162,15 +167,21 @@ export class Renderer {
     this.withContext(ctx => {
       if (this.wallSprite) {
         game.level.walls.forEach(w => {
-          ctx.drawImage(this.wallSprite, w.x, w.y - w.height, w.width, w.height);
+          const wWidth = w.width * w.spriteScale;
+          const wHeight = w.height * w.spriteScale;
+          ctx.drawImage(this.wallSprite, w.x, w.y - wHeight, wWidth, wHeight);
         });
       } else {
         ctx.fillStyle = 'gray';
         game.level.walls.forEach(w => {
-          ctx.fillRect(w.x, w.y - w.height, w.width, w.height);
+          const wWidth = w.width * w.spriteScale;
+          const wHeight = w.height * w.spriteScale;
+          ctx.fillRect(w.x, w.y - wHeight, wWidth, wHeight);
         });
       }
       const b = game.level.boss;
+      const bw = b.width * (b.spriteScale || 1);
+      const bh = b.height * (b.spriteScale || 1);
       if (this.knightSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
         if (!this.lastKnightTime) this.lastKnightTime = now;
@@ -182,10 +193,10 @@ export class Renderer {
           this.knightFrameIndex = (this.knightFrameIndex + 1) % this.knightSprites.length;
         }
         const img = this.knightSprites[this.knightFrameIndex];
-        ctx.drawImage(img, b.x, b.y - b.height, b.width, b.height);
+        ctx.drawImage(img, b.x, b.y - bh, bw, bh);
       } else {
         ctx.fillStyle = 'black';
-        ctx.fillRect(b.x, b.y - b.height, b.width, b.height);
+        ctx.fillRect(b.x, b.y - bh, bw, bh);
       }
     });
   }
