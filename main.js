@@ -18,6 +18,8 @@ window.addEventListener('DOMContentLoaded', () => {
       game.reset();
     } else {
       game = new Game(canvas);
+      game.resizeCanvas();
+      game.initializeLevel();
     }
   });
 
