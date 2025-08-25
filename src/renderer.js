@@ -128,8 +128,9 @@ export class Renderer {
         if (this.shieldSprite) {
           const img = this.shieldSprite;
           // Usa la dimensione scalata del personaggio anziché le dimensioni dell'immagine
-          const w = scaledWidth + extra * 2;
-          const h = scaledHeight + extra * 2;
+          // Raddoppia la dimensione dello scudo per renderlo evidente
+          const w = (scaledWidth + extra * 2) * 2;
+          const h = (scaledHeight + extra * 2) * 2;
           const sx = u.x * scale - w / 2;
           const sy = u.y * scale - h / 2;
           ctx.drawImage(img, sx, sy, w, h);
