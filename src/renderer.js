@@ -127,10 +127,7 @@ export class Renderer {
         const extra = SHIELD_RANGE * scale;
         if (this.shieldSprite) {
           const img = this.shieldSprite;
-          // Scale the sprite to match the player's hitbox plus the shield's
-          // additional range instead of using the raw sprite dimensions which
-          // can be much larger than the game world. This keeps the visual size
-          // of the shield consistent with its area of influence.
+          // Usa la dimensione scalata del personaggio anziché le dimensioni dell'immagine
           const w = scaledWidth + extra * 2;
           const h = scaledHeight + extra * 2;
           const sx = u.x * scale - w / 2;
