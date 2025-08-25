@@ -19,7 +19,6 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
       game = new Game(canvas);
       game.resizeCanvas();
-      game.initializeLevel();
     }
   });
 
