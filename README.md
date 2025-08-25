@@ -16,7 +16,7 @@ To skip directly to the boss fight, open:
 index.html?level=2
 ```
 
-In Level 2 the Black Knight throws walls at you. Press the spacebar or tap again to activate a shield. If a wall hits while the shield is active it shatters and the unicorn advances. When the knight runs out of space he flees and the princess wins.
+In Level 2 the Black Knight throws walls at you. Press the spacebar or tap again to activate a shield and keep tapping to maintain it. The shield now recharges 10% faster, and if a wall hits while the shield is active it shatters and the unicorn advances. When the knight runs out of space he flees and the princess wins.
 
 ## Development
 The project has no external dependencies; a recent Node.js installation is sufficient to run the tests and develop new features.
