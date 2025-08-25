@@ -1,4 +1,4 @@
-import { FIXED_DT } from '../config/physics.js';
+import { FIXED_DT } from '../config.js';
 
 export function startGameLoop({ step, render }) {
   let last = performance.now();
