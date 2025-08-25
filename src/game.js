@@ -82,18 +82,24 @@ export class Game {
   }
 
   resizeCanvas() {
-    this.canvas.width = window.innerWidth;
-    // Ensure enough vertical space so the princess remains visible even at
-    // the peak of her jump. If the viewport is shorter than the required
-    // height, expand the canvas instead of letting the character leave the
-    // field of view.
-    const availableHeight = window.innerHeight || this.canvas.height;
-    const minHeight = 480; // jump arc (~300) + max player height (~160) + ground
-    this.canvas.height = Math.max(availableHeight, minHeight);
-    this.groundY = this.canvas.height - 50;
-    const widthScale = window.innerWidth / 800;
-    const heightScale = this.canvas.height / 600;
+    // Use a fixed internal resolution so that gameplay timings (like the
+    // distance an obstacle travels before reaching the player) remain
+    // consistent across devices. The canvas is visually scaled via CSS,
+    // while in-game coordinates always assume this base size.
+    const BASE_WIDTH = 800;
+    const BASE_HEIGHT = 600;
+
+    this.canvas.width = BASE_WIDTH;
+    this.canvas.height = BASE_HEIGHT;
+    this.groundY = BASE_HEIGHT - 50;
+
+    // Determine the on-screen size of the canvas to compute the current
+    // scaling factor used for player and obstacle dimensions.
+    const { width, height } = this.canvas.getBoundingClientRect();
+    const widthScale = width / BASE_WIDTH;
+    const heightScale = height / BASE_HEIGHT;
     this.scale = Math.min(widthScale, heightScale, 2);
+
     if (this.player) {
       this.player.setScale(this.scale);
       if (!this.player.jumping) {
