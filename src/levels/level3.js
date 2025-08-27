@@ -46,8 +46,6 @@ export class Level3 extends BaseLevel {
     obstacle.setScale(this.game.scale);
     obstacle.imageIndex = Math.floor(this.random() * 2);
     obstacle.coinAwarded = false;
-    // Give the cactus its own movement so it walks across the ground.
-    obstacle.vx = -0.5;
     return obstacle;
   }
 
@@ -65,7 +63,7 @@ export class Level3 extends BaseLevel {
     }
 
     // Move existing obstacles and handle collisions
-    this.obstacles.forEach(o => o.update(move, delta));
+    this.obstacles.forEach(o => o.update(move));
     this.obstacles = this.obstacles.filter(o => {
       const obstacleRight = o.x + o.width / 2;
       const playerLeft = this.game.player.x - this.game.player.width / 2;
