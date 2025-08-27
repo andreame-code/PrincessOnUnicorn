@@ -28,6 +28,7 @@ export class Game {
     this.gravity = GRAVITY; // acceleration per second^2
     this.score = 0;
     this.coins = 0;
+    this.stars = 0;
     const storedHigh = typeof localStorage !== 'undefined' ? localStorage.getItem('highScore') : null;
     this.highScore = storedHigh ? parseInt(storedHigh, 10) : 0;
     this.gameOver = false;

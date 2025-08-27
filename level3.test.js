@@ -29,8 +29,10 @@ test('level 3 advances using move speed', () => {
 test('level 3 completes after level length', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
+  const distanceToPortal = level.portal.x - game.player.x;
+  const maxSteps = Math.ceil(distanceToPortal / level.getMoveSpeed() / FRAME) + 60;
   let steps = 0;
-  while (!game.win && steps < 5000) {
+  while (!game.win && steps < maxSteps) {
     level.update(FRAME);
     steps++;
   }
@@ -94,5 +96,40 @@ test('player cannot triple jump in level 3', () => {
   game.update(FRAME);
   player.jump();
   assert.strictEqual(player.jumpCount, 2);
+});
+
+test('level 3 has a secret of five stars', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const level = game.level;
+  assert.strictEqual(level.stars.length, 5);
+});
+
+test('collecting a star increases star count', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const star = level.stars[0];
+  star.x = game.player.x;
+  star.y = game.player.y;
+  level.update(FRAME);
+  assert.strictEqual(game.stars, 1);
+  assert.strictEqual(level.stars.length, 4);
+});
+
+test('checkpoint and portal are unique to level 3', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const level = game.level;
+  assert.ok(level.checkpoint);
+  assert.ok(level.portal);
+  const game1 = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  assert.ok(!game1.level.stars || game1.level.stars.length === 0);
+  const game2 = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  assert.ok(!game2.level.stars || game2.level.stars.length === 0);
+});
+
+test('level 3 duration is between 90 and 150 seconds', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const level = game.level;
+  const duration = level.levelLength / level.getMoveSpeed();
+  assert.ok(duration >= 90 && duration <= 150);
 });
 
