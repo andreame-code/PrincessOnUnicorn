@@ -30,9 +30,9 @@ export class Renderer {
   preload() {
     const resolve = path => new URL(`../${path}`, import.meta.url).href;
     const assets = [
-      { key: 'player_0', src: resolve('public/assets/sprites/principessa/princess_0.png') },
-      { key: 'player_1', src: resolve('public/assets/sprites/principessa/princess_1.png') },
-      { key: 'player_2', src: resolve('public/assets/sprites/principessa/princess_2.png') },
+      { key: 'player_0', src: resolve('public/assets/sprites/princess_0.png') },
+      { key: 'player_1', src: resolve('public/assets/sprites/princess_1.png') },
+      { key: 'player_2', src: resolve('public/assets/sprites/princess_2.png') },
       { key: 'tree_0', src: resolve('sprites/obstacles/trees/00.png') },
       { key: 'tree_1', src: resolve('sprites/obstacles/trees/01.png') },
       { key: 'tree_2', src: resolve('sprites/obstacles/trees/02.png') },
@@ -189,9 +189,14 @@ export class Renderer {
         const left = o.x * scale - w / 2;
         const bottom = (o.y + o.height / 2) * scale;
         const top = bottom - h;
-        if (this.treeSprites) {
-          const img = this.treeSprites[(o.imageIndex ?? 0) % this.treeSprites.length];
+        const sprites = o.type === 'tree' ? this.treeSprites : null;
+        if (sprites) {
+          const img = sprites[(o.imageIndex ?? 0) % sprites.length];
           ctx.drawImage(img, left, top, w, h);
+        } else if (o.type === 'cactus') {
+          ctx.fillStyle = 'green';
+          ctx.fillRect(left + w * 0.4, top, w * 0.2, h);
+          ctx.fillRect(left, top + h * 0.4, w, h * 0.2);
         } else {
           ctx.fillStyle = 'green';
           ctx.fillRect(left, top, w, h);
