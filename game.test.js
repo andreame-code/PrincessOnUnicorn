@@ -94,10 +94,10 @@ test('toggles pause when pause key is pressed', () => {
     origHide();
   };
   game.gamePaused = false;
-  game.input.keyListener({ code: 'KeyP', repeat: false });
+  game.input.keydownListener({ code: 'KeyP', repeat: false });
   assert.ok(game.gamePaused);
   assert.ok(showed);
-  game.input.keyListener({ code: 'KeyP', repeat: false });
+  game.input.keydownListener({ code: 'KeyP', repeat: false });
   assert.ok(!game.gamePaused);
   assert.ok(hid);
 });

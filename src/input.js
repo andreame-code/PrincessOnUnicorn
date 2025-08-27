@@ -1,16 +1,23 @@
 export class InputHandler {
   constructor(
-    keyMap = {},
+    keydownMap = {},
+    keyupMap = {},
     { pointerEvent = 'pointerdown', pointerCallback, passive = true } = {},
   ) {
-    this.keyMap = keyMap;
+    this.keydownMap = keydownMap;
+    this.keyupMap = keyupMap;
     this.pointerEvent = pointerEvent;
     this.pointerCallback = pointerCallback;
     this.eventOptions = passive ? { passive: true } : undefined;
 
-    this.keyListener = (e) => {
-      const cb = this.keyMap[e.code];
+    this.keydownListener = (e) => {
+      const cb = this.keydownMap[e.code];
       if (cb && !e.repeat) cb();
+    };
+
+    this.keyupListener = (e) => {
+      const cb = this.keyupMap[e.code];
+      if (cb) cb();
     };
 
     this.pointerListener = () => {
@@ -19,13 +26,15 @@ export class InputHandler {
   }
 
   attach() {
-    document.addEventListener('keydown', this.keyListener, this.eventOptions);
+    document.addEventListener('keydown', this.keydownListener, this.eventOptions);
+    document.addEventListener('keyup', this.keyupListener, this.eventOptions);
     if (this.pointerEvent)
       window.addEventListener(this.pointerEvent, this.pointerListener, this.eventOptions);
   }
 
   detach() {
-    document.removeEventListener('keydown', this.keyListener, this.eventOptions);
+    document.removeEventListener('keydown', this.keydownListener, this.eventOptions);
+    document.removeEventListener('keyup', this.keyupListener, this.eventOptions);
     if (this.pointerEvent)
       window.removeEventListener(
         this.pointerEvent,

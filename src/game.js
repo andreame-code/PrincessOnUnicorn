@@ -55,14 +55,20 @@ export class Game {
 
     this.renderer = new Renderer(this);
 
-    const keyMap = {
-      Space: () => this.handleInput('Space'),
-      KeyP: () => this.handleInput('KeyP'),
-      Escape: () => this.handleInput('Escape'),
-    };
-    this.input = new InputHandler(keyMap, {
-      pointerCallback: () => this.handleInput('Space'),
-    });
+    const keydownMap = {
+        Space: () => this.handleInput('Space', 'down'),
+        KeyP: () => this.handleInput('KeyP', 'down'),
+        Escape: () => this.handleInput('Escape', 'down'),
+        ArrowRight: () => this.handleInput('ArrowRight', 'down'),
+        ArrowLeft: () => this.handleInput('ArrowLeft', 'down'),
+      };
+      const keyupMap = {
+        ArrowRight: () => this.handleInput('ArrowRight', 'up'),
+        ArrowLeft: () => this.handleInput('ArrowLeft', 'up'),
+      };
+      this.input = new InputHandler(keydownMap, keyupMap, {
+        pointerCallback: () => this.handleInput('Space', 'down'),
+      });
     this.input.attach();
 
     this.renderer
@@ -78,6 +84,7 @@ export class Game {
   initializeLevel() {
     const startX = 0.5 + 0.8 / 2;
     this.player = new Player(startX, this.groundY, this.scale);
+    this.player.worldWidth = this.worldWidth;
     const LevelClass = LEVELS[this.levelNumber - 1];
     this.level = new LevelClass(this, this.random);
     if (typeof this.level.setScale === 'function') {
@@ -154,18 +161,29 @@ export class Game {
     }
   }
 
-  handleInput(code = 'Space') {
+  handleInput(code = 'Space', type = 'down') {
     if (this.gameOver) {
       this.reset();
       return;
     }
 
-    if (code === 'KeyP' || code === 'Escape') {
+    if (type === 'down' && (code === 'KeyP' || code === 'Escape')) {
       this.togglePause();
       return;
     }
 
     if (this.gamePaused) return;
+
+    if (code === 'ArrowRight') {
+      if (type === 'down') this.player.moveRight();
+      else this.player.stopHorizontal();
+      return;
+    }
+    if (code === 'ArrowLeft') {
+      if (type === 'down') this.player.moveLeft();
+      else this.player.stopHorizontal();
+      return;
+    }
 
     if (this.levelNumber === 1) {
       this.player.jump();
