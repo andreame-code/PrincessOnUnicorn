@@ -6,7 +6,16 @@ import { RhombusSprite } from '../entities/rhombusSprite.js';
 import { ThornGuard } from '../entities/thornGuard.js';
 import { PortalGuardian } from '../entities/portalGuardian.js';
 import { isColliding, isLandingOn } from '../../collision.js';
-import { JUMP_VELOCITY, GRAVITY } from '../config.js';
+import {
+  JUMP_VELOCITY,
+  GRAVITY,
+  AURA_SHIELD_DURATION,
+  WIND_HOOVES_DURATION,
+  SUGAR_WINGS_DURATION,
+  WIND_HOOVES_SPEED,
+  SUGAR_WINGS_EXTRA_JUMPS,
+} from '../config.js';
+import { PowerUp, POWERUP } from '../entities/powerUp.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
 // 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
@@ -174,6 +183,7 @@ export class Level3 extends BaseLevel {
   constructor(game, random = Math.random) {
     super(game, random);
     this.game.player.maxJumps = 2;
+    this.game.player.defaultMaxJumps = 2;
     this.map = MAP;
     this.tileSize = 1; // world units per tile
     this.distance = 0;
@@ -184,6 +194,7 @@ export class Level3 extends BaseLevel {
     this.enemies = [];
     this.thornWalls = [];
     this.stars = [];
+    this.powerUps = [];
     this.checkpoint = null;
     this.checkpointReached = false;
     this.respawnPoint = null;
@@ -194,6 +205,7 @@ export class Level3 extends BaseLevel {
     this.generateFromMap();
     this.addExclusiveEnemies();
     this.spawnPortalGuardian();
+    this.spawnPowerUps();
   }
 
   // Spawn interval from BaseLevel isn't used anymore but kept for
@@ -278,6 +290,21 @@ export class Level3 extends BaseLevel {
     }
   }
 
+  spawnPowerUps() {
+    const ground = this.game.groundY - this.tileSize / 2;
+    const startX = this.game.worldWidth + 30;
+    const positions = [
+      { x: startX, kind: POWERUP.AURA_SHIELD },
+      { x: startX + 40, kind: POWERUP.WIND_HOOVES },
+      { x: startX + 80, kind: POWERUP.SUGAR_WINGS },
+    ];
+    positions.forEach(p => {
+      const pu = new PowerUp(p.x, ground, this.tileSize, p.kind);
+      this.powerUps.push(pu);
+      this.obstacles.push(pu);
+    });
+  }
+
   handlePlayerDeath() {
     if (this.checkpointReached && this.respawnPoint) {
       if (!this.respawning) {
@@ -311,12 +338,14 @@ export class Level3 extends BaseLevel {
     this.enemies = filterAhead(this.enemies);
     this.thornWalls = filterAhead(this.thornWalls);
     this.stars = filterAhead(this.stars);
+    this.powerUps = filterAhead(this.powerUps);
     this.obstacles = [
       ...this.platforms.filter(p => p.visible),
       ...this.pipes,
       ...this.blocks,
       ...this.enemies,
       ...this.thornWalls,
+      ...this.powerUps,
     ];
   }
 
@@ -337,6 +366,7 @@ export class Level3 extends BaseLevel {
     moveArr(this.pipes);
     moveArr(this.blocks);
     moveArr(this.stars);
+    moveArr(this.powerUps);
     if (this.checkpoint) this.checkpoint.update(move);
     if (this.portal) this.portal.update(move);
     moveArr(this.thornWalls);
@@ -430,6 +460,19 @@ export class Level3 extends BaseLevel {
       }
       return s.x + s.width / 2 > 0;
     });
+    this.powerUps = this.powerUps.filter(p => {
+      if (isColliding(player, p)) {
+        if (p.kind === POWERUP.AURA_SHIELD) {
+          player.activateShield(AURA_SHIELD_DURATION, 0);
+        } else if (p.kind === POWERUP.WIND_HOOVES) {
+          player.activateSpeedBoost(WIND_HOOVES_DURATION, WIND_HOOVES_SPEED);
+        } else if (p.kind === POWERUP.SUGAR_WINGS) {
+          player.activateWings(SUGAR_WINGS_DURATION, SUGAR_WINGS_EXTRA_JUMPS);
+        }
+        return false;
+      }
+      return p.x + p.width / 2 > 0;
+    });
     if (
       !this.checkpointReached &&
       this.checkpoint &&
@@ -459,6 +502,7 @@ export class Level3 extends BaseLevel {
       ...this.blocks,
       ...this.enemies,
       ...this.thornWalls,
+      ...this.powerUps,
     ];
 
     if (this.distance >= this.levelLength && !this.portal) {
@@ -475,6 +519,7 @@ export class Level3 extends BaseLevel {
       ...this.enemies,
       ...this.stars,
       ...this.thornWalls,
+      ...this.powerUps,
     ].forEach(o => o.setScale(scale));
     if (this.checkpoint) this.checkpoint.setScale(scale);
     if (this.portal) this.portal.setScale(scale);

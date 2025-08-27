@@ -27,3 +27,12 @@ export const SHIELD_COOLDOWN = 0.9;
 export const SHIELD_DURATION = 0.5;
 // Grace window after an attack where the shield can still be activated (seconds)
 export const SHIELD_GRACE = 0.16;
+
+// Durations for Level 3 exclusive power-ups (seconds)
+export const AURA_SHIELD_DURATION = 3;
+export const WIND_HOOVES_DURATION = 3;
+export const SUGAR_WINGS_DURATION = 3;
+
+// Effect values for Level 3 power-ups
+export const WIND_HOOVES_SPEED = 6; // temporary move speed while active
+export const SUGAR_WINGS_EXTRA_JUMPS = 1; // additional jumps granted
