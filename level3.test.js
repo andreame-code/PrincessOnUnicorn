@@ -126,6 +126,52 @@ test('checkpoint and portal are unique to level 3', () => {
   assert.ok(!game2.level.stars || game2.level.stars.length === 0);
 });
 
+test('cloud platform disappears then respawns', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  level.getMoveSpeed = () => 0;
+  const cloud = level.platforms.find(p => p.kind === 'cloud');
+  assert.ok(cloud);
+  const player = game.player;
+  cloud.x = player.x;
+  cloud.y = player.y - 1;
+  player.y = cloud.y - cloud.height / 2 - player.height / 2 + 0.01;
+  player.vy = 0.1;
+  game.update(FRAME);
+  for (let i = 0; i < Math.ceil(1.2 / FRAME) + 1; i++) game.update(FRAME);
+  assert.strictEqual(cloud.visible, false);
+  for (let i = 0; i < Math.ceil(3 / FRAME); i++) game.update(FRAME);
+  assert.strictEqual(cloud.visible, true);
+});
+
+test('falling platform drops after shaking', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  level.getMoveSpeed = () => 0;
+  const falling = level.platforms.find(p => p.kind === 'falling');
+  assert.ok(falling);
+  const player = game.player;
+  falling.x = player.x;
+  falling.y = player.y - 1;
+  player.y = falling.y - falling.height / 2 - player.height / 2 + 0.01;
+  player.vy = 0.1;
+  game.update(FRAME);
+  for (let i = 0; i < Math.ceil(0.3 / FRAME) + 1; i++) game.update(FRAME);
+  const yBefore = falling.y;
+  game.update(FRAME);
+  assert.ok(falling.falling);
+  assert.ok(falling.y > yBefore);
+});
+
+test('special platforms exist only in level 3', () => {
+  const g1 = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  assert.ok(!g1.level.platforms || g1.level.platforms.length === 0);
+  const g2 = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  assert.ok(!g2.level.platforms || g2.level.platforms.length === 0);
+  const g3 = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  assert.ok(g3.level.platforms.length > 0);
+});
+
 test('level 3 duration is between 90 and 150 seconds', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
   const level = game.level;

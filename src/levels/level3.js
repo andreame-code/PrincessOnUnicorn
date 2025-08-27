@@ -2,7 +2,7 @@ import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
 import { Goomba } from '../entities/goomba.js';
 import { isColliding, isLandingOn } from '../../collision.js';
-import { JUMP_VELOCITY } from '../config.js';
+import { JUMP_VELOCITY, GRAVITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
 // 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
@@ -52,6 +52,79 @@ class Platform extends Obstacle {
   constructor(x, y, size) {
     super(x, y, size, size);
     this.type = 'platform';
+  }
+}
+
+class CloudPlatform extends Platform {
+  constructor(x, y, size) {
+    super(x, y, size);
+    this.visible = true;
+    this.stepped = false;
+    this.timer = 0;
+    this.respawn = 0;
+    this.kind = 'cloud';
+  }
+
+  onStep() {
+    this.stepped = true;
+  }
+
+  update(move, delta = 0) {
+    super.update(move);
+    if (!this.visible) {
+      this.respawn += delta;
+      if (this.respawn >= 3) {
+        this.visible = true;
+        this.respawn = 0;
+        this.stepped = false;
+        this.timer = 0;
+      }
+      return;
+    }
+    if (this.stepped) {
+      this.timer += delta;
+      if (this.timer >= 1.2) {
+        this.visible = false;
+        this.respawn = 0;
+      }
+    }
+  }
+}
+
+class FallingPlatform extends Platform {
+  constructor(x, y, size, groundY) {
+    super(x, y, size);
+    this.groundY = groundY;
+    this.stepped = false;
+    this.shake = 0;
+    this.falling = false;
+    this.vy = 0;
+    this.visible = true;
+    this.kind = 'falling';
+  }
+
+  onStep() {
+    if (!this.stepped) {
+      this.stepped = true;
+      this.shake = 0;
+    }
+  }
+
+  update(move, delta = 0) {
+    super.update(move);
+    if (this.stepped && !this.falling) {
+      this.shake += delta;
+      if (this.shake >= 0.3) {
+        this.falling = true;
+      }
+    }
+    if (this.falling) {
+      this.vy += GRAVITY * delta;
+      this.y += this.vy * delta;
+      if (this.y - this.height / 2 > this.groundY + 2) {
+        this.visible = false;
+      }
+    }
   }
 }
 
@@ -131,7 +204,12 @@ export class Level3 extends BaseLevel {
         const y = this.game.groundY - row * this.tileSize - this.tileSize / 2;
         switch (tile) {
           case TILE.PLATFORM:
-            this.platforms.push(new Platform(x, y, this.tileSize));
+            const cls = this.platforms.length % 2 === 0 ? CloudPlatform : FallingPlatform;
+            if (cls === FallingPlatform) {
+              this.platforms.push(new FallingPlatform(x, y, this.tileSize, this.game.groundY));
+            } else {
+              this.platforms.push(new CloudPlatform(x, y, this.tileSize));
+            }
             break;
           case TILE.PIPE:
             this.pipes.push(new Pipe(x, this.game.groundY, this.tileSize));
@@ -171,7 +249,7 @@ export class Level3 extends BaseLevel {
     const move = this.getMoveSpeed() * delta;
     this.distance += move;
 
-    const moveArr = arr => arr.forEach(e => e.update(move));
+    const moveArr = arr => arr.forEach(e => e.update(move, delta));
     moveArr(this.platforms);
     moveArr(this.pipes);
     moveArr(this.blocks);
@@ -181,6 +259,27 @@ export class Level3 extends BaseLevel {
     this.enemies.forEach(e => e.update(move, delta));
 
     const player = this.game.player;
+
+    // Handle platform collisions allowing the player to stand on them.
+    for (const p of this.platforms) {
+      if (!p.visible) continue;
+      if (isColliding(player, p)) {
+        const platformTop = p.y - p.height / 2;
+        const playerBottom = player.y + player.height / 2;
+        const fromAbove = player.vy >= 0 && playerBottom >= platformTop && player.y < p.y;
+        if (fromAbove) {
+          player.y = platformTop - player.height / 2;
+          player.vy = 0;
+          player.jumping = false;
+          player.jumpCount = 0;
+          if (typeof p.onStep === 'function') p.onStep();
+        } else {
+          this.game.gameOver = true;
+          return;
+        }
+      }
+    }
+
     const collideArr = arr => {
       for (const e of arr) {
         if (isColliding(player, e)) {
@@ -191,7 +290,6 @@ export class Level3 extends BaseLevel {
       return true;
     };
 
-    if (!collideArr(this.platforms)) return;
     if (!collideArr(this.pipes)) return;
     if (!collideArr(this.blocks)) return;
 
@@ -240,7 +338,7 @@ export class Level3 extends BaseLevel {
       this.game.win = true;
     }
     this.obstacles = [
-      ...this.platforms,
+      ...this.platforms.filter(p => p.visible),
       ...this.pipes,
       ...this.blocks,
       ...this.enemies,
