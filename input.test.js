@@ -16,12 +16,13 @@ test('attaches listeners with passive option by default', () => {
     },
     removeEventListener: () => {},
   };
-  const handler = new InputHandler({}, { pointerCallback: () => {} });
-  handler.attach();
-  assert.deepStrictEqual(calls, [
-    { target: 'document', type: 'keydown', options: { passive: true } },
-    { target: 'window', type: 'pointerdown', options: { passive: true } },
-  ]);
+  const handler = new InputHandler({}, {}, { pointerCallback: () => {} });
+    handler.attach();
+    assert.deepStrictEqual(calls, [
+      { target: 'document', type: 'keydown', options: { passive: true } },
+      { target: 'document', type: 'keyup', options: { passive: true } },
+      { target: 'window', type: 'pointerdown', options: { passive: true } },
+    ]);
 });
 
 test('supports dedicated callbacks for keys', () => {
@@ -30,10 +31,10 @@ test('supports dedicated callbacks for keys', () => {
   const handler = new InputHandler({
     KeyA: () => a++,
     KeyB: () => b++,
-  });
-  handler.keyListener({ code: 'KeyA', repeat: false });
-  handler.keyListener({ code: 'KeyB', repeat: false });
-  handler.keyListener({ code: 'Space', repeat: false });
+    });
+    handler.keydownListener({ code: 'KeyA', repeat: false });
+    handler.keydownListener({ code: 'KeyB', repeat: false });
+    handler.keydownListener({ code: 'Space', repeat: false });
   assert.strictEqual(a, 1);
   assert.strictEqual(b, 1);
 });
