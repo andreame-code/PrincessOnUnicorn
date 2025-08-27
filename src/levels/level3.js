@@ -1,6 +1,9 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
 import { Goomba } from '../entities/goomba.js';
+import { ShadowCrow } from '../entities/shadowCrow.js';
+import { RhombusSprite } from '../entities/rhombusSprite.js';
+import { ThornGuard } from '../entities/thornGuard.js';
 import { isColliding, isLandingOn } from '../../collision.js';
 import { JUMP_VELOCITY, GRAVITY } from '../config.js';
 
@@ -177,11 +180,13 @@ export class Level3 extends BaseLevel {
     this.pipes = [];
     this.blocks = [];
     this.enemies = [];
+    this.thornWalls = [];
     this.stars = [];
     this.checkpoint = null;
     this.checkpointReached = false;
     this.portal = null;
     this.generateFromMap();
+    this.addExclusiveEnemies();
   }
 
   // Spawn interval from BaseLevel isn't used anymore but kept for
@@ -245,6 +250,17 @@ export class Level3 extends BaseLevel {
     ];
   }
 
+  addExclusiveEnemies() {
+    // Position enemies ahead in the level so they appear over time
+    const startX = this.game.worldWidth + 20;
+    const ground = this.game.groundY - this.tileSize / 2;
+    const crow = new ShadowCrow(startX, this.game.groundY - 1.5, this.tileSize);
+    const sprite = new RhombusSprite(startX + 20, ground, this.tileSize);
+    const guard = new ThornGuard(startX + 40, ground, this.tileSize);
+    this.enemies.push(crow, sprite, guard);
+    this.obstacles.push(crow, sprite, guard);
+  }
+
   update(delta) {
     const move = this.getMoveSpeed() * delta;
     this.distance += move;
@@ -256,7 +272,15 @@ export class Level3 extends BaseLevel {
     moveArr(this.stars);
     if (this.checkpoint) this.checkpoint.update(move);
     if (this.portal) this.portal.update(move);
-    this.enemies.forEach(e => e.update(move, delta));
+    moveArr(this.thornWalls);
+    const spawnedWalls = [];
+    this.enemies.forEach(e => {
+      const spawn = e.update(move, delta);
+      if (spawn && spawn.length) {
+        spawnedWalls.push(...spawn);
+      }
+    });
+    spawnedWalls.forEach(w => this.thornWalls.push(w));
 
     const player = this.game.player;
 
@@ -292,6 +316,7 @@ export class Level3 extends BaseLevel {
 
     if (!collideArr(this.pipes)) return;
     if (!collideArr(this.blocks)) return;
+    if (!collideArr(this.thornWalls)) return;
 
     // Handle enemy collisions and cull off-screen entities
     this.enemies = this.enemies.filter(e => {
@@ -312,6 +337,7 @@ export class Level3 extends BaseLevel {
     this.platforms = filterArr(this.platforms);
     this.pipes = filterArr(this.pipes);
     this.blocks = filterArr(this.blocks);
+    this.thornWalls = filterArr(this.thornWalls);
     this.stars = this.stars.filter(s => {
       if (isColliding(player, s)) {
         this.game.stars++;
@@ -342,6 +368,7 @@ export class Level3 extends BaseLevel {
       ...this.pipes,
       ...this.blocks,
       ...this.enemies,
+      ...this.thornWalls,
     ];
 
     if (this.distance >= this.levelLength && !this.portal) {
@@ -357,6 +384,7 @@ export class Level3 extends BaseLevel {
       ...this.blocks,
       ...this.enemies,
       ...this.stars,
+      ...this.thornWalls,
     ].forEach(o => o.setScale(scale));
     if (this.checkpoint) this.checkpoint.setScale(scale);
     if (this.portal) this.portal.setScale(scale);
