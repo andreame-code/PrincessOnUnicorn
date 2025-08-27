@@ -10,7 +10,7 @@ import { JUMP_VELOCITY, GRAVITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
 // 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
-// 6 = star collectible, 7 = checkpoint, 8 = rainbow portal (finish)
+// 6 = stardust collectible, 7 = checkpoint, 8 = rainbow portal, 9 = crystal key
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
@@ -18,9 +18,10 @@ const TILE = {
   PIPE: 3,
   BLOCK: 4,
   GOOMBA: 5,
-  STAR: 6,
+  STARDUST: 6,
   CHECKPOINT: 7,
   PORTAL: 8,
+  KEY: 9,
 };
 
 // Two dimensional map describing the level layout. Each number
@@ -37,8 +38,8 @@ const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 // Ability section - small platforms to practice jumping
 for (let c = 10; c < 20; c += 2) row1[c] = TILE.PLATFORM;
 
-// Secret star path high in the sky
-for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
+// Secret stardust path high in the sky
+for (let c = 30; c < 60; c++) row2[c] = TILE.STARDUST;
 
 // Challenge obstacles
 [60, 90, 130, 170, 210].forEach(c => (row1[c] = TILE.GOOMBA));
@@ -47,7 +48,8 @@ for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
 // Central checkpoint
 row1[120] = TILE.CHECKPOINT;
 
-// Final rainbow portal
+// Crystal key and final rainbow portal
+row1[180] = TILE.KEY;
 row1[MAP_WIDTH - 5] = TILE.PORTAL;
 
 const MAP = [ground, row1, row2];
@@ -147,10 +149,17 @@ class Block extends Obstacle {
   }
 }
 
-class Star extends Obstacle {
+class StarDust extends Obstacle {
   constructor(x, y, size) {
     super(x, y, size, size);
-    this.type = 'star';
+    this.type = 'stardust';
+  }
+}
+
+class CrystalKey extends Obstacle {
+  constructor(x, groundY, size) {
+    super(x, groundY - size / 2, size, size);
+    this.type = 'key';
   }
 }
 
@@ -183,7 +192,8 @@ export class Level3 extends BaseLevel {
     this.blocks = [];
     this.enemies = [];
     this.thornWalls = [];
-    this.stars = [];
+    this.starDust = [];
+    this.crystalKey = null;
     this.checkpoint = null;
     this.checkpointReached = false;
     this.respawnPoint = null;
@@ -235,14 +245,17 @@ export class Level3 extends BaseLevel {
               new Goomba(x, this.game.groundY - this.tileSize / 2, this.tileSize)
             );
             break;
-          case TILE.STAR:
-            this.stars.push(new Star(x, y, this.tileSize));
+          case TILE.STARDUST:
+            this.starDust.push(new StarDust(x, y, this.tileSize));
             break;
           case TILE.CHECKPOINT:
             this.checkpoint = new Checkpoint(x, this.game.groundY, this.tileSize);
             break;
           case TILE.PORTAL:
             this.portal = new Portal(x, this.game.groundY, this.tileSize);
+            break;
+          case TILE.KEY:
+            this.crystalKey = new CrystalKey(x, this.game.groundY, this.tileSize);
             break;
           default:
             break;
@@ -310,7 +323,10 @@ export class Level3 extends BaseLevel {
     this.blocks = filterAhead(this.blocks);
     this.enemies = filterAhead(this.enemies);
     this.thornWalls = filterAhead(this.thornWalls);
-    this.stars = filterAhead(this.stars);
+    this.starDust = filterAhead(this.starDust);
+    if (this.crystalKey && this.crystalKey.x + this.crystalKey.width / 2 <= player.x - 0.01) {
+      this.crystalKey = null;
+    }
     this.obstacles = [
       ...this.platforms.filter(p => p.visible),
       ...this.pipes,
@@ -336,7 +352,8 @@ export class Level3 extends BaseLevel {
     moveArr(this.platforms);
     moveArr(this.pipes);
     moveArr(this.blocks);
-    moveArr(this.stars);
+    moveArr(this.starDust);
+    if (this.crystalKey) this.crystalKey.update(move, delta);
     if (this.checkpoint) this.checkpoint.update(move);
     if (this.portal) this.portal.update(move);
     moveArr(this.thornWalls);
@@ -394,7 +411,6 @@ export class Level3 extends BaseLevel {
           player.jumpCount = 1;
           e.hit();
           if (e.defeated) {
-            this.portal.open = true;
             return false;
           }
           return true;
@@ -423,13 +439,21 @@ export class Level3 extends BaseLevel {
     this.pipes = filterArr(this.pipes);
     this.blocks = filterArr(this.blocks);
     this.thornWalls = filterArr(this.thornWalls);
-    this.stars = this.stars.filter(s => {
+    this.starDust = this.starDust.filter(s => {
       if (isColliding(player, s)) {
-        this.game.stars++;
+        this.game.starDust++;
         return false;
       }
       return s.x + s.width / 2 > 0;
     });
+    if (this.crystalKey) {
+      if (isColliding(player, this.crystalKey)) {
+        this.game.hasCrystalKey = true;
+        this.crystalKey = null;
+      } else if (this.crystalKey.x + this.crystalKey.width / 2 <= 0) {
+        this.crystalKey = null;
+      }
+    }
     if (
       !this.checkpointReached &&
       this.checkpoint &&
@@ -438,9 +462,16 @@ export class Level3 extends BaseLevel {
       this.checkpointReached = true;
       this.respawnPoint = { x: player.x, y: this.game.groundY - player.height / 2 };
     }
-    if (this.portal && this.portal.open && isColliding(player, this.portal)) {
-      this.game.gameOver = true;
-      this.game.win = true;
+    if (this.portal) {
+      this.portal.open =
+        this.boss &&
+        this.boss.defeated &&
+        this.game.starDust >= 30 &&
+        this.game.hasCrystalKey;
+      if (this.portal.open && isColliding(player, this.portal)) {
+        this.game.gameOver = true;
+        this.game.win = true;
+      }
     }
     if (this.checkpoint && this.checkpoint.x + this.checkpoint.width / 2 <= 0) {
       this.checkpoint = null;
@@ -473,9 +504,10 @@ export class Level3 extends BaseLevel {
       ...this.pipes,
       ...this.blocks,
       ...this.enemies,
-      ...this.stars,
+      ...this.starDust,
       ...this.thornWalls,
     ].forEach(o => o.setScale(scale));
+    if (this.crystalKey) this.crystalKey.setScale(scale);
     if (this.checkpoint) this.checkpoint.setScale(scale);
     if (this.portal) this.portal.setScale(scale);
   }
