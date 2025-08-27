@@ -18,15 +18,19 @@ export class Player {
     this.vy = 0;
     this.vx = 0;
     this.moveSpeed = 3;
+    this.baseMoveSpeed = this.moveSpeed;
     this.worldWidth = 0; // to be set by game
     this.jumping = false;
     this.jumpCount = 0;
     this.maxJumps = 1;
+    this.baseMaxJumps = this.maxJumps;
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
     this.shieldCooldownMax = SHIELD_COOLDOWN;
     this.dead = false;
+    // Track active power-ups with remaining duration
+    this.powerUps = {};
   }
 
   setScale(scale) {
@@ -55,6 +59,19 @@ export class Player {
     if (this.shieldCooldown > 0) {
       this.shieldCooldown -= delta;
       if (this.shieldCooldown < 0) this.shieldCooldown = 0;
+    }
+
+    // Update active power-up timers and revert effects when they expire
+    for (const [key, time] of Object.entries(this.powerUps)) {
+      this.powerUps[key] = time - delta;
+      if (this.powerUps[key] <= 0) {
+        delete this.powerUps[key];
+        if (key === 'wind') {
+          this.moveSpeed = this.baseMoveSpeed;
+        } else if (key === 'wings') {
+          this.maxJumps = this.baseMaxJumps;
+        }
+      }
     }
   }
 
