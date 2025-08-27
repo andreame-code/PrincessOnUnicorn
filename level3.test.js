@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
 import { Goomba } from './src/entities/goomba.js';
+import { JUMP_VELOCITY } from './src/config.js';
 
 const FRAME = 1 / 60;
 
@@ -72,5 +73,26 @@ test('player is hit when colliding with enemy from side', () => {
   player.vy = 0;
   level.update(FRAME);
   assert.strictEqual(game.gameOver, true);
+});
+
+test('player can double jump in level 3', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const player = game.player;
+  player.jump();
+  game.update(FRAME);
+  player.jump();
+  assert.strictEqual(player.jumpCount, 2);
+  assert.strictEqual(player.vy, JUMP_VELOCITY);
+});
+
+test('player cannot triple jump in level 3', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const player = game.player;
+  player.jump();
+  game.update(FRAME);
+  player.jump();
+  game.update(FRAME);
+  player.jump();
+  assert.strictEqual(player.jumpCount, 2);
 });
 

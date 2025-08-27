@@ -53,6 +53,7 @@ class Block extends Obstacle {
 export class Level3 extends BaseLevel {
   constructor(game, random = Math.random) {
     super(game, random);
+    this.game.player.maxJumps = 2;
     this.map = MAP;
     this.tileSize = 1; // world units per tile
     this.distance = 0;
@@ -141,6 +142,7 @@ export class Level3 extends BaseLevel {
       if (isLandingOn(player, e)) {
         player.vy = JUMP_VELOCITY / 2;
         player.jumping = true;
+        player.jumpCount = 1;
         return false;
       }
       if (isColliding(player, e)) {
