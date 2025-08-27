@@ -47,3 +47,12 @@ test('level 3 completes after level length', () => {
   }
   assert.ok(game.win);
 });
+
+// Level 3 uses jump instead of shield when pressing the action button
+test('level 3 maps space to jump', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const player = game.player;
+  game.handleInput();
+  assert.strictEqual(player.jumping, true);
+  assert.strictEqual(player.shieldActive, false);
+});
