@@ -7,6 +7,12 @@ PrincessOnUnicorn is a side-scrolling runner inspired by the Chrome offline T‑
 - Start menu disappears once the game begins.
 - Three levels, including a boss fight against the Black Knight and an enchanted run through Unicornolandia.
 
+## Differences from Mario
+- Endless runner rather than a traditional platformer.
+- One-button jumping and shielding instead of complex moves.
+- Medieval setting with a unicorn mount replaces the plumber in the Mushroom Kingdom.
+- Boss battle against the Black Knight instead of Bowser.
+
 ## Play
 Open `index.html` in a modern browser. Press the spacebar or tap the screen to jump over obstacles. Reach **1000 points** to face the Black Knight.
 
@@ -27,6 +33,9 @@ index.html?level=3
 In Level 3 the princess rides through Unicornolandia, jumping over rows of mischievous mini cactus.
 
 You can jump to any available level by adjusting the `level` query parameter, for example `index.html?level=4` once a fourth level is added.
+
+## Demo
+![Princess on Unicorn demo](public/assets/sprites/princess_0.png)
 
 ## Development
 The project has no external dependencies; a recent Node.js installation is sufficient to run the tests and develop new features.
