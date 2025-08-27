@@ -4,21 +4,25 @@ import { Goomba } from '../entities/goomba.js';
 import { playerEnemyCollision } from '../../collision.js';
 import { JUMP_VELOCITY } from '../config.js';
 const TILE_MAP = '.....O.G.O...O.G.O....OG..';
-const LAYOUT = [];
-const ENEMY_LAYOUT = [];
-for (let i = 0; i < TILE_MAP.length; i++) {
-  const ch = TILE_MAP[i];
-  if (ch === 'O') LAYOUT.push(i);
-  if (ch === 'G') ENEMY_LAYOUT.push(i);
+function parseTileMap(map) {
+  const layout = [];
+  const enemies = [];
+  for (let i = 0; i < map.length; i++) {
+    const ch = map[i];
+    if (ch === 'O') layout.push(i);
+    if (ch === 'G') enemies.push(i);
+  }
+  return { layout, enemies, length: map.length };
 }
-const LEVEL_LENGTH = TILE_MAP.length;
+const { layout: LAYOUT, enemies: ENEMY_LAYOUT, length: LEVEL_LENGTH } =
+  parseTileMap(TILE_MAP);
 
 // Level 3 - Unicornolandia as a scripted platform section
 export class Level3 extends BaseLevel {
   constructor(game, random = Math.random) {
     super(game, random);
-    this.layout = LAYOUT;
-    this.enemyLayout = ENEMY_LAYOUT;
+    this.layout = [...LAYOUT];
+    this.enemyLayout = [...ENEMY_LAYOUT];
     this.distance = 0; // total distance travelled in world units
     this.nextIndex = 0; // next obstacle to spawn from layout
     this.nextEnemyIndex = 0; // next enemy to spawn from layout
