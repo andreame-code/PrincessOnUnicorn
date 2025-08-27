@@ -19,3 +19,20 @@ test('level 1 awards coin when obstacle passes', () => {
   level.update(0);
   assert.strictEqual(game.coins, before + 1);
 });
+
+test('level 1 maps space to jump only', () => {
+  const game = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  const player = game.player;
+  game.handleInput();
+  assert.strictEqual(player.jumping, true);
+  assert.strictEqual(player.shieldActive, false);
+});
+
+test('level 1 ignores horizontal movement', () => {
+  const game = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  const player = game.player;
+  const startX = player.x;
+  game.handleInput('ArrowRight', 'down');
+  player.update(0, game.groundY, 1);
+  assert.strictEqual(player.x, startX);
+});
