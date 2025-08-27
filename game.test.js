@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { Game } from './src/game.js';
 import { Level2 } from './src/levels/level2.js';
+import { Level3 } from './src/levels/level3.js';
 import { LEVEL_UP_SCORE } from './src/config.js';
 
 const FRAME = 1 / 60;
@@ -21,6 +22,15 @@ test('advances to level 2 after reaching threshold points', () => {
 test('defaults to level 1 for unknown level param', () => {
   const game = createStubGame({ search: '?level=99', skipLevelUpdate: true });
   assert.strictEqual(game.levelNumber, 1);
+});
+
+test('loads levels from query parameter', () => {
+  const game2 = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  assert.strictEqual(game2.levelNumber, 2);
+  assert.ok(game2.level instanceof Level2);
+  const game3 = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  assert.strictEqual(game3.levelNumber, 3);
+  assert.ok(game3.level instanceof Level3);
 });
 
 test('resets when action is triggered after game over', () => {
