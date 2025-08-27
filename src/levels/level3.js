@@ -186,6 +186,9 @@ export class Level3 extends BaseLevel {
     this.stars = [];
     this.checkpoint = null;
     this.checkpointReached = false;
+    this.respawnPoint = null;
+    this.respawning = false;
+    this.respawnTimer = 0;
     this.portal = null;
     this.boss = null;
     this.generateFromMap();
@@ -275,7 +278,57 @@ export class Level3 extends BaseLevel {
     }
   }
 
+  handlePlayerDeath() {
+    if (this.checkpointReached && this.respawnPoint) {
+      if (!this.respawning) {
+        this.respawning = true;
+        this.respawnTimer = 0;
+        this.game.player.die();
+      }
+    } else {
+      this.game.gameOver = true;
+    }
+  }
+
+  respawnPlayer() {
+    const player = this.game.player;
+    const { x, y } = this.respawnPoint || {
+      x: player.x,
+      y: this.game.groundY - player.height / 2,
+    };
+    player.x = x;
+    player.y = y;
+    player.vx = 0;
+    player.vy = 0;
+    player.dead = false;
+    player.jumping = false;
+    player.jumpCount = 0;
+    this.respawning = false;
+    const filterAhead = arr => arr.filter(o => o.x + o.width / 2 > player.x - 0.01);
+    this.platforms = filterAhead(this.platforms);
+    this.pipes = filterAhead(this.pipes);
+    this.blocks = filterAhead(this.blocks);
+    this.enemies = filterAhead(this.enemies);
+    this.thornWalls = filterAhead(this.thornWalls);
+    this.stars = filterAhead(this.stars);
+    this.obstacles = [
+      ...this.platforms.filter(p => p.visible),
+      ...this.pipes,
+      ...this.blocks,
+      ...this.enemies,
+      ...this.thornWalls,
+    ];
+  }
+
   update(delta) {
+    if (this.respawning) {
+      this.respawnTimer += delta;
+      if (this.respawnTimer >= 1) {
+        this.respawnPlayer();
+      }
+      return;
+    }
+
     const move = this.getMoveSpeed() * delta;
     this.distance += move;
 
@@ -312,7 +365,7 @@ export class Level3 extends BaseLevel {
           player.jumpCount = 0;
           if (typeof p.onStep === 'function') p.onStep();
         } else {
-          this.game.gameOver = true;
+          this.handlePlayerDeath();
           return;
         }
       }
@@ -321,7 +374,7 @@ export class Level3 extends BaseLevel {
     const collideArr = arr => {
       for (const e of arr) {
         if (isColliding(player, e)) {
-          this.game.gameOver = true;
+          this.handlePlayerDeath();
           return false;
         }
       }
@@ -347,7 +400,7 @@ export class Level3 extends BaseLevel {
           return true;
         }
         if (isColliding(player, e)) {
-          this.game.gameOver = true;
+          this.handlePlayerDeath();
           return false;
         }
         return e.x + e.width / 2 > 0;
@@ -359,7 +412,7 @@ export class Level3 extends BaseLevel {
         return false;
       }
       if (isColliding(player, e)) {
-        this.game.gameOver = true;
+        this.handlePlayerDeath();
         return false;
       }
       return e.x + e.width / 2 > 0;
@@ -383,6 +436,7 @@ export class Level3 extends BaseLevel {
       isColliding(player, this.checkpoint)
     ) {
       this.checkpointReached = true;
+      this.respawnPoint = { x: player.x, y: this.game.groundY - player.height / 2 };
     }
     if (this.portal && this.portal.open && isColliding(player, this.portal)) {
       this.game.gameOver = true;
