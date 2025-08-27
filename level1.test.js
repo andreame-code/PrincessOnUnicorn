@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
+import { ShadowCrow } from './src/entities/shadowCrow.js';
+import { FollettiRombo } from './src/entities/follettiRombo.js';
+import { ThornGuard } from './src/entities/thornGuard.js';
 
 test('level 1 obstacles have tree dimensions', () => {
   const game = createStubGame({ search: '?level=1' });
@@ -35,4 +38,18 @@ test('level 1 ignores horizontal movement', () => {
   game.handleInput('ArrowRight', 'down');
   player.update(0, game.groundY, 1);
   assert.strictEqual(player.x, startX);
+});
+
+test('level 1 has no level 3 enemies', () => {
+  const game = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  const level = game.level;
+  const obstacles = level.obstacles || [];
+  const enemies = level.enemies || [];
+  const has = [...obstacles, ...enemies].some(
+    e =>
+      e instanceof ShadowCrow ||
+      e instanceof FollettiRombo ||
+      e instanceof ThornGuard
+  );
+  assert.strictEqual(has, false);
 });

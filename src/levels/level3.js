@@ -1,18 +1,23 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
-import { Goomba } from '../entities/goomba.js';
+import { ShadowCrow } from '../entities/shadowCrow.js';
+import { FollettiRombo } from '../entities/follettiRombo.js';
+import { ThornGuard } from '../entities/thornGuard.js';
 import { isColliding, isLandingOn } from '../../collision.js';
 import { JUMP_VELOCITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
-// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
+// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block
+// 5 = shadow crow, 6 = folletti-rombo, 7 = thorn guard
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
   PLATFORM: 2,
   PIPE: 3,
   BLOCK: 4,
-  GOOMBA: 5,
+  SHADOW_CROW: 5,
+  FOLLETTI_ROMBO: 6,
+  THORN_GUARD: 7,
 };
 
 // Two dimensional map describing the level layout. Each number
@@ -22,7 +27,7 @@ const MAP = [
   // Ground row
   [1, 1, 1, 1, 1, 1, 1, 1],
   // Tiles one unit above the ground
-  [5, 2, 0, 3, 5, 2, 0, 0],
+  [7, 2, 0, 3, 5, 2, 0, 6],
   // Tiles two units above the ground
   [0, 0, 0, 0, 4, 0, 0, 0],
 ];
@@ -93,10 +98,31 @@ export class Level3 extends BaseLevel {
           case TILE.BLOCK:
             this.blocks.push(new Block(x, y, this.tileSize));
             break;
-          case TILE.GOOMBA:
-            // Enemies always spawn on the ground regardless of row
+          case TILE.SHADOW_CROW:
             this.enemies.push(
-              new Goomba(x, this.game.groundY - this.tileSize / 2, this.tileSize)
+              new ShadowCrow(
+                x,
+                this.game.groundY - this.tileSize * 2,
+                this.tileSize
+              )
+            );
+            break;
+          case TILE.FOLLETTI_ROMBO:
+            this.enemies.push(
+              new FollettiRombo(
+                x,
+                this.game.groundY - this.tileSize / 2,
+                this.tileSize
+              )
+            );
+            break;
+          case TILE.THORN_GUARD:
+            this.enemies.push(
+              new ThornGuard(
+                x,
+                this.game.groundY - this.tileSize / 2,
+                this.tileSize
+              )
             );
             break;
           default:
@@ -120,7 +146,12 @@ export class Level3 extends BaseLevel {
     moveArr(this.platforms);
     moveArr(this.pipes);
     moveArr(this.blocks);
-    this.enemies.forEach(e => e.update(move, delta));
+    this.enemies.forEach(e => {
+      const spawned = e.update(move, delta);
+      if (spawned && spawned.length) {
+        this.blocks.push(...spawned);
+      }
+    });
 
     const player = this.game.player;
     const collideArr = arr => {
