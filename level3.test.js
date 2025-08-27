@@ -1,23 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
+import { LEVEL3_MAP } from './src/levels/level3.js';
 
 const FRAME = 1 / 60;
 
-// Ensure obstacles are mini cactus
-// and have the expected dimensions
-// and type flag for rendering.
-test('level 3 uses mini cactus obstacles', () => {
+// Ensure the tile map is loaded and entities are generated for each tile type.
+test('level 3 builds entities from tile map', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
-  const obstacle = game.level.createObstacle();
-  assert.strictEqual(obstacle.width, 0.2);
-  assert.strictEqual(obstacle.height, 0.4);
-  assert.strictEqual(obstacle.type, 'cactus');
+  const level = game.level;
+  assert.deepStrictEqual(level.map, LEVEL3_MAP);
+  assert.ok(level.platforms.length > 0);
+  assert.ok(level.pipes.length > 0);
 });
 
-// Distance travelled should increase according to the
-// move speed so that layout markers are hit at the
-// expected times.
+// Distance travelled should increase according to the move speed.
 test('level 3 advances using move speed', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
@@ -25,18 +22,7 @@ test('level 3 advances using move speed', () => {
   assert.strictEqual(level.distance, level.getMoveSpeed());
 });
 
-// Obstacles spawn only after travelling the layout distance.
-test('level 3 spawns obstacles based on layout', () => {
-  const game = createStubGame({ search: '?level=3' });
-  const level = game.level;
-  for (let i = 0; i < 100; i++) level.update(FRAME);
-  assert.strictEqual(level.obstacles.length, 0);
-  for (let i = 0; i < 100; i++) level.update(FRAME);
-  assert.ok(level.obstacles.length > 0);
-});
-
-// After travelling the entire level and clearing obstacles
-// the level should signal completion.
+// After travelling the entire level and clearing entities the level should end.
 test('level 3 completes after level length', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
@@ -56,3 +42,4 @@ test('level 3 maps space to jump', () => {
   assert.strictEqual(player.jumping, true);
   assert.strictEqual(player.shieldActive, false);
 });
+
