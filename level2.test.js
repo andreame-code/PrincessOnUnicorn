@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { Level2 } from './src/levels/level2.js';
+import { Level3 } from './src/levels/level3.js';
 import { SHIELD_COOLDOWN } from './src/config.js';
 
 const FRAME = 1 / 60;
@@ -161,4 +162,16 @@ test('missing grace window results in game over', () => {
     level.update(FRAME);
   }
   assert.strictEqual(game.gameOver, true);
+});
+
+test('game advances to level 3 after defeating level 2 boss', () => {
+  const game = createStubGame({ search: '?level=2' });
+  const level = game.level;
+  level.bossFlee = true;
+  level.boss.x = game.worldWidth + 1;
+  game.update(FRAME);
+  assert.strictEqual(game.levelNumber, 3);
+  assert.ok(game.level instanceof Level3);
+  assert.strictEqual(game.gameOver, false);
+  assert.strictEqual(game.win, false);
 });
