@@ -7,7 +7,8 @@ import { ShadowCrow } from './src/entities/shadowCrow.js';
 import { RhombusSprite } from './src/entities/rhombusSprite.js';
 import { ThornGuard } from './src/entities/thornGuard.js';
 import { PortalGuardian } from './src/entities/portalGuardian.js';
-import { JUMP_VELOCITY } from './src/config.js';
+import { JUMP_VELOCITY, SHIELD_GRACE } from './src/config.js';
+import { Obstacle } from './src/obstacle.js';
 
 const FRAME = 1 / 60;
 
@@ -263,5 +264,45 @@ test('level 3 duration is between 90 and 150 seconds', () => {
   const level = game.level;
   const duration = level.levelLength / level.getMoveSpeed();
   assert.ok(duration >= 90 && duration <= 150);
+});
+
+test('player respawns at checkpoint in level 3', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const player = game.player;
+  const cp = level.checkpoint;
+  player.x = cp.x;
+  player.y = game.groundY - player.height / 2;
+  level.update(FRAME);
+  assert.ok(level.checkpointReached);
+  const enemy = new Goomba(player.x, player.y, 1);
+  level.enemies = [enemy];
+  level.obstacles = [
+    ...level.platforms.filter(p => p.visible),
+    ...level.pipes,
+    ...level.blocks,
+    enemy,
+  ];
+  level.update(FRAME);
+  assert.strictEqual(level.respawning, true);
+  for (let i = 0; i < Math.ceil(1 / FRAME) + 1; i++) level.update(FRAME);
+  assert.strictEqual(level.respawning, false);
+  assert.strictEqual(game.gameOver, false);
+  assert.ok(Math.abs(player.x - level.respawnPoint.x) < 1e-6);
+});
+
+test('other levels do not respawn on death', () => {
+  const g1 = createStubGame({ search: '?level=1' });
+  const p1 = g1.player;
+  const o1 = new Obstacle(p1.x, p1.y, 1, 1);
+  g1.level.handleCollision(o1);
+  assert.strictEqual(g1.gameOver, true);
+
+  const g2 = createStubGame({ search: '?level=2' });
+  const p2 = g2.player;
+  const o2 = new Obstacle(p2.x, p2.y, 1, 1);
+  g2.level.handleCollision(o2);
+  g2.level.update(SHIELD_GRACE);
+  assert.strictEqual(g2.gameOver, true);
 });
 
