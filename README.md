@@ -26,6 +26,8 @@ index.html?level=3
 
 In Level 3 the princess rides through Unicornolandia, jumping over rows of mischievous mini cactus.
 
+You can jump to any available level by adjusting the `level` query parameter, for example `index.html?level=4` once a fourth level is added.
+
 ## Development
 The project has no external dependencies; a recent Node.js installation is sufficient to run the tests and develop new features.
 
