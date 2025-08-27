@@ -63,6 +63,7 @@ export class Level3 extends BaseLevel {
     this.blocks = [];
     this.enemies = [];
     this.generateFromMap();
+    this.initCollectibles();
   }
 
   // Spawn interval from BaseLevel isn't used anymore but kept for
@@ -110,6 +111,24 @@ export class Level3 extends BaseLevel {
       ...this.blocks,
       ...this.enemies,
     ];
+  }
+
+  initCollectibles() {
+    this.starPowders = [];
+    const size = 0.2;
+    for (let i = 0; i < 30; i++) {
+      const x = this.game.worldWidth + i * size * 2 + size / 2;
+      const y = this.game.groundY - 1; // hover above ground
+      const star = new Obstacle(x, y, size, size);
+      star.type = 'star';
+      this.starPowders.push(star);
+    }
+    const keySize = 0.3;
+    const keyX = this.game.worldWidth + 10;
+    const keyY = this.game.groundY - 1;
+    this.crystalKey = new Obstacle(keyX, keyY, keySize, keySize);
+    this.crystalKey.type = 'key';
+    this.portal = null;
   }
 
   update(delta) {
@@ -163,16 +182,55 @@ export class Level3 extends BaseLevel {
       ...this.enemies,
     ];
 
-    if (this.distance >= this.levelLength && this.obstacles.length === 0) {
-      this.game.gameOver = true;
-      this.game.win = true;
+    // Collectibles
+    this.starPowders.forEach(s => s.update(move));
+    this.starPowders = this.starPowders.filter(s => {
+      if (isColliding(player, s)) {
+        return false; // collected
+      }
+      return s.x + s.width / 2 > 0;
+    });
+
+    if (this.crystalKey) {
+      this.crystalKey.update(move);
+      if (isColliding(player, this.crystalKey)) {
+        this.crystalKey = null;
+      } else if (this.crystalKey.x + this.crystalKey.width / 2 <= 0) {
+        this.crystalKey = null;
+      }
+    }
+
+    if (!this.portal && this.starPowders.length === 0 && !this.crystalKey) {
+      const w = 1;
+      const h = 2;
+      this.portal = new Obstacle(
+        this.game.worldWidth + w / 2,
+        this.game.groundY - h / 2,
+        w,
+        h
+      );
+      this.portal.type = 'portal';
+    }
+
+    if (this.portal) {
+      this.portal.update(move);
+      if (isColliding(player, this.portal)) {
+        this.game.gameOver = true;
+        this.game.win = true;
+      }
     }
   }
 
   setScale(scale) {
-    [...this.platforms, ...this.pipes, ...this.blocks, ...this.enemies].forEach(
-      o => o.setScale(scale)
-    );
+    [
+      ...this.platforms,
+      ...this.pipes,
+      ...this.blocks,
+      ...this.enemies,
+      ...this.starPowders,
+    ].forEach(o => o.setScale(scale));
+    if (this.crystalKey) this.crystalKey.setScale(scale);
+    if (this.portal) this.portal.setScale(scale);
   }
 }
 

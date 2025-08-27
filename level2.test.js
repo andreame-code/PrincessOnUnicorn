@@ -24,6 +24,14 @@ test('level 2 ignores horizontal movement', () => {
   assert.strictEqual(player.x, startX);
 });
 
+test('level 2 has no star powders or key', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const level = game.level;
+  assert.ok(!('starPowders' in level));
+  assert.ok(!('crystalKey' in level));
+  assert.ok(!('portal' in level));
+});
+
 test('player covers 80% of distance after destroying 15 walls', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const level = new Level2(game);

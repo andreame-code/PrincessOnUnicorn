@@ -25,16 +25,43 @@ test('level 3 advances using move speed', () => {
   assert.strictEqual(level.distance, level.getMoveSpeed());
 });
 
-// After travelling the entire level and clearing entities the level should end.
-test('level 3 completes after level length', () => {
+test('level 3 starts with star powders and a crystal key', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const level = game.level;
+  assert.strictEqual(level.starPowders.length, 30);
+  assert.ok(level.crystalKey);
+  assert.strictEqual(level.portal, null);
+});
+
+test('portal activates after collecting star powders and key', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
-  let steps = 0;
-  while (!game.win && steps < 5000) {
-    level.update(FRAME);
-    steps++;
-  }
-  assert.ok(game.win);
+  const player = game.player;
+
+  // collect all star powders
+  level.starPowders.forEach(s => {
+    s.x = player.x;
+    s.y = player.y;
+  });
+  level.update(0);
+  assert.strictEqual(level.starPowders.length, 0);
+
+  // collect the key
+  level.crystalKey.x = player.x;
+  level.crystalKey.y = player.y;
+  level.update(0);
+  assert.strictEqual(level.crystalKey, null);
+
+  // portal should appear
+  level.update(0);
+  assert.ok(level.portal);
+
+  // touch the portal to win
+  level.portal.x = player.x;
+  level.portal.y = player.y;
+  level.update(0);
+  assert.strictEqual(game.gameOver, true);
+  assert.strictEqual(game.win, true);
 });
 
 // Level 3 uses jump instead of shield when pressing the action button
