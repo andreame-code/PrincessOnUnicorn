@@ -96,3 +96,44 @@ test('player cannot triple jump in level 3', () => {
   assert.strictEqual(player.jumpCount, 2);
 });
 
+test('cloud platform disappears and reappears on timer', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const cloud = level.cloudPlatforms[0];
+  assert.ok(cloud.active);
+  level.update(1.1);
+  assert.ok(cloud.active);
+  level.update(0.1);
+  assert.ok(!cloud.active);
+  level.update(3);
+  assert.ok(cloud.active);
+});
+
+test('falling platform shakes then drops', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const platform = level.fallingPlatforms[0];
+  const initialY = platform.y;
+  level.update(0.2);
+  assert.ok(platform.shaking);
+  level.update(0.2);
+  level.update(0.1);
+  assert.ok(platform.falling);
+  assert.ok(platform.y > initialY);
+});
+
+test('special platforms are absent in other levels', () => {
+  const game1 = createStubGame({ search: '?level=1' });
+  game1.level.update(1);
+  game1.level.obstacles.forEach(o => {
+    assert.notStrictEqual(o.type, 'cloud');
+    assert.notStrictEqual(o.type, 'falling');
+  });
+  const game2 = createStubGame({ search: '?level=2' });
+  game2.level.update(1);
+  game2.level.obstacles.forEach(o => {
+    assert.notStrictEqual(o.type, 'cloud');
+    assert.notStrictEqual(o.type, 'falling');
+  });
+});
+
