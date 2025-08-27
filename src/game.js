@@ -2,6 +2,7 @@ import { Player } from './player.js';
 import { InputHandler } from './input.js';
 import { Level1 } from './levels/level1.js';
 import { Level2 } from './levels/level2.js';
+import { Level3 } from './levels/level3.js';
 import { Renderer } from './renderer.js';
 import { Overlay } from './overlay.js';
 import { INSTRUCTIONS_TEXT, STORY_TEXT } from './texts.js';
@@ -38,7 +39,8 @@ export class Game {
     this.worldHeight = WORLD_HEIGHT;
 
     this.params = new URLSearchParams(window.location.search);
-    this.levelNumber = this.params.get('level') === '2' ? 2 : 1;
+    const levelParam = parseInt(this.params.get('level'), 10);
+    this.levelNumber = [1, 2, 3].includes(levelParam) ? levelParam : 1;
 
     this.boundResize = this.throttle(() => this.resizeCanvas(), RESIZE_THROTTLE_MS);
     window.addEventListener('resize', this.boundResize);
@@ -74,7 +76,13 @@ export class Game {
   initializeLevel() {
     const startX = 0.5 + 0.8 / 2;
     this.player = new Player(startX, this.groundY, this.scale);
-    this.level = this.levelNumber === 1 ? new Level1(this, this.random) : new Level2(this, this.random);
+    if (this.levelNumber === 1) {
+      this.level = new Level1(this, this.random);
+    } else if (this.levelNumber === 2) {
+      this.level = new Level2(this, this.random);
+    } else {
+      this.level = new Level3(this, this.random);
+    }
     if (typeof this.level.setScale === 'function') {
       this.level.setScale(this.scale);
     }

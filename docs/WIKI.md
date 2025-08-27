@@ -16,6 +16,7 @@ Points increase with distance. Reach 1000 to encounter the Black Knight.
 ### Levels
 1. **Forest Run** – avoid obstacles and collect points.
 2. **Black Knight** – the knight hurls walls at the unicorn. Use the shield to break them. After several successful blocks the knight retreats.
+3. **Unicornolandia** – an enchanted path filled with mischievous mini cactus to leap over.
 
 ## Code Structure
 - `index.html` boots the game.
