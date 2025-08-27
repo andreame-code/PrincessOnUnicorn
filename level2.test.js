@@ -175,3 +175,11 @@ test('game advances to level 3 after defeating level 2 boss', () => {
   assert.strictEqual(game.gameOver, false);
   assert.strictEqual(game.win, false);
 });
+
+test('level 2 lacks level 3 exclusive obstacles', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const level = game.level;
+  assert.ok(!level.thorns);
+  assert.ok(!level.moonMilks);
+  assert.ok(!level.seedWalls);
+});
