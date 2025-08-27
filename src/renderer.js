@@ -168,7 +168,10 @@ export class Renderer {
         const delta = (now - this.lastSpriteTime) / 1000;
         this.lastSpriteTime = now;
         this.playerFrameTimer += delta;
-        const anim = this.game.gamePaused || this.game.gameOver ? 'idle' : 'run';
+        const anim =
+          this.game.gamePaused ||
+          this.game.gameOver ||
+          u.vx === 0 ? 'idle' : 'run';
         const frames = this.playerSprites[anim];
         if (this.playerFrameTimer >= this.frameInterval) {
           this.playerFrameTimer = 0;

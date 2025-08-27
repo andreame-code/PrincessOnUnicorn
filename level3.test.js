@@ -13,6 +13,10 @@ test('level 3 uses mini cactus obstacles', () => {
   assert.strictEqual(obstacle.width, 0.2);
   assert.strictEqual(obstacle.height, 0.4);
   assert.strictEqual(obstacle.type, 'cactus');
+  assert.ok(obstacle.vx < 0);
+  const start = obstacle.x;
+  obstacle.update(0, 1);
+  assert.ok(obstacle.x < start);
 });
 
 // Distance travelled should increase according to the
