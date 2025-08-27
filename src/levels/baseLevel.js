@@ -62,7 +62,7 @@ export class BaseLevel {
     }
     const move = this.getMoveSpeed() * delta;
     this.obstacles.forEach(o => {
-      o.update(move);
+      o.update(move, delta);
     });
     this.obstacles = this.obstacles.filter(o => {
       const obstacleRight = o.x + o.width / 2;
