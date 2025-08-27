@@ -15,6 +15,8 @@ import {
   WORLD_HEIGHT,
 } from './config.js';
 
+const LEVELS = [Level1, Level2, Level3];
+
 export class Game {
   constructor(canvas, randomFn = Math.random) {
     this.canvas = canvas;
@@ -40,7 +42,7 @@ export class Game {
 
     this.params = new URLSearchParams(window.location.search);
     const levelParam = parseInt(this.params.get('level'), 10);
-    this.levelNumber = [1, 2, 3].includes(levelParam) ? levelParam : 1;
+    this.levelNumber = levelParam >= 1 && levelParam <= LEVELS.length ? levelParam : 1;
 
     this.boundResize = this.throttle(() => this.resizeCanvas(), RESIZE_THROTTLE_MS);
     window.addEventListener('resize', this.boundResize);
@@ -76,13 +78,8 @@ export class Game {
   initializeLevel() {
     const startX = 0.5 + 0.8 / 2;
     this.player = new Player(startX, this.groundY, this.scale);
-    if (this.levelNumber === 1) {
-      this.level = new Level1(this, this.random);
-    } else if (this.levelNumber === 2) {
-      this.level = new Level2(this, this.random);
-    } else {
-      this.level = new Level3(this, this.random);
-    }
+    const LevelClass = LEVELS[this.levelNumber - 1];
+    this.level = new LevelClass(this, this.random);
     if (typeof this.level.setScale === 'function') {
       this.level.setScale(this.scale);
     }

@@ -18,6 +18,11 @@ test('advances to level 2 after reaching threshold points', () => {
   assert.ok(game.level instanceof Level2);
 });
 
+test('defaults to level 1 for unknown level param', () => {
+  const game = createStubGame({ search: '?level=99', skipLevelUpdate: true });
+  assert.strictEqual(game.levelNumber, 1);
+});
+
 test('resets when action is triggered after game over', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   let resetCalled = false;
