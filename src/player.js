@@ -16,6 +16,9 @@ export class Player {
     this.y = groundY - this.height / 2;
     this.spriteScale = scale;
     this.vy = 0;
+    this.vx = 0;
+    this.moveSpeed = 3;
+    this.worldWidth = 0; // to be set by game
     this.jumping = false;
     this.shieldActive = false;
     this.shieldTimer = 0;
@@ -36,6 +39,12 @@ export class Player {
       this.vy = 0;
       this.jumping = false;
     }
+    this.x += this.vx * delta;
+    if (this.worldWidth) {
+      const half = this.width / 2;
+      if (this.x < half) this.x = half;
+      if (this.x > this.worldWidth - half) this.x = this.worldWidth - half;
+    }
     if (this.shieldTimer > 0) {
       this.shieldTimer -= delta;
       if (this.shieldTimer <= 0) this.shieldActive = false;
@@ -51,6 +60,18 @@ export class Player {
       this.vy = JUMP_VELOCITY;
       this.jumping = true;
     }
+  }
+
+  moveLeft() {
+    this.vx = -this.moveSpeed;
+  }
+
+  moveRight() {
+    this.vx = this.moveSpeed;
+  }
+
+  stopHorizontal() {
+    this.vx = 0;
   }
 
   activateShield(
