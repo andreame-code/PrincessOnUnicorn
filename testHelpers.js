@@ -37,8 +37,12 @@ export function createStubGame({
     fill: noop,
     arc: noop,
     stroke: noop,
+    strokeRect: noop,
+    drawImage: noop,
     fillText: noop,
     measureText: () => ({ width: 0 }),
+    save: noop,
+    restore: noop,
   };
   const canvas = {
     width: canvasWidth,

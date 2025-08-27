@@ -8,6 +8,8 @@ class AudioMock {
     this.volume = 1;
     this.currentTime = 0;
     this.playCalled = false;
+    this.loop = false;
+    this.pauseCalled = false;
   }
   addEventListener(event, handler) {
     this._listeners[event] = handler;
@@ -20,6 +22,9 @@ class AudioMock {
   }
   play() {
     this.playCalled = true;
+  }
+  pause() {
+    this.pauseCalled = true;
   }
 }
 
@@ -47,4 +52,14 @@ test('playSound resets time and plays audio', async () => {
   renderer.playSound('jump');
   assert.strictEqual(jump.currentTime, 0);
   assert.ok(jump.playCalled);
+});
+
+test('playLevelMusic plays looping track', async () => {
+  global.Audio = AudioMock;
+  const renderer = new Renderer({ ctx: {} });
+  await renderer.preload();
+  renderer.playLevelMusic(3);
+  const bgm = renderer.music.bgm3;
+  assert.ok(bgm.playCalled);
+  assert.strictEqual(bgm.loop, true);
 });

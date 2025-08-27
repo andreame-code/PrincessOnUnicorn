@@ -96,3 +96,38 @@ test('player cannot triple jump in level 3', () => {
   assert.strictEqual(player.jumpCount, 2);
 });
 
+test('level 3 HUD shows powders, key and power-ups', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  game.powders = 2;
+  game.hasCrystalKey = true;
+  game.powerUps = ['speed', 'jump'];
+  const texts = [];
+  const rects = [];
+  game.ctx.fillText = t => texts.push(t);
+  game.ctx.fillRect = () => rects.push(true);
+  game.renderer.drawUI();
+  assert.ok(texts.some(t => t.includes('Polveri: 2')));
+  assert.ok(texts.some(t => t.includes('Chiave-Cristallo')));
+  assert.strictEqual(rects.length, game.powerUps.length);
+});
+
+test('other levels do not show level 3 HUD elements', () => {
+  const game = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  game.powders = 5;
+  const texts = [];
+  game.ctx.fillText = t => texts.push(t);
+  game.renderer.drawUI();
+  assert.ok(!texts.some(t => t.includes('Polveri')));
+});
+
+test('accessibility options apply in level 3', () => {
+  const game = createStubGame({ search: '?level=3&contrast=high&assist=on', skipLevelUpdate: true });
+  assert.ok(game.highContrast);
+  assert.ok(game.jumpAssist);
+  assert.strictEqual(game.player.jumpVelocity, JUMP_VELOCITY * 1.2);
+  const colors = [];
+  game.ctx.fillRect = () => colors.push(game.ctx.fillStyle);
+  game.renderer.drawBackground();
+  assert.strictEqual(colors[0], '#000');
+});
+
