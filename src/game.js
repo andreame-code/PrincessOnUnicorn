@@ -185,7 +185,7 @@ export class Game {
       return;
     }
 
-    if (this.levelNumber === 1) {
+    if (this.levelNumber === 1 || this.levelNumber === 3) {
       this.player.jump();
       this.renderer.playSound('jump');
     } else {
