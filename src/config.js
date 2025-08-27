@@ -27,3 +27,8 @@ export const SHIELD_COOLDOWN = 0.9;
 export const SHIELD_DURATION = 0.5;
 // Grace window after an attack where the shield can still be activated (seconds)
 export const SHIELD_GRACE = 0.16;
+
+// Durations for Level 3 special power-ups (seconds)
+export const AURA_SHIELD_DURATION = 5;
+export const ZOCCOLI_VENTO_DURATION = 4;
+export const ALI_DI_ZUCCHERO_DURATION = 6;

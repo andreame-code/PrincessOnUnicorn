@@ -360,6 +360,26 @@ export class Renderer {
       ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
       ctx.fillRect(barX, barY, barWidth * progress, barHeight);
 
+      // Level 3 special power-up icons
+      if (game.levelNumber === 3) {
+        let px = 10;
+        const py = iconY + iconSize + 8;
+        if (p.powerUps.aura) {
+          ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+          ctx.fillRect(px, py, iconSize, iconSize);
+          px += iconSize + 4;
+        }
+        if (p.powerUps.wind) {
+          ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+          ctx.fillRect(px, py, iconSize, iconSize);
+          px += iconSize + 4;
+        }
+        if (p.powerUps.wings) {
+          ctx.fillStyle = 'rgba(255, 0, 255, 0.5)';
+          ctx.fillRect(px, py, iconSize, iconSize);
+        }
+      }
+
       if (game.gameOver) {
         ctx.fillStyle = '#000';
         ctx.font = '24px sans-serif';
