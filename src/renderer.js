@@ -456,25 +456,41 @@ export class Renderer {
       const p = game.player;
       const iconSize = 16;
       const iconY = 48;
-      if (this.shieldSprite) {
-        ctx.drawImage(this.shieldSprite, 10, iconY, iconSize, iconSize);
+      if (game.levelNumber !== 3) {
+        if (this.shieldSprite) {
+          ctx.drawImage(this.shieldSprite, 10, iconY, iconSize, iconSize);
+        } else {
+          ctx.strokeStyle = 'blue';
+          ctx.beginPath();
+          ctx.arc(18, iconY + 8, 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        const barX = 10 + iconSize + 5;
+        const barY = iconY + 2;
+        const barWidth = 80;
+        const barHeight = 10;
+        ctx.strokeStyle = '#000';
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+        const progress = p.shieldCooldownMax
+          ? (p.shieldCooldownMax - p.shieldCooldown) / p.shieldCooldownMax
+          : 1;
+        ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+        ctx.fillRect(barX, barY, barWidth * progress, barHeight);
       } else {
-        ctx.strokeStyle = 'blue';
-        ctx.beginPath();
-        ctx.arc(18, iconY + 8, 8, 0, Math.PI * 2);
-        ctx.stroke();
+        let x = 10;
+        const icons = [];
+        if (p.shieldTimer > 0) icons.push({ color: 'blue', label: 'A' });
+        if (p.speedBoostTimer > 0) icons.push({ color: 'green', label: 'Z' });
+        if (p.wingsTimer > 0) icons.push({ color: 'purple', label: 'W' });
+        icons.forEach(icon => {
+          ctx.fillStyle = icon.color;
+          ctx.fillRect(x, iconY, iconSize, iconSize);
+          ctx.fillStyle = '#fff';
+          ctx.font = '10px sans-serif';
+          ctx.fillText(icon.label, x + 4, iconY + 12);
+          x += iconSize + 5;
+        });
       }
-      const barX = 10 + iconSize + 5;
-      const barY = iconY + 2;
-      const barWidth = 80;
-      const barHeight = 10;
-      ctx.strokeStyle = '#000';
-      ctx.strokeRect(barX, barY, barWidth, barHeight);
-      const progress = p.shieldCooldownMax
-        ? (p.shieldCooldownMax - p.shieldCooldown) / p.shieldCooldownMax
-        : 1;
-      ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-      ctx.fillRect(barX, barY, barWidth * progress, barHeight);
 
       if (game.gameOver) {
         ctx.fillStyle = '#000';

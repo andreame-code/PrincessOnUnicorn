@@ -18,14 +18,18 @@ export class Player {
     this.vy = 0;
     this.vx = 0;
     this.moveSpeed = 3;
+    this.defaultMoveSpeed = this.moveSpeed;
     this.worldWidth = 0; // to be set by game
     this.jumping = false;
     this.jumpCount = 0;
     this.maxJumps = 1;
+    this.defaultMaxJumps = this.maxJumps;
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
     this.shieldCooldownMax = SHIELD_COOLDOWN;
+    this.speedBoostTimer = 0;
+    this.wingsTimer = 0;
     this.dead = false;
   }
 
@@ -55,6 +59,21 @@ export class Player {
     if (this.shieldCooldown > 0) {
       this.shieldCooldown -= delta;
       if (this.shieldCooldown < 0) this.shieldCooldown = 0;
+    }
+    if (this.speedBoostTimer > 0) {
+      this.speedBoostTimer -= delta;
+      if (this.speedBoostTimer <= 0) {
+        this.moveSpeed = this.defaultMoveSpeed;
+        if (this.vx > 0) this.vx = this.moveSpeed;
+        if (this.vx < 0) this.vx = -this.moveSpeed;
+      }
+    }
+    if (this.wingsTimer > 0) {
+      this.wingsTimer -= delta;
+      if (this.wingsTimer <= 0) {
+        this.maxJumps = this.defaultMaxJumps;
+        if (this.jumpCount > this.maxJumps) this.jumpCount = this.maxJumps;
+      }
     }
   }
 
@@ -90,10 +109,22 @@ export class Player {
       this.shieldCooldown = cooldown;
       this.shieldCooldownMax = cooldown;
     }
-  }
+  } 
 
   die(speed = -2) {
     this.dead = true;
     this.vy = speed;
+  }
+
+  activateSpeedBoost(duration, speed) {
+    this.moveSpeed = speed;
+    this.speedBoostTimer = duration;
+    if (this.vx > 0) this.vx = this.moveSpeed;
+    if (this.vx < 0) this.vx = -this.moveSpeed;
+  }
+
+  activateWings(duration, extraJumps) {
+    this.maxJumps = this.defaultMaxJumps + extraJumps;
+    this.wingsTimer = duration;
   }
 }
