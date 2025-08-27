@@ -25,6 +25,10 @@ export class Renderer {
     this.knightFrameTimer = 0;
     this.lastKnightTime = 0;
     this.sounds = {};
+    // Simple background clouds
+    this.clouds = [];
+    this.lastCloudTime = 0;
+    this.initClouds();
   }
 
   preload() {
@@ -75,6 +79,50 @@ export class Renderer {
       Object.values(this.sounds).forEach(s => {
         if (s) s.volume = 0.5;
       });
+    });
+  }
+
+  initClouds() {
+    const { canvas } = this.game;
+    if (!canvas) return;
+    const count = 5;
+    for (let i = 0; i < count; i++) {
+      const width = 60 + Math.random() * 40;
+      const height = 20 + Math.random() * 10;
+      this.clouds.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height * 0.3,
+        width,
+        height,
+        speed: 15 + Math.random() * 10,
+      });
+    }
+  }
+
+  drawBackground() {
+    const { ctx, game } = this;
+    if (!game.canvas) return;
+    // Sky color
+    ctx.fillStyle = '#87CEEB';
+    ctx.fillRect(0, 0, game.canvas.width, game.canvas.height);
+
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if (!this.lastCloudTime) this.lastCloudTime = now;
+    const delta = (now - this.lastCloudTime) / 1000;
+    this.lastCloudTime = now;
+
+    ctx.fillStyle = '#fff';
+    this.clouds.forEach(c => {
+      c.x -= c.speed * delta;
+      if (c.x < -c.width) {
+        c.x = game.canvas.width + c.width;
+      }
+      const r = c.height / 2;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+      ctx.arc(c.x + r, c.y - r, r, 0, Math.PI * 2);
+      ctx.arc(c.x + r * 2, c.y, r, 0, Math.PI * 2);
+      ctx.fill();
     });
   }
 
@@ -331,6 +379,7 @@ export class Renderer {
   draw() {
     const { ctx, game } = this;
     ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
+    this.drawBackground();
     this.drawGround();
     this.drawPlayer();
     if (game.level.obstacles) {
