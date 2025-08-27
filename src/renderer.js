@@ -280,13 +280,24 @@ export class Renderer {
           ctx.fillRect(left, top, wWidth, wHeight);
         });
       }
-      const b = game.level.boss;
+    });
+  }
+
+  drawBoss() {
+    const { game } = this;
+    const b = game.level.boss;
+    if (!b) return;
+    this.withContext(ctx => {
+      const scale = this.game.scale;
       const bw = b.width * scale * SPRITE_SCALE;
       const bh = b.height * scale * SPRITE_SCALE;
       const bx = b.x * scale - bw / 2;
       const bottom = (b.y + b.height / 2) * scale;
       const by = bottom - bh;
-      if (this.knightSprites) {
+      if (b.type === 'guardian') {
+        ctx.fillStyle = 'purple';
+        ctx.fillRect(bx, by, bw, bh);
+      } else if (this.knightSprites) {
         const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
         if (!this.lastKnightTime) this.lastKnightTime = now;
         const delta = (now - this.lastKnightTime) / 1000;
@@ -390,6 +401,9 @@ export class Renderer {
     }
     if (game.level.walls) {
       this.drawWalls();
+    }
+    if (game.level.boss) {
+      this.drawBoss();
     }
     if (game.level.coins) {
       this.drawCoins();

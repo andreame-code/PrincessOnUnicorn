@@ -25,15 +25,44 @@ test('level 3 advances using move speed', () => {
   assert.strictEqual(level.distance, level.getMoveSpeed());
 });
 
-// After travelling the entire level and clearing entities the level should end.
-test('level 3 completes after level length', () => {
+// After travelling the entire level the portal guardian should appear.
+test('level 3 spawns guardian after level length', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
   let steps = 0;
-  while (!game.win && steps < 5000) {
+  while (!level.boss && steps < 5000) {
     level.update(FRAME);
     steps++;
   }
+  assert.ok(level.boss);
+  assert.strictEqual(level.boss.type, 'guardian');
+  assert.strictEqual(game.win, false);
+});
+
+test('portal opens and game is won after three hits on guardian', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  let steps = 0;
+  while (!level.boss && steps < 5000) {
+    level.update(FRAME);
+    steps++;
+  }
+  const boss = level.boss;
+  const player = game.player;
+  assert.strictEqual(boss.attackPhases.length, 3);
+  for (let i = 0; i < 2; i++) {
+    player.x = boss.x;
+    player.y = boss.y - boss.height / 2 - player.height / 2 + 0.01;
+    player.vy = 1;
+    level.update(FRAME);
+  }
+  assert.strictEqual(boss.hits, 2);
+  assert.strictEqual(level.portalOpen, false);
+  player.x = boss.x;
+  player.y = boss.y - boss.height / 2 - player.height / 2 + 0.01;
+  player.vy = 1;
+  level.update(FRAME);
+  assert.ok(level.portalOpen);
   assert.ok(game.win);
 });
 
@@ -94,5 +123,12 @@ test('player cannot triple jump in level 3', () => {
   game.update(FRAME);
   player.jump();
   assert.strictEqual(player.jumpCount, 2);
+});
+
+test('guardian does not appear in level 1 or 2', () => {
+  let game = createStubGame({ search: '?level=1' });
+  assert.ok(!game.level.boss || game.level.boss.type !== 'guardian');
+  game = createStubGame({ search: '?level=2' });
+  assert.ok(!game.level.boss || game.level.boss.type !== 'guardian');
 });
 
