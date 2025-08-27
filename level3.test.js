@@ -3,6 +3,9 @@ import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
 import { Goomba } from './src/entities/goomba.js';
+import { ShadowCrow } from './src/entities/shadowCrow.js';
+import { RhombusSprite } from './src/entities/rhombusSprite.js';
+import { ThornGuard } from './src/entities/thornGuard.js';
 import { JUMP_VELOCITY } from './src/config.js';
 
 const FRAME = 1 / 60;
@@ -46,6 +49,53 @@ test('level 3 maps space to jump', () => {
   game.handleInput();
   assert.strictEqual(player.jumping, true);
   assert.strictEqual(player.shieldActive, false);
+});
+
+test('level 3 spawns exclusive enemies', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const level = game.level;
+  assert.ok(level.enemies.some(e => e instanceof ShadowCrow));
+  assert.ok(level.enemies.some(e => e instanceof RhombusSprite));
+  assert.ok(level.enemies.some(e => e instanceof ThornGuard));
+});
+
+test('exclusive enemies only appear in level 3', () => {
+  const g1 = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  const g2 = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const hasExclusive = lvl =>
+    !!(
+      lvl.enemies &&
+      lvl.enemies.some(
+        e => e instanceof ShadowCrow || e instanceof RhombusSprite || e instanceof ThornGuard
+      )
+    );
+  assert.strictEqual(hasExclusive(g1.level), false);
+  assert.strictEqual(hasExclusive(g2.level), false);
+});
+
+test('shadow crow moves in a sinusoidal path', () => {
+  const crow = new ShadowCrow(0, 0, 1);
+  const startY = crow.y;
+  crow.update(0, 0.25);
+  const midY = crow.y;
+  crow.update(0, 0.25);
+  const endY = crow.y;
+  assert.notStrictEqual(startY, midY);
+  assert.ok(Math.abs(endY - startY) < 1e-6);
+});
+
+test('rhombus sprite dashes forward', () => {
+  const sprite = new RhombusSprite(0, 0, 1);
+  const startX = sprite.x;
+  sprite.update(0, 0.5); // trigger dash
+  sprite.update(0, 0.1); // perform dash
+  assert.ok(sprite.x < startX);
+});
+
+test('thorn guard throws seed walls', () => {
+  const guard = new ThornGuard(0, 0, 1);
+  const spawned = guard.update(0, 1.1);
+  assert.strictEqual(spawned.length, 1);
 });
 
 test('player defeats enemy by landing on it', () => {
