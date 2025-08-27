@@ -42,6 +42,8 @@ test('level 3 completes after level length', () => {
     player.vy = 1;
     level.update(FRAME);
   }
+  game.starDust = 30;
+  game.hasCrystalKey = true;
   const distanceToPortal = level.portal.x - player.x;
   const maxSteps = Math.ceil(distanceToPortal / level.getMoveSpeed() / FRAME) + 60;
   let steps = 0;
@@ -78,7 +80,7 @@ test('portal guardian only appears in level 3', () => {
   assert.ok(l3.boss instanceof PortalGuardian);
 });
 
-test('defeating portal guardian opens portal', () => {
+test('portal stays closed until items collected', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
   const boss = level.boss;
@@ -93,6 +95,10 @@ test('defeating portal guardian opens portal', () => {
     if (i < 2) assert.strictEqual(boss.phase, i + 2);
   }
   assert.ok(boss.defeated);
+  assert.strictEqual(level.portal.open, false);
+  game.starDust = 30;
+  game.hasCrystalKey = true;
+  level.update(FRAME);
   assert.strictEqual(level.portal.open, true);
 });
 
@@ -185,32 +191,67 @@ test('player cannot triple jump in level 3', () => {
   assert.strictEqual(player.jumpCount, 2);
 });
 
-test('level 3 has a secret of five stars', () => {
+test('level 3 has thirty stardust and a crystal key', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
   const level = game.level;
-  assert.strictEqual(level.stars.length, 5);
+  assert.strictEqual(level.starDust.length, 30);
+  assert.ok(level.crystalKey);
 });
 
-test('collecting a star increases star count', () => {
+test('collecting stardust increases count', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
-  const star = level.stars[0];
-  star.x = game.player.x;
-  star.y = game.player.y;
+  const dust = level.starDust[0];
+  dust.x = game.player.x;
+  dust.y = game.player.y;
   level.update(FRAME);
-  assert.strictEqual(game.stars, 1);
-  assert.strictEqual(level.stars.length, 4);
+  assert.strictEqual(game.starDust, 1);
+  assert.strictEqual(level.starDust.length, 29);
 });
 
-test('checkpoint and portal are unique to level 3', () => {
+test('collecting crystal key sets flag', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const key = level.crystalKey;
+  key.x = game.player.x;
+  key.y = game.player.y;
+  level.update(FRAME);
+  assert.ok(game.hasCrystalKey);
+  assert.strictEqual(level.crystalKey, null);
+});
+
+test('stardust, key and portal are unique to level 3', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
   const level = game.level;
   assert.ok(level.checkpoint);
   assert.ok(level.portal);
+  assert.ok(level.crystalKey);
+  assert.ok(level.starDust.length > 0);
   const game1 = createStubGame({ search: '?level=1', skipLevelUpdate: true });
-  assert.ok(!game1.level.stars || game1.level.stars.length === 0);
+  assert.ok(!game1.level.starDust || game1.level.starDust.length === 0);
+  assert.ok(!game1.level.crystalKey);
+  assert.ok(!game1.level.portal);
   const game2 = createStubGame({ search: '?level=2', skipLevelUpdate: true });
-  assert.ok(!game2.level.stars || game2.level.stars.length === 0);
+  assert.ok(!game2.level.starDust || game2.level.starDust.length === 0);
+  assert.ok(!game2.level.crystalKey);
+  assert.ok(!game2.level.portal);
+});
+
+test('portal requires stardust and key', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  level.getMoveSpeed = () => 0;
+  const portal = level.portal;
+  portal.x = game.player.x;
+  portal.y = game.player.y;
+  level.boss.defeated = true;
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, false);
+  game.starDust = 30;
+  game.hasCrystalKey = true;
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, true);
+  assert.strictEqual(game.win, true);
 });
 
 test('cloud platform disappears then respawns', () => {
