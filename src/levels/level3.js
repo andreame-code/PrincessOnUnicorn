@@ -4,6 +4,7 @@ import { Goomba } from '../entities/goomba.js';
 import { ShadowCrow } from '../entities/shadowCrow.js';
 import { RhombusSprite } from '../entities/rhombusSprite.js';
 import { ThornGuard } from '../entities/thornGuard.js';
+import { PortalGuardian } from '../entities/portalGuardian.js';
 import { isColliding, isLandingOn } from '../../collision.js';
 import { JUMP_VELOCITY, GRAVITY } from '../config.js';
 
@@ -164,6 +165,7 @@ class Portal extends Obstacle {
   constructor(x, groundY, size) {
     super(x, groundY - size, size, size * 2);
     this.type = 'portal';
+    this.open = false;
   }
 }
 
@@ -185,8 +187,10 @@ export class Level3 extends BaseLevel {
     this.checkpoint = null;
     this.checkpointReached = false;
     this.portal = null;
+    this.boss = null;
     this.generateFromMap();
     this.addExclusiveEnemies();
+    this.spawnPortalGuardian();
   }
 
   // Spawn interval from BaseLevel isn't used anymore but kept for
@@ -261,6 +265,16 @@ export class Level3 extends BaseLevel {
     this.obstacles.push(crow, sprite, guard);
   }
 
+  spawnPortalGuardian() {
+    if (this.portal) {
+      const x = this.portal.x - this.tileSize * 5;
+      const y = this.game.groundY - this.tileSize / 2;
+      this.boss = new PortalGuardian(x, y, this.tileSize * 2);
+      this.enemies.push(this.boss);
+      this.obstacles.push(this.boss);
+    }
+  }
+
   update(delta) {
     const move = this.getMoveSpeed() * delta;
     this.distance += move;
@@ -320,6 +334,24 @@ export class Level3 extends BaseLevel {
 
     // Handle enemy collisions and cull off-screen entities
     this.enemies = this.enemies.filter(e => {
+      if (e === this.boss) {
+        if (isLandingOn(player, e)) {
+          player.vy = JUMP_VELOCITY / 2;
+          player.jumping = true;
+          player.jumpCount = 1;
+          e.hit();
+          if (e.defeated) {
+            this.portal.open = true;
+            return false;
+          }
+          return true;
+        }
+        if (isColliding(player, e)) {
+          this.game.gameOver = true;
+          return false;
+        }
+        return e.x + e.width / 2 > 0;
+      }
       if (isLandingOn(player, e)) {
         player.vy = JUMP_VELOCITY / 2;
         player.jumping = true;
@@ -352,14 +384,18 @@ export class Level3 extends BaseLevel {
     ) {
       this.checkpointReached = true;
     }
-    if (this.portal && isColliding(player, this.portal)) {
+    if (this.portal && this.portal.open && isColliding(player, this.portal)) {
       this.game.gameOver = true;
       this.game.win = true;
     }
     if (this.checkpoint && this.checkpoint.x + this.checkpoint.width / 2 <= 0) {
       this.checkpoint = null;
     }
-    if (this.portal && this.portal.x + this.portal.width / 2 <= 0) {
+    if (
+      this.portal &&
+      this.portal.open &&
+      this.portal.x + this.portal.width / 2 <= 0
+    ) {
       this.game.gameOver = true;
       this.game.win = true;
     }
