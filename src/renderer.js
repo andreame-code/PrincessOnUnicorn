@@ -105,28 +105,99 @@ export class Renderer {
   drawBackground() {
     const { ctx, game } = this;
     if (!game.canvas) return;
-    // Sky color
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, game.canvas.width, game.canvas.height);
 
-    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
-    if (!this.lastCloudTime) this.lastCloudTime = now;
-    const delta = (now - this.lastCloudTime) / 1000;
-    this.lastCloudTime = now;
+    if (game.levelNumber === 3) {
+      // Pastel sky gradient specific to level 3
+      const grd = ctx.createLinearGradient(0, 0, 0, game.canvas.height);
+      grd.addColorStop(0, '#fbeaff');
+      grd.addColorStop(1, '#d6f5ff');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, game.canvas.width, game.canvas.height);
 
-    ctx.fillStyle = '#fff';
-    this.clouds.forEach(c => {
-      c.x -= c.speed * delta;
-      if (c.x < -c.width) {
-        c.x = game.canvas.width + c.width;
-      }
-      const r = c.height / 2;
+      // Cupcake mountains (simple rounded shapes)
+      ctx.fillStyle = '#ffd1dc';
       ctx.beginPath();
-      ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
-      ctx.arc(c.x + r, c.y - r, r, 0, Math.PI * 2);
-      ctx.arc(c.x + r * 2, c.y, r, 0, Math.PI * 2);
+      ctx.moveTo(0, game.canvas.height * 0.8);
+      ctx.quadraticCurveTo(
+        game.canvas.width * 0.1,
+        game.canvas.height * 0.55,
+        game.canvas.width * 0.25,
+        game.canvas.height * 0.8
+      );
       ctx.fill();
-    });
+
+      ctx.fillStyle = '#ffb7ce';
+      ctx.beginPath();
+      ctx.moveTo(game.canvas.width * 0.2, game.canvas.height * 0.8);
+      ctx.quadraticCurveTo(
+        game.canvas.width * 0.35,
+        game.canvas.height * 0.5,
+        game.canvas.width * 0.5,
+        game.canvas.height * 0.8
+      );
+      ctx.fill();
+
+      // Rainbow castle (simplified)
+      const castleBaseY = game.canvas.height * 0.75;
+      const castleX = game.canvas.width * 0.7;
+      const castleW = 40;
+      const castleH = 40;
+      const colors = ['#ff9aa2', '#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7', '#c7ceea'];
+      colors.forEach((color, i) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(castleX + i * (castleW / colors.length), castleBaseY - castleH, castleW / colors.length, castleH);
+      });
+      ctx.fillStyle = '#c7ceea';
+      ctx.beginPath();
+      ctx.moveTo(castleX + castleW * 0.5, castleBaseY - castleH - 20);
+      ctx.lineTo(castleX + castleW * 0.6, castleBaseY - castleH);
+      ctx.lineTo(castleX + castleW * 0.4, castleBaseY - castleH);
+      ctx.closePath();
+      ctx.fill();
+
+      // Moving clouds for level 3
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      if (!this.lastCloudTime) this.lastCloudTime = now;
+      const delta = (now - this.lastCloudTime) / 1000;
+      this.lastCloudTime = now;
+
+      ctx.fillStyle = '#ffffffaa';
+      this.clouds.forEach(c => {
+        c.x -= c.speed * delta;
+        if (c.x < -c.width) {
+          c.x = game.canvas.width + c.width;
+        }
+        const r = c.height / 2;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+        ctx.arc(c.x + r, c.y - r, r, 0, Math.PI * 2);
+        ctx.arc(c.x + r * 2, c.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    } else {
+      // Default blue sky with clouds for other levels
+      ctx.fillStyle = '#87CEEB';
+      ctx.fillRect(0, 0, game.canvas.width, game.canvas.height);
+
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      if (!this.lastCloudTime) this.lastCloudTime = now;
+      const delta = (now - this.lastCloudTime) / 1000;
+      this.lastCloudTime = now;
+
+      ctx.fillStyle = '#fff';
+      this.clouds.forEach(c => {
+        c.x -= c.speed * delta;
+        if (c.x < -c.width) {
+          c.x = game.canvas.width + c.width;
+        }
+        const r = c.height / 2;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+        ctx.arc(c.x + r, c.y - r, r, 0, Math.PI * 2);
+        ctx.arc(c.x + r * 2, c.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
   }
 
   playSound(key) {
@@ -150,8 +221,18 @@ export class Renderer {
   drawGround() {
     const { game } = this;
     this.withContext(ctx => {
-      ctx.fillStyle = '#555';
-      ctx.fillRect(0, game.groundY * game.scale, game.canvas.width, 2);
+      if (game.levelNumber === 3) {
+        const y = game.groundY * game.scale;
+        const h = game.canvas.height - y;
+        const grd = ctx.createLinearGradient(0, y, 0, game.canvas.height);
+        grd.addColorStop(0, '#b3ffcc');
+        grd.addColorStop(1, '#eaffea');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, y, game.canvas.width, h);
+      } else {
+        ctx.fillStyle = '#555';
+        ctx.fillRect(0, game.groundY * game.scale, game.canvas.width, 2);
+      }
     });
   }
 
@@ -240,17 +321,52 @@ export class Renderer {
         const left = o.x * scale - w / 2;
         const bottom = (o.y + o.height / 2) * scale;
         const top = bottom - h;
-        const sprites = o.type === 'tree' ? this.treeSprites : null;
-        if (sprites) {
-          const img = sprites[(o.imageIndex ?? 0) % sprites.length];
-          ctx.drawImage(img, left, top, w, h);
-        } else if (o.type === 'cactus') {
-          ctx.fillStyle = 'green';
-          ctx.fillRect(left + w * 0.4, top, w * 0.2, h);
-          ctx.fillRect(left, top + h * 0.4, w, h * 0.2);
+        if (game.levelNumber === 3) {
+          if (o.type === 'platform') {
+            // Cloud platforms
+            ctx.fillStyle = '#ffffff';
+            const r = h / 2;
+            ctx.beginPath();
+            ctx.arc(left + r, top + r, r, 0, Math.PI * 2);
+            ctx.arc(left + r * 2, top + r * 0.5, r, 0, Math.PI * 2);
+            ctx.arc(left + r * 3, top + r, r, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (o.type === 'pipe') {
+            // Purple brambles
+            ctx.fillStyle = '#a64ac9';
+            ctx.fillRect(left, top, w, h);
+            ctx.fillStyle = '#8e24aa';
+            for (let i = 0; i < w; i += w / 5) {
+              ctx.beginPath();
+              ctx.moveTo(left + i, top);
+              ctx.lineTo(left + i + w / 10, top - 10);
+              ctx.lineTo(left + i + w / 5, top);
+              ctx.fill();
+            }
+          } else if (o.type === 'block') {
+            // Moon milk lakes
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(left, top, w, h);
+            ctx.strokeStyle = '#d0eaff';
+            ctx.strokeRect(left, top, w, h);
+          } else {
+            // Enemies or other objects
+            ctx.fillStyle = '#ffb7ce';
+            ctx.fillRect(left, top, w, h);
+          }
         } else {
-          ctx.fillStyle = 'green';
-          ctx.fillRect(left, top, w, h);
+          const sprites = o.type === 'tree' ? this.treeSprites : null;
+          if (sprites) {
+            const img = sprites[(o.imageIndex ?? 0) % sprites.length];
+            ctx.drawImage(img, left, top, w, h);
+          } else if (o.type === 'cactus') {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(left + w * 0.4, top, w * 0.2, h);
+            ctx.fillRect(left, top + h * 0.4, w, h * 0.2);
+          } else {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(left, top, w, h);
+          }
         }
       });
     });
