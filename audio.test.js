@@ -30,6 +30,12 @@ test('renderer preloads audio assets and sets volume', async () => {
   const jump = renderer.assets.get('jump');
   assert.ok(jump instanceof AudioMock);
   assert.strictEqual(jump.volume, 0.5);
+  const bounce = renderer.assets.get('bounce');
+  assert.ok(bounce instanceof AudioMock);
+  assert.strictEqual(bounce.volume, 0.5);
+  const coin = renderer.assets.get('coin');
+  assert.ok(coin instanceof AudioMock);
+  assert.strictEqual(coin.volume, 0.5);
 });
 
 test('playSound resets time and plays audio', async () => {

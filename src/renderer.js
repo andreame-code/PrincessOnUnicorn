@@ -2,8 +2,9 @@ import { AssetManager } from './assetManager.js';
 import { SHIELD_RANGE } from './config.js';
 
 const JUMP_SOUND = 'data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YcgAAACA/K4UKcryYAFw+L0eHr34cAFg8sopFK78fwNR69Y1DZ/+jwdC4eFCB4/+nw011utRA4D8rhQpyvJgAXD4vR4evfhwAWDyyikUrvyAA1Hr1jUNn/6PB0Lh4UIHj/6fDTXW61EDgPyuFCnK8mABcPi9Hh69+HABYPLKKRSu/H8DUevWNQ2f/o8HQuHhQgeP/p8NNdbrUQN//K4UKcryYAFw+L0eHr34cAFg8sopFK78fwNR69Y1DZ/+jwdC4eFCB4/+nw011utRAw==';
-const COIN_SOUND = 'data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YcgAAACA7e+DFA546fKLGQtw5PaTHgho3/ibIwZg2fujKQRY0/yrLwJRzf2yNQFJx/65OwFCwP/AQgE7uf7HSQE1sv3NUQIvq/zTWAQpo/vZYAYjm/jfaAgek/bkcAsZi/LpeA4Ug+/tgBIQfOvxhxYNdOb0jxsJbOH3lyAHZNz5nyYEXNb7pywDVND9rjICTcr+tjgBRsT+vT8BP73+xEYBOLb+yk0CMq790FQDLKf71lwEJp/53GQHIJf34WwJG4/05nQNFofx63wQEg==';
 const SHIELD_SOUND = 'data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YcgAAACA0PzvrlgUAil4yvvytmAZASNwxPj2vWgeAR5ovfb4xHAjARlgtvL7yngpAhRYru/80H8vAxBRp+v91oc1BA1Jn+b+3I87BwlCl+H/4ZdCCQc7j9z+5p9JDQQ1h9b966dREAMvgND8765YFAIpeMr78rZgGQEjcMT49r1oHgEeaL32+MRwIwEZYLby+8p4KQIUWK7v/NCALwMQUafr/daHNQQNSZ/m/tyPOwcJQpfh/+GXQgkHO4/c/uafSQ0ENYfW/eunURADLw==';
+const COIN_SOUND = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACA0f3vr1kVAil4y/vztmAZASNwxPn2vWgeAR5ovfb5xHAjARlgtvP7y3gpAhVZr+/90YAvAxFRp+v+14g1BQ1KoOf/3ZA8BwpDmOL/4phDCgc8kN3/56BKDQU1iNf+66dREQMvgNH9769ZFQIpeMv787ZgGQEjcMT59r1oHgEeaL32+cRwIwEZYLbz+8t4KQIVWa/v/dGALwMRUafr/teI';
+const BOUNCE_SOUND = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACAq9Ht/f3v1K+EWTIVBAIPKU54o8vp+/7z2raMYDkZBgELI0ZwnMTk+f/2372UaD8eCQEJHj9olL3f9v/55MSccEYjCwEGGTlgjLba8/776cujeE4pDwIEFTJZhK/U7/397dGrgFUvEwMDESxRfKfO6/z+8deyiF01FwUCDSZKdKDH5/r/9d26kGQ8HAcBCiFDbJjB4vf/9+LBmGxDIQoB';
 
 const SPRITE_SCALE = 2;
 
@@ -47,6 +48,7 @@ export class Renderer {
       { key: 'shield', src: resolve('public/assets/sprites/shield.png') },
       { key: 'jump', src: JUMP_SOUND, type: 'audio' },
       { key: 'coin', src: COIN_SOUND, type: 'audio' },
+      { key: 'bounce', src: BOUNCE_SOUND, type: 'audio' },
       { key: 'shield_hit', src: SHIELD_SOUND, type: 'audio' },
     ];
     return this.assets.loadAll(assets).then(() => {
@@ -75,6 +77,7 @@ export class Renderer {
       this.shieldSprite = this.assets.get('shield');
       this.sounds.jump = this.assets.get('jump');
       this.sounds.coin = this.assets.get('coin');
+      this.sounds.bounce = this.assets.get('bounce');
       this.sounds.shield = this.assets.get('shield_hit');
       Object.values(this.sounds).forEach(s => {
         if (s) s.volume = 0.5;

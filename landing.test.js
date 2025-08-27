@@ -8,6 +8,12 @@ const FRAME = 1 / 60;
 test('player lands within expected time after jumping', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const { player, groundY } = game;
+  let bounceCalls = 0;
+  const originalPlaySound = game.renderer.playSound.bind(game.renderer);
+  game.renderer.playSound = key => {
+    if (key === 'bounce') bounceCalls++;
+    originalPlaySound(key);
+  };
 
   const jumpDuration = (-2 * JUMP_VELOCITY) / GRAVITY;
   const framesToLand = Math.ceil(jumpDuration / FRAME);
@@ -19,4 +25,5 @@ test('player lands within expected time after jumping', () => {
 
   assert.strictEqual(player.y, groundY - player.height / 2);
   assert.ok(!player.jumping);
+  assert.strictEqual(bounceCalls, 1);
 });
