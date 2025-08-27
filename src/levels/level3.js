@@ -6,6 +6,7 @@ import { JUMP_VELOCITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
 // 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
+// 6 = star collectible, 7 = checkpoint, 8 = rainbow portal (finish)
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
@@ -13,19 +14,39 @@ const TILE = {
   PIPE: 3,
   BLOCK: 4,
   GOOMBA: 5,
+  STAR: 6,
+  CHECKPOINT: 7,
+  PORTAL: 8,
 };
 
 // Two dimensional map describing the level layout. Each number
 // corresponds to a tile type defined above. The first row is the
 // ground and subsequent rows stack upwards.
-const MAP = [
-  // Ground row
-  [1, 1, 1, 1, 1, 1, 1, 1],
-  // Tiles one unit above the ground
-  [5, 2, 0, 3, 5, 2, 0, 0],
-  // Tiles two units above the ground
-  [0, 0, 0, 0, 4, 0, 0, 0],
-];
+// The map is programmatically generated to provide a long progressive
+// level with a hidden star path, a central checkpoint and a rainbow
+// portal at the end.
+const MAP_WIDTH = 240; // ~120 seconds at move speed ~2
+const ground = Array(MAP_WIDTH).fill(TILE.GROUND);
+const row1 = Array(MAP_WIDTH).fill(TILE.EMPTY);
+const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
+
+// Ability section - small platforms to practice jumping
+for (let c = 10; c < 20; c += 2) row1[c] = TILE.PLATFORM;
+
+// Secret star path high in the sky
+for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
+
+// Challenge obstacles
+[60, 90, 130, 170, 210].forEach(c => (row1[c] = TILE.GOOMBA));
+[70, 100, 160, 190].forEach(c => (row1[c] = TILE.PIPE));
+
+// Central checkpoint
+row1[120] = TILE.CHECKPOINT;
+
+// Final rainbow portal
+row1[MAP_WIDTH - 5] = TILE.PORTAL;
+
+const MAP = [ground, row1, row2];
 
 class Platform extends Obstacle {
   constructor(x, y, size) {
@@ -49,6 +70,27 @@ class Block extends Obstacle {
   }
 }
 
+class Star extends Obstacle {
+  constructor(x, y, size) {
+    super(x, y, size, size);
+    this.type = 'star';
+  }
+}
+
+class Checkpoint extends Obstacle {
+  constructor(x, groundY, size) {
+    super(x, groundY - size / 2, size, size);
+    this.type = 'checkpoint';
+  }
+}
+
+class Portal extends Obstacle {
+  constructor(x, groundY, size) {
+    super(x, groundY - size, size, size * 2);
+    this.type = 'portal';
+  }
+}
+
 // Level 3 - Unicornolandia converted to a tile-based platform section
 export class Level3 extends BaseLevel {
   constructor(game, random = Math.random) {
@@ -62,6 +104,10 @@ export class Level3 extends BaseLevel {
     this.pipes = [];
     this.blocks = [];
     this.enemies = [];
+    this.stars = [];
+    this.checkpoint = null;
+    this.checkpointReached = false;
+    this.portal = null;
     this.generateFromMap();
   }
 
@@ -99,6 +145,15 @@ export class Level3 extends BaseLevel {
               new Goomba(x, this.game.groundY - this.tileSize / 2, this.tileSize)
             );
             break;
+          case TILE.STAR:
+            this.stars.push(new Star(x, y, this.tileSize));
+            break;
+          case TILE.CHECKPOINT:
+            this.checkpoint = new Checkpoint(x, this.game.groundY, this.tileSize);
+            break;
+          case TILE.PORTAL:
+            this.portal = new Portal(x, this.game.groundY, this.tileSize);
+            break;
           default:
             break;
         }
@@ -120,6 +175,9 @@ export class Level3 extends BaseLevel {
     moveArr(this.platforms);
     moveArr(this.pipes);
     moveArr(this.blocks);
+    moveArr(this.stars);
+    if (this.checkpoint) this.checkpoint.update(move);
+    if (this.portal) this.portal.update(move);
     this.enemies.forEach(e => e.update(move, delta));
 
     const player = this.game.player;
@@ -156,6 +214,31 @@ export class Level3 extends BaseLevel {
     this.platforms = filterArr(this.platforms);
     this.pipes = filterArr(this.pipes);
     this.blocks = filterArr(this.blocks);
+    this.stars = this.stars.filter(s => {
+      if (isColliding(player, s)) {
+        this.game.stars++;
+        return false;
+      }
+      return s.x + s.width / 2 > 0;
+    });
+    if (
+      !this.checkpointReached &&
+      this.checkpoint &&
+      isColliding(player, this.checkpoint)
+    ) {
+      this.checkpointReached = true;
+    }
+    if (this.portal && isColliding(player, this.portal)) {
+      this.game.gameOver = true;
+      this.game.win = true;
+    }
+    if (this.checkpoint && this.checkpoint.x + this.checkpoint.width / 2 <= 0) {
+      this.checkpoint = null;
+    }
+    if (this.portal && this.portal.x + this.portal.width / 2 <= 0) {
+      this.game.gameOver = true;
+      this.game.win = true;
+    }
     this.obstacles = [
       ...this.platforms,
       ...this.pipes,
@@ -163,16 +246,22 @@ export class Level3 extends BaseLevel {
       ...this.enemies,
     ];
 
-    if (this.distance >= this.levelLength && this.obstacles.length === 0) {
+    if (this.distance >= this.levelLength && !this.portal) {
       this.game.gameOver = true;
       this.game.win = true;
     }
   }
 
   setScale(scale) {
-    [...this.platforms, ...this.pipes, ...this.blocks, ...this.enemies].forEach(
-      o => o.setScale(scale)
-    );
+    [
+      ...this.platforms,
+      ...this.pipes,
+      ...this.blocks,
+      ...this.enemies,
+      ...this.stars,
+    ].forEach(o => o.setScale(scale));
+    if (this.checkpoint) this.checkpoint.setScale(scale);
+    if (this.portal) this.portal.setScale(scale);
   }
 }
 
