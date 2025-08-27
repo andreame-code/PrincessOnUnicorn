@@ -6,6 +6,23 @@ import { SHIELD_COOLDOWN } from './src/config.js';
 
 const FRAME = 1 / 60;
 
+test('level 2 maps space to shield only', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const player = game.player;
+  game.handleInput();
+  assert.strictEqual(player.shieldActive, true);
+  assert.strictEqual(player.jumping, false);
+});
+
+test('level 2 ignores horizontal movement', () => {
+  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+  const player = game.player;
+  const startX = player.x;
+  game.handleInput('ArrowLeft', 'down');
+  player.update(0, game.groundY, 1);
+  assert.strictEqual(player.x, startX);
+});
+
 test('player covers 80% of distance after destroying 15 walls', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   const level = new Level2(game);

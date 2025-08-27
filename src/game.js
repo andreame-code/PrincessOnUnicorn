@@ -175,11 +175,13 @@ export class Game {
     if (this.gamePaused) return;
 
     if (code === 'ArrowRight') {
+      if (this.levelNumber !== 3) return;
       if (type === 'down') this.player.moveRight();
       else this.player.stopHorizontal();
       return;
     }
     if (code === 'ArrowLeft') {
+      if (this.levelNumber !== 3) return;
       if (type === 'down') this.player.moveLeft();
       else this.player.stopHorizontal();
       return;
