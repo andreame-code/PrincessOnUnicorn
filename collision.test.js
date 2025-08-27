@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { isColliding } from './collision.js';
+import { playerEnemyCollision } from './collision.js';
 
 const groundY = 1.5;
 
@@ -51,4 +52,18 @@ test('extended width collider detects earlier collision', () => {
   const obstacle = createEntity(1.45, groundY, 0.32, 0.64);
   assert.strictEqual(isColliding(unicorn, obstacle), false);
   assert.strictEqual(isColliding(shielded, obstacle), true);
+});
+
+test('player stomps enemy when colliding from above', () => {
+  const player = createEntity(0.5, groundY - 0.1, 0.8, 0.8);
+  player.vy = 1;
+  const enemy = createEntity(0.5, groundY, 0.6, 0.6);
+  assert.strictEqual(playerEnemyCollision(player, enemy), 'top');
+});
+
+test('player takes damage when colliding from side', () => {
+  const player = createEntity(0.5, groundY, 0.8, 0.8);
+  player.vy = 0;
+  const enemy = createEntity(0.9, groundY, 0.6, 0.6);
+  assert.strictEqual(playerEnemyCollision(player, enemy), 'side');
 });

@@ -1,24 +1,29 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
-
-// Predetermined positions (in world units travelled) where
-// obstacles should appear. This acts as a very small tile map
-// describing the rhythm of the level.
-const LAYOUT = [5, 9, 13, 17, 22];
-
-// Total length of the level in world units. Once the player has
-// scrolled this far and all obstacles have been cleared the level
-// is considered complete.
-const LEVEL_LENGTH = 26;
+import { Goomba } from '../entities/goomba.js';
+import { playerEnemyCollision } from '../../collision.js';
+import { JUMP_VELOCITY } from '../config.js';
+const TILE_MAP = '.....O.G.O...O.G.O....OG..';
+const LAYOUT = [];
+const ENEMY_LAYOUT = [];
+for (let i = 0; i < TILE_MAP.length; i++) {
+  const ch = TILE_MAP[i];
+  if (ch === 'O') LAYOUT.push(i);
+  if (ch === 'G') ENEMY_LAYOUT.push(i);
+}
+const LEVEL_LENGTH = TILE_MAP.length;
 
 // Level 3 - Unicornolandia as a scripted platform section
 export class Level3 extends BaseLevel {
   constructor(game, random = Math.random) {
     super(game, random);
     this.layout = LAYOUT;
+    this.enemyLayout = ENEMY_LAYOUT;
     this.distance = 0; // total distance travelled in world units
     this.nextIndex = 0; // next obstacle to spawn from layout
+    this.nextEnemyIndex = 0; // next enemy to spawn from layout
     this.levelLength = LEVEL_LENGTH;
+    this.enemies = [];
   }
 
   // Spawn interval from BaseLevel isn't used anymore but kept for
@@ -49,6 +54,17 @@ export class Level3 extends BaseLevel {
     return obstacle;
   }
 
+  createEnemy() {
+    const width = 0.6;
+    const height = 0.6;
+    const enemy = new Goomba(
+      this.game.worldWidth + width / 2,
+      this.game.groundY - height / 2
+    );
+    enemy.setScale(this.game.scale);
+    return enemy;
+  }
+
   update(delta) {
     const move = this.getMoveSpeed() * delta;
     this.distance += move;
@@ -60,6 +76,14 @@ export class Level3 extends BaseLevel {
     ) {
       this.obstacles.push(this.createObstacle());
       this.nextIndex++;
+    }
+
+    while (
+      this.nextEnemyIndex < this.enemyLayout.length &&
+      this.distance >= this.enemyLayout[this.nextEnemyIndex]
+    ) {
+      this.enemies.push(this.createEnemy());
+      this.nextEnemyIndex++;
     }
 
     // Move existing obstacles and handle collisions
@@ -74,11 +98,43 @@ export class Level3 extends BaseLevel {
       return this.handleCollision(o);
     });
 
+    this.enemies.forEach(e => e.update(move, delta));
+    this.enemies = this.enemies.filter(e => {
+      const enemyRight = e.x + e.width / 2;
+      const playerLeft = this.game.player.x - this.game.player.width / 2;
+      if (enemyRight < playerLeft) {
+        return false;
+      }
+      return this.handleEnemyCollision(e);
+    });
+
     // Level complete when travelled the full length and cleared obstacles
-    if (this.distance >= this.levelLength && this.obstacles.length === 0) {
+    if (
+      this.distance >= this.levelLength &&
+      this.obstacles.length === 0 &&
+      this.enemies.length === 0
+    ) {
       this.game.gameOver = true;
       this.game.win = true;
     }
+  }
+
+  handleEnemyCollision(e) {
+    const result = playerEnemyCollision(this.game.player, e);
+    if (result === 'top') {
+      this.game.player.vy = JUMP_VELOCITY / 2;
+      return false;
+    }
+    if (result === 'side') {
+      this.game.gameOver = true;
+      return false;
+    }
+    return true;
+  }
+
+  setScale(scale) {
+    super.setScale(scale);
+    this.enemies.forEach(e => e.setScale(scale));
   }
 }
 

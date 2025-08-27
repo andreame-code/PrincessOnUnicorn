@@ -256,6 +256,22 @@ export class Renderer {
     });
   }
 
+  drawEnemies() {
+    const { game } = this;
+    this.withContext(ctx => {
+      const scale = this.game.scale;
+      game.level.enemies.forEach(e => {
+        const w = e.width * scale * SPRITE_SCALE;
+        const h = e.height * scale * SPRITE_SCALE;
+        const left = e.x * scale - w / 2;
+        const bottom = (e.y + e.height / 2) * scale;
+        const top = bottom - h;
+        ctx.fillStyle = 'brown';
+        ctx.fillRect(left, top, w, h);
+      });
+    });
+  }
+
   drawWalls() {
     const { game } = this;
     this.withContext(ctx => {
@@ -387,6 +403,9 @@ export class Renderer {
     this.drawPlayer();
     if (game.level.obstacles) {
       this.drawObstacles();
+    }
+    if (game.level.enemies) {
+      this.drawEnemies();
     }
     if (game.level.walls) {
       this.drawWalls();

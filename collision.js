@@ -16,3 +16,13 @@ export function isColliding(a, b) {
     aTop < bBottom
   );
 }
+
+export function playerEnemyCollision(player, enemy) {
+  if (!isColliding(player, enemy)) return null;
+  const playerBottom = player.y + player.height / 2;
+  const enemyTop = enemy.y - enemy.height / 2;
+  if (player.vy > 0 && playerBottom - player.vy <= enemyTop) {
+    return 'top';
+  }
+  return 'side';
+}
