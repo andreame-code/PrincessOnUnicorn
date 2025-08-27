@@ -4,6 +4,9 @@ import { createStubGame } from './testHelpers.js';
 import { Level2 } from './src/levels/level2.js';
 import { Level3 } from './src/levels/level3.js';
 import { SHIELD_COOLDOWN } from './src/config.js';
+import { ShadowCrow } from './src/entities/shadowCrow.js';
+import { FollettiRombo } from './src/entities/follettiRombo.js';
+import { ThornGuard } from './src/entities/thornGuard.js';
 
 const FRAME = 1 / 60;
 
@@ -123,13 +126,27 @@ test('shield blocks obstacles slightly earlier', () => {
   assert.ok(!level.handleCollision(wall));
 });
 
-test('shield cooldown bar uses latest cooldown value', () => {
-  const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
-  const player = game.player;
-  assert.strictEqual(player.shieldCooldownMax, SHIELD_COOLDOWN);
-  player.activateShield(0.25, 2);
-  assert.strictEqual(player.shieldCooldownMax, 2);
-});
+  test('shield cooldown bar uses latest cooldown value', () => {
+    const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+    const player = game.player;
+    assert.strictEqual(player.shieldCooldownMax, SHIELD_COOLDOWN);
+    player.activateShield(0.25, 2);
+    assert.strictEqual(player.shieldCooldownMax, 2);
+  });
+
+  test('level 2 has no level 3 enemies', () => {
+    const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });
+    const level = game.level;
+    const obstacles = level.obstacles || [];
+    const enemies = level.enemies || [];
+    const has = [...obstacles, ...enemies].some(
+      e =>
+        e instanceof ShadowCrow ||
+        e instanceof FollettiRombo ||
+        e instanceof ThornGuard
+    );
+    assert.strictEqual(has, false);
+  });
 
 test('shield activation within grace window blocks attack', () => {
   const game = createStubGame({ search: '?level=2' });

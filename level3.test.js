@@ -2,20 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert';
 import { createStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
-import { Goomba } from './src/entities/goomba.js';
+import { ShadowCrow } from './src/entities/shadowCrow.js';
+import { FollettiRombo } from './src/entities/follettiRombo.js';
+import { ThornGuard } from './src/entities/thornGuard.js';
 import { JUMP_VELOCITY } from './src/config.js';
 
 const FRAME = 1 / 60;
 
 // Ensure the tile map is loaded and entities are generated for each tile type.
-test('level 3 builds entities from tile map', () => {
-  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
-  const level = game.level;
-  assert.deepStrictEqual(level.map, LEVEL3_MAP);
-  assert.ok(level.platforms.length > 0);
-  assert.ok(level.pipes.length > 0);
-  assert.ok(level.enemies.length > 0);
-});
+  test('level 3 builds entities from tile map', () => {
+    const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+    const level = game.level;
+    assert.deepStrictEqual(level.map, LEVEL3_MAP);
+    assert.ok(level.platforms.length > 0);
+    assert.ok(level.pipes.length > 0);
+    assert.ok(level.enemies.some(e => e instanceof ShadowCrow));
+    assert.ok(level.enemies.some(e => e instanceof FollettiRombo));
+    assert.ok(level.enemies.some(e => e instanceof ThornGuard));
+  });
 
 // Distance travelled should increase according to the move speed.
 test('level 3 advances using move speed', () => {
@@ -50,7 +54,7 @@ test('player defeats enemy by landing on it', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
   const player = game.player;
-  const enemy = new Goomba(player.x + 0.2, game.groundY - 0.5, 1);
+  const enemy = new FollettiRombo(player.x + 0.2, game.groundY - 0.5, 1);
   level.enemies = [enemy];
   level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
   player.x = enemy.x;
@@ -65,7 +69,7 @@ test('player is hit when colliding with enemy from side', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
   const player = game.player;
-  const enemy = new Goomba(player.x + 0.5, game.groundY - 0.5, 1);
+  const enemy = new FollettiRombo(player.x + 0.5, game.groundY - 0.5, 1);
   level.enemies = [enemy];
   level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
   player.x = enemy.x - enemy.width / 2 - player.width / 2 + 0.01;
@@ -73,7 +77,35 @@ test('player is hit when colliding with enemy from side', () => {
   player.vy = 0;
   level.update(FRAME);
   assert.strictEqual(game.gameOver, true);
-});
+  });
+
+  test('shadow crow flies in a sine wave', () => {
+    const crow = new ShadowCrow(0, 1, 1);
+    const y0 = crow.y;
+    crow.update(0, 0.5);
+    const y1 = crow.y;
+    crow.update(0, 0.5);
+    const y2 = crow.y;
+    assert.notStrictEqual(y0, y1);
+    assert.notStrictEqual(y1, y2);
+  });
+
+  test('folletti rombo dashes forward', () => {
+    const folletto = new FollettiRombo(0, 0, 1);
+    folletto.update(0, folletto.cooldown);
+    const x1 = folletto.x;
+    folletto.update(0, folletto.dashTime);
+    const x2 = folletto.x;
+    assert.ok(Math.abs(x2 - x1) > Math.abs(folletto.vx * folletto.dashTime));
+  });
+
+  test('thorn guard throws seed walls', () => {
+    const guard = new ThornGuard(0, 0, 1);
+    let seeds = guard.update(0, guard.throwCooldown - 0.1);
+    assert.strictEqual(seeds.length, 0);
+    seeds = guard.update(0, 0.2);
+    assert.strictEqual(seeds.length, 1);
+  });
 
 test('player can double jump in level 3', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
