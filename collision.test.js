@@ -44,3 +44,11 @@ test('detects collision while jumping into obstacle', () => {
   const obstacle = createEntity(0.6, groundY, 0.32, 0.48);
   assert.strictEqual(isColliding(unicorn, obstacle), true);
 });
+
+test('extended width collider detects earlier collision', () => {
+  const unicorn = createEntity(0.5, groundY, 0.8, 0.8);
+  const shielded = { ...unicorn, width: unicorn.width + 0.4 }; // simulate shield range
+  const obstacle = createEntity(1.45, groundY, 0.32, 0.64);
+  assert.strictEqual(isColliding(unicorn, obstacle), false);
+  assert.strictEqual(isColliding(shielded, obstacle), true);
+});
