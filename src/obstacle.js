@@ -11,16 +11,13 @@ export class Obstacle {
     this.baseWidth = width;
     this.baseHeight = height;
     this.spriteScale = 1;
-    // Horizontal velocity in world units per second.
-    this.vx = 0;
   }
 
   setScale(scale) {
     this.spriteScale = scale;
   }
 
-  update(speed, delta = 0) {
+  update(speed) {
     this.x -= speed;
-    this.x += this.vx * delta;
   }
 }
