@@ -13,7 +13,9 @@ test('level 3 builds entities from tile map', () => {
   const level = game.level;
   assert.deepStrictEqual(level.map, LEVEL3_MAP);
   assert.ok(level.platforms.length > 0);
-  assert.ok(level.pipes.length > 0);
+  assert.ok(level.thorns.length > 0);
+  assert.ok(level.moonMilks.length > 0);
+  assert.ok(level.seedWalls.length > 0);
   assert.ok(level.enemies.length > 0);
 });
 
@@ -54,7 +56,13 @@ test('player defeats enemy by landing on it', () => {
   const player = game.player;
   const enemy = new Goomba(player.x + 0.2, game.groundY - 0.5, 1);
   level.enemies = [enemy];
-  level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
+  level.obstacles = [
+    ...level.platforms,
+    ...level.thorns,
+    ...level.moonMilks,
+    ...level.seedWalls,
+    enemy,
+  ];
   player.x = enemy.x;
   player.y = enemy.y - enemy.height / 2 - player.height / 2 + 0.01;
   player.vy = 1; // falling
@@ -69,7 +77,13 @@ test('player is hit when colliding with enemy from side', () => {
   const player = game.player;
   const enemy = new Goomba(player.x + 0.5, game.groundY - 0.5, 1);
   level.enemies = [enemy];
-  level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
+  level.obstacles = [
+    ...level.platforms,
+    ...level.thorns,
+    ...level.moonMilks,
+    ...level.seedWalls,
+    enemy,
+  ];
   player.x = enemy.x - enemy.width / 2 - player.width / 2 + 0.01;
   player.y = enemy.y;
   player.vy = 0;
@@ -113,6 +127,52 @@ test('collecting a star increases star count', () => {
   level.update(FRAME);
   assert.strictEqual(game.stars, 1);
   assert.strictEqual(level.stars.length, 4);
+});
+
+test('purple thorns cause immediate damage', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const thorn = level.thorns[0];
+  thorn.x = game.player.x;
+  thorn.y = game.player.y;
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, true);
+});
+
+test('moon milk respawns player at checkpoint', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  level.checkpointReached = true;
+  level.checkpoint.x = game.player.x;
+  const milk = level.moonMilks[0];
+  milk.x = game.player.x;
+  milk.y = game.player.y;
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, false);
+  assert.strictEqual(game.player.x, level.checkpoint.x);
+});
+
+test('seed walls require shield to break', () => {
+  // Without shield
+  let game = createStubGame({ search: '?level=3' });
+  let level = game.level;
+  let wall = level.seedWalls[0];
+  wall.x = game.player.x;
+  wall.y = game.player.y;
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, true);
+
+  // With shield
+  game = createStubGame({ search: '?level=3' });
+  level = game.level;
+  wall = level.seedWalls[0];
+  const player = game.player;
+  player.shieldActive = true;
+  wall.x = player.x;
+  wall.y = player.y;
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, false);
+  assert.strictEqual(level.seedWalls.length, 0);
 });
 
 test('checkpoint and portal are unique to level 3', () => {

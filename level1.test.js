@@ -36,3 +36,11 @@ test('level 1 ignores horizontal movement', () => {
   player.update(0, game.groundY, 1);
   assert.strictEqual(player.x, startX);
 });
+
+test('level 1 lacks level 3 exclusive obstacles', () => {
+  const game = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  const level = game.level;
+  assert.ok(!level.thorns);
+  assert.ok(!level.moonMilks);
+  assert.ok(!level.seedWalls);
+});

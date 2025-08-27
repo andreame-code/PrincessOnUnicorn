@@ -331,8 +331,8 @@ export class Renderer {
             ctx.arc(left + r * 2, top + r * 0.5, r, 0, Math.PI * 2);
             ctx.arc(left + r * 3, top + r, r, 0, Math.PI * 2);
             ctx.fill();
-          } else if (o.type === 'pipe') {
-            // Purple brambles
+          } else if (o.type === 'thorn') {
+            // Purple thorns
             ctx.fillStyle = '#a64ac9';
             ctx.fillRect(left, top, w, h);
             ctx.fillStyle = '#8e24aa';
@@ -343,12 +343,16 @@ export class Renderer {
               ctx.lineTo(left + i + w / 5, top);
               ctx.fill();
             }
-          } else if (o.type === 'block') {
+          } else if (o.type === 'moonmilk') {
             // Moon milk lakes
             ctx.fillStyle = '#f0f8ff';
             ctx.fillRect(left, top, w, h);
             ctx.strokeStyle = '#d0eaff';
             ctx.strokeRect(left, top, w, h);
+          } else if (o.type === 'seedWall') {
+            // Seed walls
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(left, top, w, h);
           } else {
             // Enemies or other objects
             ctx.fillStyle = '#ffb7ce';

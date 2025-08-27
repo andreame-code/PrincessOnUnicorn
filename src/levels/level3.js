@@ -5,18 +5,20 @@ import { isColliding, isLandingOn } from '../../collision.js';
 import { JUMP_VELOCITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
-// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
-// 6 = star collectible, 7 = checkpoint, 8 = rainbow portal (finish)
+// 0 = empty, 1 = ground, 2 = platform, 3 = thorn, 4 = moon milk, 5 = enemy
+// 6 = star collectible, 7 = checkpoint, 8 = rainbow portal (finish),
+// 9 = seed wall (destroyable with shield)
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
   PLATFORM: 2,
-  PIPE: 3,
-  BLOCK: 4,
+  THORN: 3,
+  MOON_MILK: 4,
   GOOMBA: 5,
   STAR: 6,
   CHECKPOINT: 7,
   PORTAL: 8,
+  SEED_WALL: 9,
 };
 
 // Two dimensional map describing the level layout. Each number
@@ -38,7 +40,9 @@ for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
 
 // Challenge obstacles
 [60, 90, 130, 170, 210].forEach(c => (row1[c] = TILE.GOOMBA));
-[70, 100, 160, 190].forEach(c => (row1[c] = TILE.PIPE));
+[70, 100, 160, 190].forEach(c => (row1[c] = TILE.THORN));
+row1[125] = TILE.MOON_MILK;
+row1[150] = TILE.SEED_WALL;
 
 // Central checkpoint
 row1[120] = TILE.CHECKPOINT;
@@ -55,18 +59,25 @@ class Platform extends Obstacle {
   }
 }
 
-class Pipe extends Obstacle {
+class Thorn extends Obstacle {
   constructor(x, groundY, size) {
-    // Pipes are two tiles tall and rest on the ground
+    // Thorns are two tiles tall and rest on the ground
     super(x, groundY - size, size, size * 2);
-    this.type = 'pipe';
+    this.type = 'thorn';
   }
 }
 
-class Block extends Obstacle {
+class MoonMilk extends Obstacle {
   constructor(x, y, size) {
     super(x, y, size, size);
-    this.type = 'block';
+    this.type = 'moonmilk';
+  }
+}
+
+class SeedWall extends Obstacle {
+  constructor(x, y, size) {
+    super(x, y, size, size);
+    this.type = 'seedWall';
   }
 }
 
@@ -101,8 +112,9 @@ export class Level3 extends BaseLevel {
     this.distance = 0;
     this.levelLength = this.map[0].length * this.tileSize;
     this.platforms = [];
-    this.pipes = [];
-    this.blocks = [];
+    this.thorns = [];
+    this.moonMilks = [];
+    this.seedWalls = [];
     this.enemies = [];
     this.stars = [];
     this.checkpoint = null;
@@ -133,11 +145,14 @@ export class Level3 extends BaseLevel {
           case TILE.PLATFORM:
             this.platforms.push(new Platform(x, y, this.tileSize));
             break;
-          case TILE.PIPE:
-            this.pipes.push(new Pipe(x, this.game.groundY, this.tileSize));
+          case TILE.THORN:
+            this.thorns.push(new Thorn(x, this.game.groundY, this.tileSize));
             break;
-          case TILE.BLOCK:
-            this.blocks.push(new Block(x, y, this.tileSize));
+          case TILE.MOON_MILK:
+            this.moonMilks.push(new MoonMilk(x, y, this.tileSize));
+            break;
+          case TILE.SEED_WALL:
+            this.seedWalls.push(new SeedWall(x, y, this.tileSize));
             break;
           case TILE.GOOMBA:
             // Enemies always spawn on the ground regardless of row
@@ -161,8 +176,9 @@ export class Level3 extends BaseLevel {
     }
     this.obstacles = [
       ...this.platforms,
-      ...this.pipes,
-      ...this.blocks,
+      ...this.thorns,
+      ...this.moonMilks,
+      ...this.seedWalls,
       ...this.enemies,
     ];
   }
@@ -173,8 +189,9 @@ export class Level3 extends BaseLevel {
 
     const moveArr = arr => arr.forEach(e => e.update(move));
     moveArr(this.platforms);
-    moveArr(this.pipes);
-    moveArr(this.blocks);
+    moveArr(this.thorns);
+    moveArr(this.moonMilks);
+    moveArr(this.seedWalls);
     moveArr(this.stars);
     if (this.checkpoint) this.checkpoint.update(move);
     if (this.portal) this.portal.update(move);
@@ -192,8 +209,7 @@ export class Level3 extends BaseLevel {
     };
 
     if (!collideArr(this.platforms)) return;
-    if (!collideArr(this.pipes)) return;
-    if (!collideArr(this.blocks)) return;
+    if (!collideArr(this.thorns)) return;
 
     // Handle enemy collisions and cull off-screen entities
     this.enemies = this.enemies.filter(e => {
@@ -210,10 +226,37 @@ export class Level3 extends BaseLevel {
       return e.x + e.width / 2 > 0;
     });
 
+    this.seedWalls = this.seedWalls.filter(w => {
+      if (isColliding(player, w)) {
+        if (player.shieldActive) {
+          return false;
+        }
+        this.game.gameOver = true;
+        return false;
+      }
+      return w.x + w.width / 2 > 0;
+    });
+    this.moonMilks = this.moonMilks.filter(m => {
+      if (isColliding(player, m)) {
+        if (this.checkpointReached && this.checkpoint) {
+          const p = this.game.player;
+          p.x = this.checkpoint.x;
+          p.y = this.game.groundY - p.height / 2;
+          p.vy = 0;
+          p.vx = 0;
+          p.jumping = false;
+          p.jumpCount = 0;
+        } else {
+          this.game.gameOver = true;
+        }
+        return false;
+      }
+      return m.x + m.width / 2 > 0;
+    });
+
     const filterArr = arr => arr.filter(e => e.x + e.width / 2 > 0);
     this.platforms = filterArr(this.platforms);
-    this.pipes = filterArr(this.pipes);
-    this.blocks = filterArr(this.blocks);
+    this.thorns = filterArr(this.thorns);
     this.stars = this.stars.filter(s => {
       if (isColliding(player, s)) {
         this.game.stars++;
@@ -241,8 +284,9 @@ export class Level3 extends BaseLevel {
     }
     this.obstacles = [
       ...this.platforms,
-      ...this.pipes,
-      ...this.blocks,
+      ...this.thorns,
+      ...this.moonMilks,
+      ...this.seedWalls,
       ...this.enemies,
     ];
 
@@ -255,8 +299,9 @@ export class Level3 extends BaseLevel {
   setScale(scale) {
     [
       ...this.platforms,
-      ...this.pipes,
-      ...this.blocks,
+      ...this.thorns,
+      ...this.moonMilks,
+      ...this.seedWalls,
       ...this.enemies,
       ...this.stars,
     ].forEach(o => o.setScale(scale));
