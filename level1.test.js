@@ -36,3 +36,11 @@ test('level 1 ignores horizontal movement', () => {
   player.update(0, game.groundY, 1);
   assert.strictEqual(player.x, startX);
 });
+
+test('level 1 has no star powders or key', () => {
+  const game = createStubGame({ search: '?level=1', skipLevelUpdate: true });
+  const level = game.level;
+  assert.ok(!('starPowders' in level));
+  assert.ok(!('crystalKey' in level));
+  assert.ok(!('portal' in level));
+});
