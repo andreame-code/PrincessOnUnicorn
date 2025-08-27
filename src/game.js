@@ -241,6 +241,17 @@ export class Game {
       });
     }
 
+    if (this.levelNumber === 2 && this.gameOver && this.win) {
+      this.levelNumber = 3;
+      this.initializeLevel();
+      this.gamePaused = true;
+      this.gameOver = false;
+      this.win = false;
+      this.showOverlay(STORY_TEXT[2], () => {
+        this.showOverlay(INSTRUCTIONS_TEXT[3], () => this.startLoop());
+      });
+    }
+
     if (this.gameOver) this.gamePaused = true;
   }
 
@@ -276,7 +287,9 @@ export class Game {
     if (this.gameOver) {
       if (this.win) {
         this.input.detach();
-        this.showOverlay(STORY_TEXT[2], () => { this.gamePaused = false; });
+        this.showOverlay(STORY_TEXT[this.levelNumber], () => {
+          this.gamePaused = false;
+        });
       } else {
         requestAnimationFrame(ts => this.loop(ts));
       }
