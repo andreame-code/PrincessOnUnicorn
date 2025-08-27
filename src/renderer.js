@@ -7,6 +7,9 @@ const COIN_SOUND = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAE
 const BOUNCE_SOUND = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACAq9Ht/f3v1K+EWTIVBAIPKU54o8vp+/7z2raMYDkZBgELI0ZwnMTk+f/2372UaD8eCQEJHj9olL3f9v/55MSccEYjCwEGGTlgjLba8/776cujeE4pDwIEFTJZhK/U7/397dGrgFUvEwMDESxRfKfO6/z+8deyiF01FwUCDSZKdKDH5/r/9d26kGQ8HAcBCiFDbJjB4vf/9+LBmGxDIQoB';
 
 const SPRITE_SCALE = 2;
+const BG1_LOOP = JUMP_SOUND;
+const BG2_LOOP = SHIELD_SOUND;
+const FAIRY_LOOP = BOUNCE_SOUND;
 
 export class Renderer {
   constructor(game) {
@@ -26,6 +29,8 @@ export class Renderer {
     this.knightFrameTimer = 0;
     this.lastKnightTime = 0;
     this.sounds = {};
+    this.music = {};
+    this.currentMusic = null;
     // Simple background clouds
     this.clouds = [];
     this.lastCloudTime = 0;
@@ -50,6 +55,9 @@ export class Renderer {
       { key: 'coin', src: COIN_SOUND, type: 'audio' },
       { key: 'bounce', src: BOUNCE_SOUND, type: 'audio' },
       { key: 'shield_hit', src: SHIELD_SOUND, type: 'audio' },
+      { key: 'bgm1', src: BG1_LOOP, type: 'audio' },
+      { key: 'bgm2', src: BG2_LOOP, type: 'audio' },
+      { key: 'bgm3', src: FAIRY_LOOP, type: 'audio' },
     ];
     return this.assets.loadAll(assets).then(() => {
       this.playerSprites = {
@@ -82,6 +90,12 @@ export class Renderer {
       Object.values(this.sounds).forEach(s => {
         if (s) s.volume = 0.5;
       });
+      this.music.bgm1 = this.assets.get('bgm1');
+      this.music.bgm2 = this.assets.get('bgm2');
+      this.music.bgm3 = this.assets.get('bgm3');
+      Object.values(this.music).forEach(m => {
+        if (m) m.volume = 0.3;
+      });
     });
   }
 
@@ -106,7 +120,7 @@ export class Renderer {
     const { ctx, game } = this;
     if (!game.canvas) return;
     // Sky color
-    ctx.fillStyle = '#87CEEB';
+    ctx.fillStyle = game.highContrast ? '#000' : '#87CEEB';
     ctx.fillRect(0, 0, game.canvas.width, game.canvas.height);
 
     const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -137,6 +151,20 @@ export class Renderer {
     }
   }
 
+  playLevelMusic(level) {
+    const key = `bgm${level}`;
+    const audio = this.music[key];
+    if (this.currentMusic && this.currentMusic !== audio && typeof this.currentMusic.pause === 'function') {
+      this.currentMusic.pause();
+    }
+    if (audio) {
+      audio.loop = true;
+      audio.currentTime = 0;
+      if (typeof audio.play === 'function') audio.play();
+    }
+    this.currentMusic = audio;
+  }
+
   withContext(drawFn) {
     const { ctx } = this;
     ctx.save();
@@ -150,7 +178,7 @@ export class Renderer {
   drawGround() {
     const { game } = this;
     this.withContext(ctx => {
-      ctx.fillStyle = '#555';
+      ctx.fillStyle = game.highContrast ? '#fff' : '#555';
       ctx.fillRect(0, game.groundY * game.scale, game.canvas.width, 2);
     });
   }
@@ -321,47 +349,63 @@ export class Renderer {
   drawUI() {
     const { game } = this;
     this.withContext(ctx => {
-      ctx.fillStyle = '#000';
+      const textColor = game.highContrast ? '#fff' : '#000';
+      ctx.fillStyle = textColor;
       ctx.font = '16px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(`Punteggio: ${Math.floor(game.score)}`, 10, 20);
       ctx.fillText(`High Score: ${Math.floor(game.highScore)}`, 10, 40);
 
       const coinX = game.canvas.width - 20;
-      ctx.fillStyle = 'gold';
+      ctx.fillStyle = game.highContrast ? '#fff' : 'gold';
       ctx.beginPath();
       ctx.arc(coinX, 15, 8, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = textColor;
       ctx.textAlign = 'right';
       ctx.fillText(`x ${game.coins}`, coinX - 10, 20);
       ctx.textAlign = 'left';
 
-      const p = game.player;
-      const iconSize = 16;
-      const iconY = 48;
-      if (this.shieldSprite) {
-        ctx.drawImage(this.shieldSprite, 10, iconY, iconSize, iconSize);
+      if (game.levelNumber === 3) {
+        ctx.fillStyle = textColor;
+        ctx.fillText(`Polveri: ${game.powders}`, 10, 60);
+        if (game.hasCrystalKey) {
+          ctx.fillText('Chiave-Cristallo', 10, 80);
+        }
+        const size = 16;
+        const y = 90;
+        game.powerUps.forEach((p, i) => {
+          ctx.fillStyle = game.highContrast ? '#fff' : '#0f0';
+          ctx.fillRect(10 + i * (size + 4), y, size, size);
+        });
+        ctx.fillStyle = textColor;
       } else {
-        ctx.strokeStyle = 'blue';
-        ctx.beginPath();
-        ctx.arc(18, iconY + 8, 8, 0, Math.PI * 2);
-        ctx.stroke();
+        const p = game.player;
+        const iconSize = 16;
+        const iconY = 48;
+        if (this.shieldSprite) {
+          ctx.drawImage(this.shieldSprite, 10, iconY, iconSize, iconSize);
+        } else {
+          ctx.strokeStyle = 'blue';
+          ctx.beginPath();
+          ctx.arc(18, iconY + 8, 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        const barX = 10 + iconSize + 5;
+        const barY = iconY + 2;
+        const barWidth = 80;
+        const barHeight = 10;
+        ctx.strokeStyle = textColor;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+        const progress = p.shieldCooldownMax
+          ? (p.shieldCooldownMax - p.shieldCooldown) / p.shieldCooldownMax
+          : 1;
+        ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+        ctx.fillRect(barX, barY, barWidth * progress, barHeight);
       }
-      const barX = 10 + iconSize + 5;
-      const barY = iconY + 2;
-      const barWidth = 80;
-      const barHeight = 10;
-      ctx.strokeStyle = '#000';
-      ctx.strokeRect(barX, barY, barWidth, barHeight);
-      const progress = p.shieldCooldownMax
-        ? (p.shieldCooldownMax - p.shieldCooldown) / p.shieldCooldownMax
-        : 1;
-      ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-      ctx.fillRect(barX, barY, barWidth * progress, barHeight);
 
       if (game.gameOver) {
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = textColor;
         ctx.font = '24px sans-serif';
         const lines = game.win
           ? ['Complimenti!', 'Hai sconfitto il Cavaliere Nero!']

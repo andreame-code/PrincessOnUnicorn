@@ -22,6 +22,7 @@ export class Player {
     this.jumping = false;
     this.jumpCount = 0;
     this.maxJumps = 1;
+    this.jumpVelocity = JUMP_VELOCITY;
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
@@ -60,7 +61,7 @@ export class Player {
 
   jump() {
     if (this.jumpCount < this.maxJumps) {
-      this.vy = JUMP_VELOCITY;
+      this.vy = this.jumpVelocity;
       this.jumping = true;
       this.jumpCount++;
     }

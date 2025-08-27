@@ -13,6 +13,7 @@ import {
   RESIZE_THROTTLE_MS,
   WORLD_WIDTH,
   WORLD_HEIGHT,
+  JUMP_VELOCITY,
 } from './config.js';
 
 const LEVELS = [Level1, Level2, Level3];
@@ -28,6 +29,9 @@ export class Game {
     this.gravity = GRAVITY; // acceleration per second^2
     this.score = 0;
     this.coins = 0;
+    this.powders = 0;
+    this.hasCrystalKey = false;
+    this.powerUps = [];
     const storedHigh = typeof localStorage !== 'undefined' ? localStorage.getItem('highScore') : null;
     this.highScore = storedHigh ? parseInt(storedHigh, 10) : 0;
     this.gameOver = false;
@@ -43,6 +47,8 @@ export class Game {
     this.params = new URLSearchParams(window.location.search);
     const levelParam = parseInt(this.params.get('level'), 10);
     this.levelNumber = levelParam >= 1 && levelParam <= LEVELS.length ? levelParam : 1;
+    this.highContrast = this.params.get('contrast') === 'high';
+    this.jumpAssist = this.params.get('assist') === 'on';
 
     this.boundResize = this.throttle(() => this.resizeCanvas(), RESIZE_THROTTLE_MS);
     window.addEventListener('resize', this.boundResize);
@@ -73,6 +79,7 @@ export class Game {
 
     this.renderer
       .preload()
+      .then(() => this.renderer.playLevelMusic(this.levelNumber))
       .catch(err => console.error(err))
       .finally(() => this.startGame());
   }
@@ -85,11 +92,18 @@ export class Game {
     const startX = 0.5 + 0.8 / 2;
     this.player = new Player(startX, this.groundY, this.scale);
     this.player.worldWidth = this.worldWidth;
+    this.player.jumpVelocity = this.jumpAssist ? JUMP_VELOCITY * 1.2 : JUMP_VELOCITY;
     const LevelClass = LEVELS[this.levelNumber - 1];
     this.level = new LevelClass(this, this.random);
     if (typeof this.level.setScale === 'function') {
       this.level.setScale(this.scale);
     }
+    if (this.renderer && typeof this.renderer.playLevelMusic === 'function') {
+      this.renderer.playLevelMusic(this.levelNumber);
+    }
+    this.powders = 0;
+    this.hasCrystalKey = false;
+    this.powerUps = [];
   }
 
   startLoop() {
