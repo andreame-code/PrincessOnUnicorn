@@ -18,6 +18,14 @@ Points increase with distance. Reach 1000 to encounter the Black Knight.
 2. **Black Knight** – the knight hurls walls at the unicorn. Use the shield to break them. After several successful blocks the knight retreats.
 3. **Unicornolandia** – an enchanted path filled with mischievous mini cactus to leap over.
 
+## Differences from Mario
+- Continuous runner; no brick-breaking or backtracking.
+- Single jump/shield control instead of multiple power-ups.
+- Medieval fantasy theme replaces the plumber's Mushroom Kingdom.
+
+## Demo
+![Princess on Unicorn demo](../public/assets/sprites/princess_0.png)
+
 ## Code Structure
 - `index.html` boots the game.
 - `main.js` handles the game loop and level logic.
