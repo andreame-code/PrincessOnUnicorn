@@ -5,7 +5,7 @@ PrincessOnUnicorn is a side-scrolling runner inspired by the Chrome offline T‑
 ## Features
 - Medieval themed interface.
 - Start menu disappears once the game begins.
-- Two levels, including a boss fight against the Black Knight.
+- Three levels, including a boss fight against the Black Knight and an enchanted run through Unicornolandia.
 
 ## Play
 Open `index.html` in a modern browser. Press the spacebar or tap the screen to jump over obstacles. Reach **1000 points** to face the Black Knight.
@@ -17,6 +17,14 @@ index.html?level=2
 ```
 
 In Level 2 the Black Knight throws walls at you. Press the spacebar or tap again to activate a shield and keep tapping to maintain it. The shield now recharges 10% faster, and if a wall hits while the shield is active it shatters and the unicorn advances. When the knight runs out of space he flees and the princess wins.
+
+To explore the enchanted third level with mini cactus enemies, open:
+
+```
+index.html?level=3
+```
+
+In Level 3 the princess rides through Unicornolandia, jumping over rows of mischievous mini cactus.
 
 ## Development
 The project has no external dependencies; a recent Node.js installation is sufficient to run the tests and develop new features.
