@@ -6,6 +6,7 @@ import { Goomba } from './src/entities/goomba.js';
 import { ShadowCrow } from './src/entities/shadowCrow.js';
 import { RhombusSprite } from './src/entities/rhombusSprite.js';
 import { ThornGuard } from './src/entities/thornGuard.js';
+import { PortalGuardian } from './src/entities/portalGuardian.js';
 import { JUMP_VELOCITY } from './src/config.js';
 
 const FRAME = 1 / 60;
@@ -32,7 +33,15 @@ test('level 3 advances using move speed', () => {
 test('level 3 completes after level length', () => {
   const game = createStubGame({ search: '?level=3' });
   const level = game.level;
-  const distanceToPortal = level.portal.x - game.player.x;
+  const boss = level.boss;
+  const player = game.player;
+  for (let i = 0; i < 3; i++) {
+    player.x = boss.x;
+    player.y = boss.y - boss.height / 2 - player.height / 2 + 0.01;
+    player.vy = 1;
+    level.update(FRAME);
+  }
+  const distanceToPortal = level.portal.x - player.x;
   const maxSteps = Math.ceil(distanceToPortal / level.getMoveSpeed() / FRAME) + 60;
   let steps = 0;
   while (!game.win && steps < maxSteps) {
@@ -57,6 +66,33 @@ test('level 3 spawns exclusive enemies', () => {
   assert.ok(level.enemies.some(e => e instanceof ShadowCrow));
   assert.ok(level.enemies.some(e => e instanceof RhombusSprite));
   assert.ok(level.enemies.some(e => e instanceof ThornGuard));
+});
+
+test('portal guardian only appears in level 3', () => {
+  const l1 = createStubGame({ search: '?level=1', skipLevelUpdate: true }).level;
+  const l2 = createStubGame({ search: '?level=2', skipLevelUpdate: true }).level;
+  const l3 = createStubGame({ search: '?level=3', skipLevelUpdate: true }).level;
+  assert.ok(!(l1.boss instanceof PortalGuardian));
+  assert.ok(!(l2.boss instanceof PortalGuardian));
+  assert.ok(l3.boss instanceof PortalGuardian);
+});
+
+test('defeating portal guardian opens portal', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const boss = level.boss;
+  const player = game.player;
+  assert.strictEqual(level.portal.open, false);
+  assert.strictEqual(boss.phase, 1);
+  for (let i = 0; i < 3; i++) {
+    player.x = boss.x;
+    player.y = boss.y - boss.height / 2 - player.height / 2 + 0.01;
+    player.vy = 1;
+    level.update(FRAME);
+    if (i < 2) assert.strictEqual(boss.phase, i + 2);
+  }
+  assert.ok(boss.defeated);
+  assert.strictEqual(level.portal.open, true);
 });
 
 test('exclusive enemies only appear in level 3', () => {
