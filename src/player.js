@@ -20,6 +20,8 @@ export class Player {
     this.moveSpeed = 3;
     this.worldWidth = 0; // to be set by game
     this.jumping = false;
+    this.jumpCount = 0;
+    this.maxJumps = 1;
     this.shieldActive = false;
     this.shieldTimer = 0;
     this.shieldCooldown = 0;
@@ -38,6 +40,7 @@ export class Player {
       this.y = groundY - this.height / 2;
       this.vy = 0;
       this.jumping = false;
+      this.jumpCount = 0;
     }
     this.x += this.vx * delta;
     if (this.worldWidth) {
@@ -56,9 +59,10 @@ export class Player {
   }
 
   jump() {
-    if (!this.jumping) {
+    if (this.jumpCount < this.maxJumps) {
       this.vy = JUMP_VELOCITY;
       this.jumping = true;
+      this.jumpCount++;
     }
   }
 
