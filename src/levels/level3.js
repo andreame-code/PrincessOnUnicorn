@@ -1,6 +1,7 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
 import { Goomba } from '../entities/goomba.js';
+import { Guardian } from '../entities/guardian.js';
 import { isColliding, isLandingOn } from '../../collision.js';
 import { JUMP_VELOCITY } from '../config.js';
 
@@ -63,6 +64,8 @@ export class Level3 extends BaseLevel {
     this.blocks = [];
     this.enemies = [];
     this.generateFromMap();
+    this.boss = null;
+    this.portalOpen = false;
   }
 
   // Spawn interval from BaseLevel isn't used anymore but kept for
@@ -74,6 +77,16 @@ export class Level3 extends BaseLevel {
   getMoveSpeed() {
     // Slightly increase speed to keep the challenge
     return this.game.speed + 0.2;
+  }
+
+  spawnBoss() {
+    const size = 1;
+    this.boss = new Guardian(
+      this.game.worldWidth + size / 2,
+      this.game.groundY - size / 2,
+      size
+    );
+    this.boss.setScale(this.game.scale);
   }
 
   generateFromMap() {
@@ -121,6 +134,7 @@ export class Level3 extends BaseLevel {
     moveArr(this.pipes);
     moveArr(this.blocks);
     this.enemies.forEach(e => e.update(move, delta));
+    if (this.boss) this.boss.update(move, delta);
 
     const player = this.game.player;
     const collideArr = arr => {
@@ -152,6 +166,23 @@ export class Level3 extends BaseLevel {
       return e.x + e.width / 2 > 0;
     });
 
+    if (this.boss) {
+      if (isLandingOn(player, this.boss)) {
+        player.vy = JUMP_VELOCITY / 2;
+        player.jumping = true;
+        player.jumpCount = 1;
+        this.boss.registerHit();
+        if (this.boss.hits >= 3) {
+          this.portalOpen = true;
+          this.boss = null;
+          this.game.gameOver = true;
+          this.game.win = true;
+        }
+      } else if (isColliding(player, this.boss)) {
+        this.game.gameOver = true;
+      }
+    }
+
     const filterArr = arr => arr.filter(e => e.x + e.width / 2 > 0);
     this.platforms = filterArr(this.platforms);
     this.pipes = filterArr(this.pipes);
@@ -163,9 +194,13 @@ export class Level3 extends BaseLevel {
       ...this.enemies,
     ];
 
-    if (this.distance >= this.levelLength && this.obstacles.length === 0) {
-      this.game.gameOver = true;
-      this.game.win = true;
+    if (
+      !this.boss &&
+      this.distance >= this.levelLength &&
+      this.obstacles.length === 0 &&
+      !this.portalOpen
+    ) {
+      this.spawnBoss();
     }
   }
 
@@ -173,6 +208,7 @@ export class Level3 extends BaseLevel {
     [...this.platforms, ...this.pipes, ...this.blocks, ...this.enemies].forEach(
       o => o.setScale(scale)
     );
+    if (this.boss) this.boss.setScale(scale);
   }
 }
 
