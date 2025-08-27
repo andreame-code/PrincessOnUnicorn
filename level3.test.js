@@ -56,3 +56,69 @@ test('level 3 maps space to jump', () => {
   assert.strictEqual(player.jumping, true);
   assert.strictEqual(player.shieldActive, false);
 });
+
+// Tile map should include both blocks and platforms
+test('level 3 generates tile map with blocks and platforms', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const tiles = game.level.tiles ?? [];
+  const hasBlock = tiles.some(t => t.type === 'block');
+  const hasPlatform = tiles.some(t => t.type === 'platform');
+  assert.ok(hasBlock, 'tile map lacks blocks');
+  assert.ok(hasPlatform, 'tile map lacks platforms');
+});
+
+// Enemies should spawn based on the map description
+test('level 3 spawns enemies from map', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  for (let i = 0; i < 200; i++) level.update(FRAME);
+  assert.ok((level.enemies?.length ?? 0) > 0);
+});
+
+// Jumping on enemies should defeat them
+test('enemy dies when player jumps on it', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const player = game.player;
+  const enemy = { x: player.x, y: player.y + player.height / 2, width: 0.5, height: 0.5, update: () => {} };
+  level.enemies = [enemy];
+  player.jump();
+  player.y = enemy.y - enemy.height - 0.1;
+  player.vy = 5;
+  level.update(FRAME);
+  assert.strictEqual(level.enemies.length, 0);
+});
+
+// Direct contact with an enemy should cause game over
+test('contact with enemy causes game over', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const player = game.player;
+  const enemy = { x: player.x, y: player.y, width: 0.5, height: 0.5, update: () => {} };
+  level.enemies = [enemy];
+  level.update(FRAME);
+  assert.strictEqual(game.gameOver, true);
+});
+
+// Completion should depend on reaching map end and defeating enemies
+test('level 3 completes after map end and enemies defeated', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  // Remove obstacles and prevent new ones so only enemies gate completion
+  level.obstacles = [];
+  level.layout = [];
+  // Persist enemy so level shouldn't complete
+  level.enemies = [{ x: game.player.x + 1, y: game.groundY, width: 0.5, height: 0.5, update: () => {} }];
+  let steps = 0;
+  while (level.distance < level.levelLength && steps < 5000) {
+    level.update(FRAME);
+    steps++;
+  }
+  assert.ok(!game.win, 'level should not complete while enemies remain');
+  level.enemies = [];
+  while (!game.win && steps < 10000) {
+    level.update(FRAME);
+    steps++;
+  }
+  assert.ok(game.win);
+});
