@@ -5,7 +5,8 @@ import { isColliding, isLandingOn } from '../../collision.js';
 import { JUMP_VELOCITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
-// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
+// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy,
+// 6 = cloud platform, 7 = falling platform, 8 = moving platform
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
@@ -13,6 +14,9 @@ const TILE = {
   PIPE: 3,
   BLOCK: 4,
   GOOMBA: 5,
+  CLOUD: 6,
+  FALLING: 7,
+  MOVING: 8,
 };
 
 // Two dimensional map describing the level layout. Each number
@@ -22,7 +26,7 @@ const MAP = [
   // Ground row
   [1, 1, 1, 1, 1, 1, 1, 1],
   // Tiles one unit above the ground
-  [5, 2, 0, 3, 5, 2, 0, 0],
+  [5, 6, 8, 3, 5, 7, 2, 0],
   // Tiles two units above the ground
   [0, 0, 0, 0, 4, 0, 0, 0],
 ];
@@ -31,6 +35,70 @@ class Platform extends Obstacle {
   constructor(x, y, size) {
     super(x, y, size, size);
     this.type = 'platform';
+  }
+}
+
+class CloudPlatform extends Platform {
+  constructor(x, y, size) {
+    super(x, y, size);
+    this.type = 'cloud';
+    this.active = true;
+    this.timer = 0;
+  }
+
+  update(move, delta = 0) {
+    super.update(move);
+    this.timer += delta;
+    if (this.active && this.timer >= 1.2) {
+      this.active = false;
+      this.timer = 0;
+    } else if (!this.active && this.timer >= 3) {
+      this.active = true;
+      this.timer = 0;
+    }
+  }
+}
+
+class FallingPlatform extends Platform {
+  constructor(x, y, size) {
+    super(x, y, size);
+    this.type = 'falling';
+    this.elapsed = 0;
+    this.falling = false;
+    this.fallSpeed = 5;
+  }
+
+  update(move, delta = 0) {
+    super.update(move);
+    if (this.falling) {
+      this.y += this.fallSpeed * delta;
+    } else {
+      this.elapsed += delta;
+      if (this.elapsed >= 0.3) {
+        this.falling = true;
+      }
+    }
+  }
+
+  get shaking() {
+    return !this.falling && this.elapsed < 0.3;
+  }
+}
+
+class MovingPlatform extends Platform {
+  constructor(x, y, size) {
+    super(x, y, size);
+    this.type = 'moving';
+    this.originY = y;
+    this.time = 0;
+    this.amplitude = 0.5;
+    this.speed = 1;
+  }
+
+  update(move, delta = 0) {
+    super.update(move);
+    this.time += delta;
+    this.y = this.originY + Math.sin(this.time * this.speed) * this.amplitude;
   }
 }
 
@@ -59,6 +127,9 @@ export class Level3 extends BaseLevel {
     this.distance = 0;
     this.levelLength = this.map[0].length * this.tileSize;
     this.platforms = [];
+    this.cloudPlatforms = [];
+    this.fallingPlatforms = [];
+    this.movingPlatforms = [];
     this.pipes = [];
     this.blocks = [];
     this.enemies = [];
@@ -87,6 +158,15 @@ export class Level3 extends BaseLevel {
           case TILE.PLATFORM:
             this.platforms.push(new Platform(x, y, this.tileSize));
             break;
+          case TILE.CLOUD:
+            this.cloudPlatforms.push(new CloudPlatform(x, y, this.tileSize));
+            break;
+          case TILE.FALLING:
+            this.fallingPlatforms.push(new FallingPlatform(x, y, this.tileSize));
+            break;
+          case TILE.MOVING:
+            this.movingPlatforms.push(new MovingPlatform(x, y, this.tileSize));
+            break;
           case TILE.PIPE:
             this.pipes.push(new Pipe(x, this.game.groundY, this.tileSize));
             break;
@@ -106,6 +186,9 @@ export class Level3 extends BaseLevel {
     }
     this.obstacles = [
       ...this.platforms,
+      ...this.cloudPlatforms.filter(p => p.active),
+      ...this.fallingPlatforms,
+      ...this.movingPlatforms,
       ...this.pipes,
       ...this.blocks,
       ...this.enemies,
@@ -115,9 +198,11 @@ export class Level3 extends BaseLevel {
   update(delta) {
     const move = this.getMoveSpeed() * delta;
     this.distance += move;
-
-    const moveArr = arr => arr.forEach(e => e.update(move));
+    const moveArr = arr => arr.forEach(e => e.update(move, delta));
     moveArr(this.platforms);
+    moveArr(this.cloudPlatforms);
+    moveArr(this.fallingPlatforms);
+    moveArr(this.movingPlatforms);
     moveArr(this.pipes);
     moveArr(this.blocks);
     this.enemies.forEach(e => e.update(move, delta));
@@ -134,6 +219,14 @@ export class Level3 extends BaseLevel {
     };
 
     if (!collideArr(this.platforms)) return;
+    if (!collideArr(this.fallingPlatforms)) return;
+    if (!collideArr(this.movingPlatforms)) return;
+    for (const e of this.cloudPlatforms) {
+      if (e.active && isColliding(player, e)) {
+        this.game.gameOver = true;
+        return;
+      }
+    }
     if (!collideArr(this.pipes)) return;
     if (!collideArr(this.blocks)) return;
 
@@ -154,10 +247,16 @@ export class Level3 extends BaseLevel {
 
     const filterArr = arr => arr.filter(e => e.x + e.width / 2 > 0);
     this.platforms = filterArr(this.platforms);
+    this.cloudPlatforms = filterArr(this.cloudPlatforms);
+    this.fallingPlatforms = filterArr(this.fallingPlatforms);
+    this.movingPlatforms = filterArr(this.movingPlatforms);
     this.pipes = filterArr(this.pipes);
     this.blocks = filterArr(this.blocks);
     this.obstacles = [
       ...this.platforms,
+      ...this.cloudPlatforms.filter(p => p.active),
+      ...this.fallingPlatforms,
+      ...this.movingPlatforms,
       ...this.pipes,
       ...this.blocks,
       ...this.enemies,
@@ -170,9 +269,15 @@ export class Level3 extends BaseLevel {
   }
 
   setScale(scale) {
-    [...this.platforms, ...this.pipes, ...this.blocks, ...this.enemies].forEach(
-      o => o.setScale(scale)
-    );
+    [
+      ...this.platforms,
+      ...this.cloudPlatforms,
+      ...this.fallingPlatforms,
+      ...this.movingPlatforms,
+      ...this.pipes,
+      ...this.blocks,
+      ...this.enemies,
+    ].forEach(o => o.setScale(scale));
   }
 }
 
