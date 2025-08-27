@@ -16,3 +16,16 @@ export function isColliding(a, b) {
     aTop < bBottom
   );
 }
+
+export function isLandingOn(a, b) {
+  if (!isColliding(a, b)) return false;
+  const aBottom = a.y + a.height / 2;
+  const bTop = b.y - b.height / 2;
+  const verticalOverlap = aBottom - bTop;
+  const aRight = a.x + a.width / 2;
+  const aLeft = a.x - a.width / 2;
+  const bRight = b.x + b.width / 2;
+  const bLeft = b.x - b.width / 2;
+  const horizontalOverlap = Math.min(aRight, bRight) - Math.max(aLeft, bLeft);
+  return verticalOverlap < horizontalOverlap && a.vy > 0;
+}

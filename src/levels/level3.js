@@ -1,15 +1,18 @@
 import { BaseLevel } from './baseLevel.js';
 import { Obstacle } from '../obstacle.js';
-import { isColliding } from '../../collision.js';
+import { Goomba } from '../entities/goomba.js';
+import { isColliding, isLandingOn } from '../../collision.js';
+import { JUMP_VELOCITY } from '../config.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
-// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block
+// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
   PLATFORM: 2,
   PIPE: 3,
   BLOCK: 4,
+  GOOMBA: 5,
 };
 
 // Two dimensional map describing the level layout. Each number
@@ -19,7 +22,7 @@ const MAP = [
   // Ground row
   [1, 1, 1, 1, 1, 1, 1, 1],
   // Tiles one unit above the ground
-  [0, 2, 0, 3, 0, 2, 0, 0],
+  [5, 2, 0, 3, 5, 2, 0, 0],
   // Tiles two units above the ground
   [0, 0, 0, 0, 4, 0, 0, 0],
 ];
@@ -57,6 +60,7 @@ export class Level3 extends BaseLevel {
     this.platforms = [];
     this.pipes = [];
     this.blocks = [];
+    this.enemies = [];
     this.generateFromMap();
   }
 
@@ -88,12 +92,23 @@ export class Level3 extends BaseLevel {
           case TILE.BLOCK:
             this.blocks.push(new Block(x, y, this.tileSize));
             break;
+          case TILE.GOOMBA:
+            // Enemies always spawn on the ground regardless of row
+            this.enemies.push(
+              new Goomba(x, this.game.groundY - this.tileSize / 2, this.tileSize)
+            );
+            break;
           default:
             break;
         }
       }
     }
-    this.obstacles = [...this.platforms, ...this.pipes, ...this.blocks];
+    this.obstacles = [
+      ...this.platforms,
+      ...this.pipes,
+      ...this.blocks,
+      ...this.enemies,
+    ];
   }
 
   update(delta) {
@@ -104,6 +119,7 @@ export class Level3 extends BaseLevel {
     moveArr(this.platforms);
     moveArr(this.pipes);
     moveArr(this.blocks);
+    this.enemies.forEach(e => e.update(move, delta));
 
     const player = this.game.player;
     const collideArr = arr => {
@@ -120,11 +136,30 @@ export class Level3 extends BaseLevel {
     if (!collideArr(this.pipes)) return;
     if (!collideArr(this.blocks)) return;
 
+    // Handle enemy collisions and cull off-screen entities
+    this.enemies = this.enemies.filter(e => {
+      if (isLandingOn(player, e)) {
+        player.vy = JUMP_VELOCITY / 2;
+        player.jumping = true;
+        return false;
+      }
+      if (isColliding(player, e)) {
+        this.game.gameOver = true;
+        return false;
+      }
+      return e.x + e.width / 2 > 0;
+    });
+
     const filterArr = arr => arr.filter(e => e.x + e.width / 2 > 0);
     this.platforms = filterArr(this.platforms);
     this.pipes = filterArr(this.pipes);
     this.blocks = filterArr(this.blocks);
-    this.obstacles = [...this.platforms, ...this.pipes, ...this.blocks];
+    this.obstacles = [
+      ...this.platforms,
+      ...this.pipes,
+      ...this.blocks,
+      ...this.enemies,
+    ];
 
     if (this.distance >= this.levelLength && this.obstacles.length === 0) {
       this.game.gameOver = true;
@@ -133,8 +168,8 @@ export class Level3 extends BaseLevel {
   }
 
   setScale(scale) {
-    [...this.platforms, ...this.pipes, ...this.blocks].forEach(o =>
-      o.setScale(scale)
+    [...this.platforms, ...this.pipes, ...this.blocks, ...this.enemies].forEach(
+      o => o.setScale(scale)
     );
   }
 }
