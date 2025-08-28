@@ -97,20 +97,67 @@ test('coyote time allows late jumps', () => {
   assert.ok(player.jumping);
 });
 
-test('jump buffer triggers jump on landing', () => {
-  const game = createStubGame({ search: '?level=3' });
-  const { player } = game;
-  game.level.getMoveSpeed = () => 0;
-  player.y = game.groundY - player.height / 2 - 1;
-  player.vy = 0;
-  player.jumping = true;
-  for (let i = 0; i < 30; i++) {
-    if (i === 20) game.handleInput();
-    game.update(FRAME);
-  }
-  assert.ok(player.jumping);
-  assert.ok(player.y < game.groundY - player.height / 2);
-});
+  test('jump buffer triggers jump on landing', () => {
+    const game = createStubGame({ search: '?level=3' });
+    const { player } = game;
+    game.level.getMoveSpeed = () => 0;
+    player.y = game.groundY - player.height / 2 - 1;
+    player.vy = 0;
+    player.jumping = true;
+    for (let i = 0; i < 30; i++) {
+      if (i === 20) game.handleInput();
+      game.update(FRAME);
+    }
+    assert.ok(player.jumping);
+    assert.ok(player.y < game.groundY - player.height / 2);
+  });
+
+  test('player safely bumps into platform side', () => {
+    const game = createStubGame({ search: '?level=3' });
+    const level = game.level;
+    level.getMoveSpeed = () => 0;
+    const { player } = game;
+    const platform = {
+      x: player.x + 1,
+      y: player.y,
+      width: 1,
+      height: 0.2,
+      visible: true,
+      update: () => {},
+    };
+    level.platforms = [platform];
+    level.obstacles = [platform];
+    player.x = platform.x - platform.width / 2 - player.width / 2 + 0.1;
+    player.vy = 0;
+    level.update(FRAME);
+    const expectedX = platform.x - platform.width / 2 - player.width / 2;
+    assert.ok(Math.abs(player.x - expectedX) < 1e-6);
+    assert.strictEqual(game.gameOver, false);
+  });
+
+  test('player safely touches platform bottom', () => {
+    const game = createStubGame({ search: '?level=3' });
+    const level = game.level;
+    level.getMoveSpeed = () => 0;
+    const { player } = game;
+    const startY = player.y;
+    const platform = {
+      x: player.x,
+      y: startY - 1,
+      width: 1,
+      height: 0.2,
+      visible: true,
+      update: () => {},
+    };
+    level.platforms = [platform];
+    level.obstacles = [platform];
+    player.y = platform.y + platform.height / 2 + player.height / 2 - 0.05;
+    player.vy = -1;
+    level.update(FRAME);
+    const expectedY = platform.y + platform.height / 2 + player.height / 2;
+    assert.ok(Math.abs(player.y - expectedY) < 1e-6);
+    assert.strictEqual(game.gameOver, false);
+  });
 
 test('level 3 spawns exclusive enemies', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
