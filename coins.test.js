@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { Obstacle } from './src/obstacle.js';
 import { Level2 } from './src/levels/level2.js';
 import { LEVEL_UP_SCORE } from './src/config.js';
 
 const FRAME = 1 / 60;
+
+test.after(() => destroyStubGame());
 
 test('awards coin for passed obstacle and preserves coins in level 2', () => {
   const game = createStubGame();

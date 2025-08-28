@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 
 const FRAME = 1 / 60;
+
+test.after(() => destroyStubGame());
 
 test('spawns a new obstacle after interval', () => {
   const game = createStubGame();

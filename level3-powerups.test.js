@@ -1,7 +1,7 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert';
 import { withLevel3, FRAME } from './level3TestHelpers.js';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import {
   AURA_SHIELD_DURATION,
   WIND_HOOVES_DURATION,
@@ -10,6 +10,8 @@ import {
 } from './src/config.js';
 
 // Power-up related tests for Level 3
+
+test.after(() => destroyStubGame());
 
 describe('Level 3 power-ups', () => {
   describe('availability', () => {

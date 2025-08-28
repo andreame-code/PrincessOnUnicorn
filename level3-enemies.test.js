@@ -1,7 +1,7 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert';
 import { withLevel3, FRAME } from './level3TestHelpers.js';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { Goomba } from './src/entities/goomba.js';
 import { ShadowCrow } from './src/entities/shadowCrow.js';
 import { RhombusSprite } from './src/entities/rhombusSprite.js';
@@ -9,6 +9,8 @@ import { ThornGuard } from './src/entities/thornGuard.js';
 import { PortalGuardian } from './src/entities/portalGuardian.js';
 
 // Enemy-related tests for Level 3
+
+test.after(() => destroyStubGame());
 
 describe('Level 3 enemies', () => {
   describe('spawning', () => {

@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
+
+test.after(() => destroyStubGame());
 
 test('reads high score from localStorage', () => {
+  createStubGame({ skipLevelUpdate: true });
   localStorage.clear();
   localStorage.setItem('highScore', '123');
   const game = createStubGame({ skipLevelUpdate: true });
@@ -10,6 +13,7 @@ test('reads high score from localStorage', () => {
 });
 
 test('updates high score and persists across reset and new game', () => {
+  createStubGame({ skipLevelUpdate: true });
   localStorage.clear();
   const game = createStubGame({ skipLevelUpdate: true });
   game.score = 50;
