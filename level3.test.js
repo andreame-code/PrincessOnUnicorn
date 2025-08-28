@@ -40,6 +40,17 @@ test('level 3 does not auto advance without input', () => {
   assert.ok(level.distance > 0);
 });
 
+test('level 3 allows backtracking without losing obstacles', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const level = game.level;
+  const firstPlatform = level.platforms[0];
+  level.update(0, 30);
+  assert.ok(firstPlatform.x + firstPlatform.width / 2 < 0);
+  level.update(0, -30);
+  assert.ok(level.platforms.includes(firstPlatform));
+  assert.ok(firstPlatform.x + firstPlatform.width / 2 > 0);
+});
+
 // After travelling the entire level and clearing entities the level should end.
 test('level 3 completes after level length', () => {
   const game = createStubGame({ search: '?level=3' });

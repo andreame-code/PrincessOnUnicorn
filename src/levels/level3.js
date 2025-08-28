@@ -52,15 +52,24 @@ const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 // Ability section - small platforms to practice jumping
 for (let c = 10; c < 20; c += 2) row1[c] = TILE.PLATFORM;
 
-// Secret star path high in the sky
+// Ramp up to a sky path of stars, allowing backtracking and verticality
+for (let c = 24; c < 30; c += 2) row1[c] = TILE.PLATFORM;
+
+// Secret star path high in the sky (visual guide)
 for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
+for (let c = 35; c < 40; c += 2) row1[c] = TILE.PLATFORM;
+
+// Second optional elevated route using clouds
+for (let c = 80; c < 88; c += 2) row1[c] = TILE.PLATFORM;
+for (let c = 88; c < 96; c += 2) row2[c] = TILE.PLATFORM;
+row1[96] = TILE.PLATFORM;
 
 // Challenge obstacles
 [60, 90, 130, 170, 210].forEach(c => (row1[c] = TILE.GOOMBA));
-[70, 100, 160, 190].forEach(c => (row1[c] = TILE.PIPE));
+[70, 110, 160, 190].forEach(c => (row1[c] = TILE.PIPE));
 
 // Central checkpoint
-row1[120] = TILE.CHECKPOINT;
+row1[100] = TILE.CHECKPOINT;
 
 // Final rainbow portal
 row1[MAP_WIDTH - 5] = TILE.PORTAL;
@@ -448,7 +457,7 @@ export class Level3 extends BaseLevel {
           this.handlePlayerDeath();
           return false;
         }
-        return e.x + e.width / 2 > 0;
+        return true;
       }
       if (isLandingOn(player, e)) {
         player.vy = JUMP_VELOCITY / 2;
@@ -460,20 +469,15 @@ export class Level3 extends BaseLevel {
         this.handlePlayerDeath();
         return false;
       }
-      return e.x + e.width / 2 > 0;
+      return true;
     });
 
-    const filterArr = arr => arr.filter(e => e.x + e.width / 2 > 0);
-    this.platforms = filterArr(this.platforms);
-    this.pipes = filterArr(this.pipes);
-    this.blocks = filterArr(this.blocks);
-    this.thornWalls = filterArr(this.thornWalls);
     this.stars = this.stars.filter(s => {
       if (isColliding(player, s)) {
         this.game.stars++;
         return false;
       }
-      return s.x + s.width / 2 > 0;
+      return true;
     });
     this.powerUps = this.powerUps.filter(p => {
       if (isColliding(player, p)) {
@@ -486,7 +490,7 @@ export class Level3 extends BaseLevel {
         }
         return false;
       }
-      return p.x + p.width / 2 > 0;
+      return true;
     });
     if (
       !this.checkpointReached &&
@@ -497,17 +501,6 @@ export class Level3 extends BaseLevel {
       this.respawnPoint = { x: player.x, y: this.game.groundY - player.height / 2 };
     }
     if (this.portal && this.portal.open && isColliding(player, this.portal)) {
-      this.game.gameOver = true;
-      this.game.win = true;
-    }
-    if (this.checkpoint && this.checkpoint.x + this.checkpoint.width / 2 <= 0) {
-      this.checkpoint = null;
-    }
-    if (
-      this.portal &&
-      this.portal.open &&
-      this.portal.x + this.portal.width / 2 <= 0
-    ) {
       this.game.gameOver = true;
       this.game.win = true;
     }
