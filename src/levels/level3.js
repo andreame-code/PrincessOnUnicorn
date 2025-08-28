@@ -202,6 +202,7 @@ export class Level3 extends BaseLevel {
     this.respawnTimer = 0;
     this.portal = null;
     this.boss = null;
+    this.disableAutoScroll = true;
     this.generateFromMap();
     this.addExclusiveEnemies();
     this.spawnPortalGuardian();
@@ -349,7 +350,7 @@ export class Level3 extends BaseLevel {
     ];
   }
 
-  update(delta) {
+  update(delta, move = this.game.player.vx * delta) {
     if (this.respawning) {
       this.respawnTimer += delta;
       if (this.respawnTimer >= 1) {
@@ -358,8 +359,7 @@ export class Level3 extends BaseLevel {
       return;
     }
 
-    const move = this.getMoveSpeed() * delta;
-    this.distance += move;
+    this.distance += move > 0 ? move : 0;
 
     const moveArr = arr => arr.forEach(e => e.update(move, delta));
     moveArr(this.platforms);
