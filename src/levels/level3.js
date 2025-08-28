@@ -352,8 +352,15 @@ export class Level3 extends BaseLevel {
       if (!p.visible) continue;
       if (isColliding(player, p)) {
         const platformTop = p.y - p.height / 2;
+        const platformBottom = p.y + p.height / 2;
+        const platformLeft = p.x - p.width / 2;
+        const platformRight = p.x + p.width / 2;
         const playerBottom = player.y + player.height / 2;
-        const fromAbove = player.vy >= 0 && playerBottom >= platformTop && player.y < p.y;
+        const playerTop = player.y - player.height / 2;
+        const playerLeft = player.x - player.width / 2;
+        const playerRight = player.x + player.width / 2;
+        const fromAbove =
+          player.vy >= 0 && playerBottom >= platformTop && player.y < p.y;
         if (fromAbove) {
           player.y = platformTop - player.height / 2;
           player.vy = 0;
@@ -361,8 +368,23 @@ export class Level3 extends BaseLevel {
           player.jumpCount = 0;
           if (typeof p.onStep === 'function') p.onStep();
         } else {
-          this.handlePlayerDeath();
-          return;
+          const overlapLeft = playerRight - platformLeft;
+          const overlapRight = platformRight - playerLeft;
+          const overlapTop = platformBottom - playerTop;
+          const overlapBottom = playerBottom - platformTop;
+          const minOverlapX = Math.min(overlapLeft, overlapRight);
+          const minOverlapY = Math.min(overlapTop, overlapBottom);
+          if (minOverlapX < minOverlapY) {
+            if (overlapLeft < overlapRight) {
+              player.x = platformLeft - player.width / 2;
+            } else {
+              player.x = platformRight + player.width / 2;
+            }
+            player.vx = 0;
+          } else if (player.vy < 0) {
+            player.y = platformBottom + player.height / 2;
+            player.vy = 0;
+          }
         }
       }
     }
