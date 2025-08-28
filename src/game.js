@@ -13,6 +13,9 @@ import {
   RESIZE_THROTTLE_MS,
   WORLD_WIDTH,
   WORLD_HEIGHT,
+  LEVEL3_DEADZONE_LEFT,
+  LEVEL3_DEADZONE_RIGHT,
+  LEVEL3_CAMERA_SMOOTHING,
 } from './config.js';
 
 const LEVELS = [Level1, Level2, Level3];
@@ -83,7 +86,10 @@ export class Game {
   }
 
   initializeLevel() {
-    const startX = 0.5 + 0.8 / 2;
+    const startX =
+      this.levelNumber === 3
+        ? this.worldWidth * ((LEVEL3_DEADZONE_LEFT + LEVEL3_DEADZONE_RIGHT) / 2)
+        : 0.5 + 0.8 / 2;
     this.player = new Player(startX, this.groundY, this.scale);
     this.player.worldWidth = this.worldWidth;
     const LevelClass = LEVELS[this.levelNumber - 1];
@@ -218,8 +224,20 @@ export class Game {
     const wasJumping = this.player.jumping;
     const prevX = this.player.x;
     this.player.update(this.win ? 0 : this.gravity, this.groundY, delta);
-    const deltaX = this.player.x - prevX;
-    if (this.level.disableAutoScroll) {
+    if (this.level.disableAutoScroll && this.levelNumber === 3) {
+      const left = this.worldWidth * LEVEL3_DEADZONE_LEFT;
+      const right = this.worldWidth * LEVEL3_DEADZONE_RIGHT;
+      let target = this.level.distance;
+      if (this.player.x < left) target += this.player.x - left;
+      else if (this.player.x > right) target += this.player.x - right;
+      const maxDist = Math.max(0, this.level.levelLength - this.worldWidth);
+      if (target < 0) target = 0;
+      if (target > maxDist) target = maxDist;
+      const move = (target - this.level.distance) * LEVEL3_CAMERA_SMOOTHING;
+      this.player.x -= move;
+      this.level.update(delta, move);
+    } else if (this.level.disableAutoScroll) {
+      const deltaX = this.player.x - prevX;
       this.player.x = prevX;
       this.level.update(delta, deltaX);
     } else {
