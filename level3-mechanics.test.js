@@ -33,6 +33,13 @@ describe('Level 3 mechanics', () => {
       });
     });
 
+    test('player starts centered on screen', () => {
+      withLevel3({ skipLevelUpdate: true }, ({ game, player }) => {
+        const ratio = player.x / game.worldWidth;
+        assert.ok(ratio >= 0.45 && ratio <= 0.55);
+      });
+    });
+
     test('level 3 completes after level length', () => {
       withLevel3({}, ({ game, level, player }) => {
         const boss = level.boss;
