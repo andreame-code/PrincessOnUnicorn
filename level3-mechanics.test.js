@@ -5,6 +5,7 @@ import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
 import { JUMP_VELOCITY, SHIELD_GRACE } from './src/config.js';
 import { Goomba } from './src/entities/goomba.js';
+import { Block } from './src/entities/block.js';
 import { Obstacle } from './src/obstacle.js';
 
 // Mechanics and general level features
@@ -222,6 +223,88 @@ describe('Level 3 mechanics', () => {
       withLevel3({ skipLevelUpdate: true }, ({ level }) => {
         assert.ok(level.platforms.length > 0);
       });
+    });
+  });
+
+  describe('hazard collisions', () => {
+    test('player dies when hitting a pipe', () => {
+      const game = createStubGame({ search: '?level=3' });
+      const level = game.level;
+      const player = game.player;
+      level.getMoveSpeed = () => 0;
+      const pipe = level.pipes[0];
+      assert.ok(pipe);
+      pipe.x = player.x;
+      level.pipes = [pipe];
+      level.blocks = [];
+      level.enemies = [];
+      level.platforms = [];
+      level.thornWalls = [];
+      level.obstacles = [pipe];
+      let calls = 0;
+      const orig = level.handlePlayerDeath.bind(level);
+      level.handlePlayerDeath = () => {
+        calls++;
+        orig();
+      };
+      level.update(FRAME);
+      assert.strictEqual(calls, 1);
+      assert.strictEqual(game.gameOver, true);
+    });
+
+    test('player dies when hitting a block', () => {
+      const game = createStubGame({ search: '?level=3' });
+      const level = game.level;
+      const player = game.player;
+      level.getMoveSpeed = () => 0;
+      const block = new Block(player.x, player.y, 1);
+      level.blocks = [block];
+      level.pipes = [];
+      level.enemies = [];
+      level.platforms = [];
+      level.thornWalls = [];
+      level.obstacles = [block];
+      let calls = 0;
+      const orig = level.handlePlayerDeath.bind(level);
+      level.handlePlayerDeath = () => {
+        calls++;
+        orig();
+      };
+      level.update(FRAME);
+      assert.strictEqual(calls, 1);
+      assert.strictEqual(game.gameOver, true);
+    });
+
+    test('player respawns after hitting a thorn wall post-checkpoint', () => {
+      const game = createStubGame({ search: '?level=3' });
+      const level = game.level;
+      const player = game.player;
+      level.getMoveSpeed = () => 0;
+      const cp = level.checkpoint;
+      player.x = cp.x;
+      player.y = game.groundY - player.height / 2;
+      level.update(FRAME);
+      assert.ok(level.checkpointReached);
+      const wall = new Obstacle(player.x, player.y, 1, 1);
+      level.thornWalls = [wall];
+      level.pipes = [];
+      level.blocks = [];
+      level.enemies = [];
+      level.platforms = [];
+      level.obstacles = [wall];
+      let calls = 0;
+      const orig = level.handlePlayerDeath.bind(level);
+      level.handlePlayerDeath = () => {
+        calls++;
+        orig();
+      };
+      level.update(FRAME);
+      assert.strictEqual(calls, 1);
+      assert.strictEqual(level.respawning, true);
+      for (let i = 0; i <= Math.ceil(1 / FRAME); i++) level.update(FRAME);
+      assert.strictEqual(level.respawning, false);
+      assert.strictEqual(game.gameOver, false);
+      assert.ok(Math.abs(player.x - level.respawnPoint.x) < 1e-6);
     });
   });
 
