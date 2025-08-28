@@ -69,13 +69,18 @@ const row1 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 
 // Ability section - small platforms to practice jumping
+const CLOUD_PLATFORM_COLUMNS = [];
+const FALLING_PLATFORM_COLUMNS = [];
 for (
   let c = ABILITY_SECTION_START, i = 0;
   c < ABILITY_SECTION_END;
   c += 2, i++
 ) {
-  row1[c] = i % 2 === 0 ? TILE.CLOUD_PLATFORM : TILE.FALLING_PLATFORM;
+  if (i % 2 === 0) CLOUD_PLATFORM_COLUMNS.push(c);
+  else FALLING_PLATFORM_COLUMNS.push(c);
 }
+CLOUD_PLATFORM_COLUMNS.forEach(c => (row1[c] = TILE.CLOUD_PLATFORM));
+FALLING_PLATFORM_COLUMNS.forEach(c => (row1[c] = TILE.FALLING_PLATFORM));
 
 // Secret star path high in the sky
 for (let c = SECRET_STAR_START; c < SECRET_STAR_END; c++) row2[c] = TILE.STAR;
