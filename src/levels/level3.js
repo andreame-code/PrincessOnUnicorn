@@ -1,10 +1,17 @@
 import { BaseLevel } from './baseLevel.js';
-import { Obstacle } from '../obstacle.js';
 import { Goomba } from '../entities/goomba.js';
 import { ShadowCrow } from '../entities/shadowCrow.js';
 import { RhombusSprite } from '../entities/rhombusSprite.js';
 import { ThornGuard } from '../entities/thornGuard.js';
 import { PortalGuardian } from '../entities/portalGuardian.js';
+import { Platform } from '../entities/platform.js';
+import { CloudPlatform } from '../entities/cloudPlatform.js';
+import { FallingPlatform } from '../entities/fallingPlatform.js';
+import { Pipe } from '../entities/pipe.js';
+import { Block } from '../entities/block.js';
+import { Star } from '../entities/star.js';
+import { Checkpoint } from '../entities/checkpoint.js';
+import { Portal } from '../entities/portal.js';
 import { isColliding, isLandingOn } from '../../collision.js';
 import {
   JUMP_VELOCITY,
@@ -67,122 +74,6 @@ row1[MAP_WIDTH - 5] = TILE.PORTAL;
 
 const MAP = [ground, row1, row2];
 
-class Platform extends Obstacle {
-  constructor(x, y, size) {
-    super(x, y, size, size);
-    this.type = 'platform';
-  }
-}
-
-class CloudPlatform extends Platform {
-  constructor(x, y, size) {
-    super(x, y, size);
-    this.visible = true;
-    this.stepped = false;
-    this.timer = 0;
-    this.respawn = 0;
-    this.kind = 'cloud';
-  }
-
-  onStep() {
-    this.stepped = true;
-  }
-
-  update(move, delta = 0) {
-    super.update(move);
-    if (!this.visible) {
-      this.respawn += delta;
-      if (this.respawn >= 3) {
-        this.visible = true;
-        this.respawn = 0;
-        this.stepped = false;
-        this.timer = 0;
-      }
-      return;
-    }
-    if (this.stepped) {
-      this.timer += delta;
-      if (this.timer >= 1.2) {
-        this.visible = false;
-        this.respawn = 0;
-      }
-    }
-  }
-}
-
-class FallingPlatform extends Platform {
-  constructor(x, y, size, groundY) {
-    super(x, y, size);
-    this.groundY = groundY;
-    this.stepped = false;
-    this.shake = 0;
-    this.falling = false;
-    this.vy = 0;
-    this.visible = true;
-    this.kind = 'falling';
-  }
-
-  onStep() {
-    if (!this.stepped) {
-      this.stepped = true;
-      this.shake = 0;
-    }
-  }
-
-  update(move, delta = 0) {
-    super.update(move);
-    if (this.stepped && !this.falling) {
-      this.shake += delta;
-      if (this.shake >= 0.3) {
-        this.falling = true;
-      }
-    }
-    if (this.falling) {
-      this.vy += GRAVITY * delta;
-      this.y += this.vy * delta;
-      if (this.y - this.height / 2 > this.groundY + 2) {
-        this.visible = false;
-      }
-    }
-  }
-}
-
-class Pipe extends Obstacle {
-  constructor(x, groundY, size) {
-    // Pipes are two tiles tall and rest on the ground
-    super(x, groundY - size, size, size * 2);
-    this.type = 'pipe';
-  }
-}
-
-class Block extends Obstacle {
-  constructor(x, y, size) {
-    super(x, y, size, size);
-    this.type = 'block';
-  }
-}
-
-class Star extends Obstacle {
-  constructor(x, y, size) {
-    super(x, y, size, size);
-    this.type = 'star';
-  }
-}
-
-class Checkpoint extends Obstacle {
-  constructor(x, groundY, size) {
-    super(x, groundY - size / 2, size, size);
-    this.type = 'checkpoint';
-  }
-}
-
-class Portal extends Obstacle {
-  constructor(x, groundY, size) {
-    super(x, groundY - size, size, size * 2);
-    this.type = 'portal';
-    this.open = false;
-  }
-}
 
 // Level 3 - Unicornolandia converted to a tile-based platform section
 export class Level3 extends BaseLevel {
