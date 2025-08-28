@@ -238,14 +238,74 @@ export class Level3 extends BaseLevel {
     player.jumping = false;
     player.jumpCount = 0;
     this.respawning = false;
+
+    // Rebuild platforms, enemies and power-ups from the original level map so
+    // that any destroyed or altered entities return to their initial state.
+    this.platforms = [];
+    this.pipes = [];
+    this.blocks = [];
+    this.enemies = [];
+    this.thornWalls = [];
+    this.stars = [];
+    this.powerUps = [];
+    this.checkpoint = null;
+    this.portal = null;
+    this.boss = null;
+
+    // Recreate level entities using the original LEVEL3_MAP.
+    this.generateFromMap();
+    this.addExclusiveEnemies();
+    this.spawnPortalGuardian();
+    this.spawnPowerUps();
+
+    // Ensure newly created objects use the current game scale.
+    this.setScale(this.game.scale);
+
+    // Only keep objects that are ahead of the respawn point.
     const filterAhead = arr => arr.filter(o => o.x + o.width / 2 > player.x - 0.01);
-    this.platforms = filterAhead(this.platforms);
+
+    // Reset stateful properties so entities behave as if never interacted with.
+    this.platforms = filterAhead(this.platforms).map(p => {
+      if (p.kind === 'cloud') {
+        p.visible = true;
+        p.stepped = false;
+        p.timer = 0;
+        p.respawn = 0;
+      } else if (p.kind === 'falling') {
+        p.visible = true;
+        p.stepped = false;
+        p.falling = false;
+        p.shake = 0;
+        p.vy = 0;
+      }
+      return p;
+    });
+
     this.pipes = filterAhead(this.pipes);
     this.blocks = filterAhead(this.blocks);
-    this.enemies = filterAhead(this.enemies);
+
+    this.enemies = filterAhead(this.enemies).map(e => {
+      if (e instanceof ShadowCrow) {
+        e.time = 0;
+        e.y = e.baseY;
+      } else if (e instanceof RhombusSprite) {
+        e.state = 'waiting';
+        e.timer = 0;
+      } else if (e instanceof ThornGuard) {
+        e.timer = 0;
+      } else if (e instanceof PortalGuardian) {
+        e.hits = 0;
+        e.phase = 1;
+        e.defeated = false;
+      }
+      return e;
+    });
+
     this.thornWalls = filterAhead(this.thornWalls);
     this.stars = filterAhead(this.stars);
     this.powerUps = filterAhead(this.powerUps);
+
+    // Rebuild combined obstacle list for collision checks.
     this.obstacles = [
       ...this.platforms.filter(p => p.visible),
       ...this.pipes,
