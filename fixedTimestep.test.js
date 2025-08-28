@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 
 const STEP = 1 / 60;
+
+test.after(() => destroyStubGame());
 
 // Verify that the main game loop advances the simulation using a fixed 60 Hz
 // timestep regardless of the frame delta provided.

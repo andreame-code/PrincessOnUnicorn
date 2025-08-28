@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { JUMP_VELOCITY, GRAVITY } from './src/config.js';
 
 const FRAME = 1 / 60;
@@ -19,6 +19,8 @@ function simulate(innerWidth) {
   }
   return { finalY: player.y, minY };
 }
+
+test.after(() => destroyStubGame());
 
 test('jump height and timing unaffected by sprite scale', () => {
   const normal = simulate(1600); // scale ~1

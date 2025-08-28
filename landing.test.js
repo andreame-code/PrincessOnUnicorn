@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { JUMP_VELOCITY, GRAVITY } from './src/config.js';
 
 const FRAME = 1 / 60;
+
+test.after(() => destroyStubGame());
 
 test('player lands within expected time after jumping', () => {
   const game = createStubGame({ skipLevelUpdate: true });
