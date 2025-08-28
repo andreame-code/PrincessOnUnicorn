@@ -1,5 +1,12 @@
 import { Game } from './src/game.js';
 
+const originalWindow = global.window;
+const originalDocument = global.document;
+const originalLocalStorage = global.localStorage;
+const hadWindow = Object.prototype.hasOwnProperty.call(global, 'window');
+const hadDocument = Object.prototype.hasOwnProperty.call(global, 'document');
+const hadLocalStorage = Object.prototype.hasOwnProperty.call(global, 'localStorage');
+
 const localStorageStub = (() => {
   let store = {};
   return {
@@ -17,7 +24,6 @@ const localStorageStub = (() => {
     },
   };
 })();
-global.localStorage = localStorageStub;
 
 export function createStubGame({
   rng,
@@ -27,6 +33,7 @@ export function createStubGame({
   search = '',
   skipLevelUpdate = false,
 } = {}) {
+  global.localStorage = localStorageStub;
   const noop = () => {};
   const ctx = {
     clearRect: noop,
@@ -104,4 +111,14 @@ export function createStubGame({
     game.level.update = noop;
   }
   return game;
+}
+
+export function destroyStubGame() {
+  if (hadWindow) global.window = originalWindow;
+  else delete global.window;
+  if (hadDocument) global.document = originalDocument;
+  else delete global.document;
+  if (hadLocalStorage) global.localStorage = originalLocalStorage;
+  else delete global.localStorage;
+  localStorageStub.clear();
 }

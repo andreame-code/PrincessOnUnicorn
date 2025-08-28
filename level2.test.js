@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { Level2 } from './src/levels/level2.js';
 import { Level3 } from './src/levels/level3.js';
 import { SHIELD_COOLDOWN } from './src/config.js';
 
 const FRAME = 1 / 60;
+
+test.after(() => destroyStubGame());
 
 test('level 2 maps space to shield only', () => {
   const game = createStubGame({ search: '?level=2', skipLevelUpdate: true });

@@ -1,13 +1,15 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert';
 import { withLevel3, FRAME } from './level3TestHelpers.js';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
 import { JUMP_VELOCITY, SHIELD_GRACE } from './src/config.js';
 import { Goomba } from './src/entities/goomba.js';
 import { Obstacle } from './src/obstacle.js';
 
 // Mechanics and general level features
+
+test.after(() => destroyStubGame());
 
 describe('Level 3 mechanics', () => {
   describe('level basics', () => {

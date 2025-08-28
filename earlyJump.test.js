@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 
 const FRAME = 1 / 60;
+
+test.after(() => destroyStubGame());
 
 // Ensure that jumping early over an obstacle no longer causes a collision
 // once the obstacle has been cleared.
