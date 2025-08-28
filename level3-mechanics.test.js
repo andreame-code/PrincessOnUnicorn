@@ -28,7 +28,7 @@ describe('Level 3 mechanics', () => {
         game.update(1);
         assert.strictEqual(level.distance, 0);
         player.moveRight();
-        game.update(1);
+        for (let i = 0; i < 120; i++) game.update(FRAME);
         assert.ok(level.distance > 0);
       });
     });
@@ -37,6 +37,30 @@ describe('Level 3 mechanics', () => {
       withLevel3({ skipLevelUpdate: true }, ({ game, player }) => {
         const ratio = player.x / game.worldWidth;
         assert.ok(ratio >= 0.45 && ratio <= 0.55);
+      });
+    });
+
+    test('camera scrolls only outside dead zone', () => {
+      withLevel3({}, ({ game, level, player }) => {
+        player.vx = 0;
+        player.x = game.worldWidth / 2;
+        game.update(FRAME);
+        player.x =
+          game.worldWidth / 2 +
+          (game.worldWidth * level.deadZoneWidthPct) / 2 -
+          0.1;
+        game.update(FRAME);
+        assert.strictEqual(level.scrollX, 0);
+        player.x =
+          game.worldWidth / 2 +
+          (game.worldWidth * level.deadZoneWidthPct) / 2 +
+          1;
+        game.update(FRAME);
+        for (let i = 0; i < 5; i++) game.update(FRAME);
+        assert.ok(level.scrollX > 0);
+        const maxX =
+          game.worldWidth / 2 + (game.worldWidth * level.deadZoneWidthPct) / 2 + 1;
+        assert.ok(player.x <= maxX);
       });
     });
 

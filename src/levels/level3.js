@@ -119,6 +119,11 @@ export class Level3 extends BaseLevel {
     this.tileSize = 1; // world units per tile
     this.distance = 0;
     this.levelLength = this.map[0].length * this.tileSize;
+    this.scrollX = 0;
+    const params = this.game.params;
+    this.deadZoneWidthPct = parseFloat(params.get('deadZoneWidthPct')) || 0.5;
+    this.deadZoneHeightPct = parseFloat(params.get('deadZoneHeightPct')) || 0.5;
+    this.cameraLerp = parseFloat(params.get('cameraLerp')) || 0.1;
     this.platforms = [];
     this.pipes = [];
     this.blocks = [];
@@ -251,6 +256,8 @@ export class Level3 extends BaseLevel {
 
   respawnPlayer() {
     const player = this.game.player;
+    this.scrollX = 0;
+    this.distance = 0;
     const { x, y } = this.respawnPoint || {
       x: player.x,
       y: this.game.groundY - player.height / 2,
@@ -341,7 +348,7 @@ export class Level3 extends BaseLevel {
     ];
   }
 
-  update(delta, move = this.game.player.vx * delta) {
+  update(delta, move = 0) {
     if (this.respawning) {
       this.respawnTimer += delta;
       if (this.respawnTimer >= 1) {
