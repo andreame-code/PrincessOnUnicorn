@@ -4,7 +4,8 @@
   "description": "A simple runner game inspired by the Chrome offline T-Rex, but featuring a princess riding a unicorn.",
   "main": "game.js",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "uat": "node --test uat.test.js"
   },
   "keywords": [],
   "author": "",
