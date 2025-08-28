@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
+
+test.after(() => destroyStubGame());
 
 test('level 1 obstacles have tree dimensions', () => {
   const game = createStubGame({ search: '?level=1' });

@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { createStubGame } from './testHelpers.js';
+import { createStubGame, destroyStubGame } from './testHelpers.js';
 
 // If the canvas is not yet visible, getBoundingClientRect can return zeros.
 // resizeCanvas should fall back to window dimensions so the scale isn't 0.
+test.after(() => destroyStubGame());
+
 test('resizeCanvas falls back to window size when bounding rect is zero', () => {
   const game = createStubGame();
   window.innerWidth = 1000;
