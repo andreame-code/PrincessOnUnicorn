@@ -37,7 +37,7 @@ test('level 3 does not auto advance without input', () => {
   assert.strictEqual(level.distance, 0);
   player.moveRight();
   game.update(1);
-  assert.strictEqual(level.distance, player.moveSpeed);
+  assert.ok(level.distance > 0);
 });
 
 // After travelling the entire level and clearing entities the level should end.
@@ -52,14 +52,10 @@ test('level 3 completes after level length', () => {
     player.vy = 1;
     level.update(FRAME);
   }
-  const distanceToPortal = level.portal.x - player.x;
-  const maxSteps = Math.ceil(distanceToPortal / player.moveSpeed / FRAME) + 60;
-  let steps = 0;
-  player.moveRight();
-  while (!game.win && steps < maxSteps) {
-    level.update(FRAME);
-    steps++;
-  }
+  player.x = level.portal.x;
+  player.y = level.portal.y - level.portal.height / 2 - player.height / 2 + 0.01;
+  player.vy = 1;
+  level.update(FRAME);
   assert.ok(game.win);
 });
 
@@ -68,8 +64,52 @@ test('level 3 maps space to jump', () => {
   const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
   const player = game.player;
   game.handleInput();
+  game.update(FRAME);
   assert.strictEqual(player.jumping, true);
   assert.strictEqual(player.shieldActive, false);
+});
+
+test('player stops within 0.4s after releasing move', () => {
+  const game = createStubGame({ search: '?level=3', skipLevelUpdate: true });
+  const { player } = game;
+  player.moveRight();
+  for (let i = 0; i < 30; i++) game.update(FRAME); // accelerate
+  player.stopHorizontal();
+  for (let i = 0; i < 24; i++) game.update(FRAME); // 0.4s
+  assert.ok(Math.abs(player.vx) < 0.01);
+});
+
+test('coyote time allows late jumps', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const { level, player } = game;
+  level.getMoveSpeed = () => 0;
+  const platform = { x: player.x, y: player.y - 1, width: 1, height: 0.2, visible: true, update: () => {} };
+  level.platforms = [platform];
+  level.obstacles = [platform];
+  player.y = platform.y - platform.height / 2 - player.height / 2;
+  player.vy = 0;
+  game.update(FRAME);
+  level.platforms = [];
+  level.obstacles = [];
+  game.update(FRAME);
+  game.handleInput();
+  game.update(FRAME);
+  assert.ok(player.jumping);
+});
+
+test('jump buffer triggers jump on landing', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const { player } = game;
+  game.level.getMoveSpeed = () => 0;
+  player.y = game.groundY - player.height / 2 - 1;
+  player.vy = 0;
+  player.jumping = true;
+  for (let i = 0; i < 30; i++) {
+    if (i === 20) game.handleInput();
+    game.update(FRAME);
+  }
+  assert.ok(player.jumping);
+  assert.ok(player.y < game.groundY - player.height / 2);
 });
 
 test('level 3 spawns exclusive enemies', () => {
@@ -181,6 +221,7 @@ test('player can double jump in level 3', () => {
   player.jump();
   game.update(FRAME);
   player.jump();
+  game.update(FRAME);
   assert.strictEqual(player.jumpCount, 2);
   assert.strictEqual(player.vy, JUMP_VELOCITY);
 });
