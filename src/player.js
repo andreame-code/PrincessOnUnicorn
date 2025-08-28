@@ -31,21 +31,99 @@ export class Player {
     this.speedBoostTimer = 0;
     this.wingsTimer = 0;
     this.dead = false;
+
+    // Platforming controls (used in Level 3)
+    this.platformControls = false;
+    this.horizontal = 0;
+    this.acceleration = 0;
+    this.airAcceleration = 0;
+    this.friction = 0;
+    this.coyoteTimeMax = 0;
+    this.coyoteTimer = 0;
+    this.jumpBufferMax = 0;
+    this.jumpBufferTimer = 0;
+    this.jumpHoldMax = 0;
+    this.jumpHoldTimer = 0;
+    this.jumpHoldForce = 0;
+    this.jumpKeyHeld = false;
   }
 
   setScale(scale) {
     this.spriteScale = scale;
   }
 
+  enablePlatformControls({
+    acceleration,
+    airAcceleration,
+    friction,
+    coyoteTime,
+    jumpBuffer,
+    jumpHold,
+    jumpHoldForce,
+  }) {
+    this.platformControls = true;
+    this.acceleration = acceleration;
+    this.airAcceleration = airAcceleration;
+    this.friction = friction;
+    this.coyoteTimeMax = coyoteTime;
+    this.jumpBufferMax = jumpBuffer;
+    this.jumpHoldMax = jumpHold;
+    this.jumpHoldForce = jumpHoldForce;
+  }
+
   update(gravity, groundY, delta) {
+    if (this.platformControls) {
+      const accel = this.jumping ? this.airAcceleration : this.acceleration;
+      if (this.horizontal !== 0) {
+        this.vx += this.horizontal * accel * delta;
+      } else {
+        if (this.vx > 0) this.vx = Math.max(0, this.vx - this.friction * delta);
+        else if (this.vx < 0) this.vx = Math.min(0, this.vx + this.friction * delta);
+      }
+      if (this.vx > this.moveSpeed) this.vx = this.moveSpeed;
+      if (this.vx < -this.moveSpeed) this.vx = -this.moveSpeed;
+    }
+
     this.vy += gravity * delta;
+    if (
+      this.platformControls &&
+      this.jumping &&
+      this.jumpKeyHeld &&
+      this.jumpHoldTimer > 0
+    ) {
+      this.vy -= this.jumpHoldForce * delta;
+      this.jumpHoldTimer -= delta;
+      if (this.jumpHoldTimer < 0) this.jumpHoldTimer = 0;
+    }
     this.y += this.vy * delta;
-    if (this.y + this.height / 2 >= groundY) {
+
+    if (this.platformControls) {
+      if (this.y + this.height / 2 >= groundY) {
+        this.y = groundY - this.height / 2;
+        this.vy = 0;
+        this.jumping = false;
+        this.jumpCount = 0;
+        this.coyoteTimer = this.coyoteTimeMax;
+      } else {
+        this.coyoteTimer -= delta;
+      }
+      if (this.jumpBufferTimer > 0) {
+        this.jumpBufferTimer -= delta;
+        if (this.coyoteTimer > 0 || this.jumpCount < this.maxJumps) {
+          this.vy = JUMP_VELOCITY;
+          this.jumping = true;
+          this.jumpCount++;
+          this.jumpHoldTimer = this.jumpHoldMax;
+          this.jumpBufferTimer = 0;
+        }
+      }
+    } else if (this.y + this.height / 2 >= groundY) {
       this.y = groundY - this.height / 2;
       this.vy = 0;
       this.jumping = false;
       this.jumpCount = 0;
     }
+
     this.x += this.vx * delta;
     if (this.worldWidth) {
       const half = this.width / 2;
@@ -78,23 +156,36 @@ export class Player {
   }
 
   jump() {
-    if (this.jumpCount < this.maxJumps) {
+    if (this.platformControls) {
+      this.jumpBufferTimer = this.jumpBufferMax;
+      this.jumpKeyHeld = true;
+    } else if (this.jumpCount < this.maxJumps) {
       this.vy = JUMP_VELOCITY;
       this.jumping = true;
       this.jumpCount++;
     }
   }
 
+  releaseJump() {
+    if (this.platformControls) {
+      this.jumpKeyHeld = false;
+      this.jumpHoldTimer = 0;
+    }
+  }
+
   moveLeft() {
-    this.vx = -this.moveSpeed;
+    if (this.platformControls) this.horizontal = -1;
+    else this.vx = -this.moveSpeed;
   }
 
   moveRight() {
-    this.vx = this.moveSpeed;
+    if (this.platformControls) this.horizontal = 1;
+    else this.vx = this.moveSpeed;
   }
 
   stopHorizontal() {
-    this.vx = 0;
+    if (this.platformControls) this.horizontal = 0;
+    else this.vx = 0;
   }
 
   activateShield(
