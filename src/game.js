@@ -84,7 +84,8 @@ export class Game {
   }
 
   initializeLevel() {
-    const startX = 0.5 + 0.8 / 2;
+    const defaultStartX = 0.5 + 0.8 / 2;
+    const startX = this.levelNumber === 3 ? this.worldWidth / 2 : defaultStartX;
     this.player = new Player(startX, this.groundY, this.scale);
     this.player.worldWidth = this.worldWidth;
     const LevelClass = LEVELS[this.levelNumber - 1];
