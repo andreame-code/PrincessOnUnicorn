@@ -29,12 +29,15 @@ test('level 3 builds entities from tile map', () => {
   assert.ok(level.enemies.length > 0);
 });
 
-// Distance travelled should increase according to the move speed.
-test('level 3 advances using move speed', () => {
+// Level 3 should remain static unless the player moves.
+test('level 3 does not auto advance without input', () => {
   const game = createStubGame({ search: '?level=3' });
-  const level = game.level;
-  level.update(1); // one second
-  assert.strictEqual(level.distance, level.getMoveSpeed());
+  const { level, player } = game;
+  game.update(1);
+  assert.strictEqual(level.distance, 0);
+  player.moveRight();
+  game.update(1);
+  assert.strictEqual(level.distance, player.moveSpeed);
 });
 
 // After travelling the entire level and clearing entities the level should end.
@@ -50,8 +53,9 @@ test('level 3 completes after level length', () => {
     level.update(FRAME);
   }
   const distanceToPortal = level.portal.x - player.x;
-  const maxSteps = Math.ceil(distanceToPortal / level.getMoveSpeed() / FRAME) + 60;
+  const maxSteps = Math.ceil(distanceToPortal / player.moveSpeed / FRAME) + 60;
   let steps = 0;
+  player.moveRight();
   while (!game.win && steps < maxSteps) {
     level.update(FRAME);
     steps++;
