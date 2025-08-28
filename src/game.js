@@ -223,12 +223,24 @@ export class Game {
     // Always apply gravity after a loss so the death animation completes.
     // Only skip gravity when the player has won, so they remain in place.
     const wasJumping = this.player.jumping;
-    const prevX = this.player.x;
     this.player.update(this.win ? 0 : this.gravity, this.groundY, delta);
-    const deltaX = this.player.x - prevX;
     if (this.level.disableAutoScroll) {
-      this.player.x = prevX;
-      this.level.update(delta, deltaX);
+      const level = this.level;
+      const worldX = level.scrollX + this.player.x;
+      const dzWidth = this.worldWidth * level.deadZoneWidthPct;
+      const dzLeft = this.worldWidth / 2 - dzWidth / 2;
+      const dzRight = dzLeft + dzWidth;
+      let targetScroll = level.scrollX;
+      if (this.player.x < dzLeft) targetScroll = worldX - dzLeft;
+      else if (this.player.x > dzRight) targetScroll = worldX - dzRight;
+      const maxScroll = level.levelLength;
+      if (targetScroll < 0) targetScroll = 0;
+      if (targetScroll > maxScroll) targetScroll = maxScroll;
+      const prevScroll = level.scrollX;
+      level.scrollX += (targetScroll - level.scrollX) * level.cameraLerp;
+      const move = level.scrollX - prevScroll;
+      this.player.x = worldX - level.scrollX;
+      level.update(delta, move);
     } else {
       this.level.update(delta);
     }
