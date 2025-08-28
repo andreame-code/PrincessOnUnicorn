@@ -447,32 +447,39 @@ export class Renderer {
       ctx.fillStyle = '#000';
       ctx.font = '16px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(`Punteggio: ${Math.floor(game.score)}`, 10, 20);
-      ctx.fillText(`High Score: ${Math.floor(game.highScore)}`, 10, 40);
+      ctx.textBaseline = 'top';
+      const margin = 10;
+      ctx.fillText(`Punteggio: ${Math.floor(game.score)}`, margin, margin);
+      ctx.fillText(
+        `High Score: ${Math.floor(game.highScore)}`,
+        margin,
+        margin + 20,
+      );
 
-      const coinX = game.canvas.width - 20;
+      const coinX = game.canvas.width - margin;
+      const coinY = margin + 10;
       ctx.fillStyle = 'gold';
       ctx.beginPath();
-      ctx.arc(coinX, 15, 8, 0, Math.PI * 2);
+      ctx.arc(coinX, coinY, 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#000';
       ctx.textAlign = 'right';
-      ctx.fillText(`x ${game.coins}`, coinX - 10, 20);
+      ctx.fillText(`x ${game.coins}`, coinX - 10, margin);
       ctx.textAlign = 'left';
 
       const p = game.player;
       const iconSize = 16;
-      const iconY = 48;
+      const iconY = margin + 38;
       if (game.levelNumber !== 3) {
         if (this.shieldSprite) {
-          ctx.drawImage(this.shieldSprite, 10, iconY, iconSize, iconSize);
+          ctx.drawImage(this.shieldSprite, margin, iconY, iconSize, iconSize);
         } else {
           ctx.strokeStyle = 'blue';
           ctx.beginPath();
-          ctx.arc(18, iconY + 8, 8, 0, Math.PI * 2);
+          ctx.arc(margin + 8, iconY + 8, 8, 0, Math.PI * 2);
           ctx.stroke();
         }
-        const barX = 10 + iconSize + 5;
+        const barX = margin + iconSize + 5;
         const barY = iconY + 2;
         const barWidth = 80;
         const barHeight = 10;
@@ -484,7 +491,7 @@ export class Renderer {
         ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
         ctx.fillRect(barX, barY, barWidth * progress, barHeight);
       } else {
-        let x = 10;
+        let x = margin;
         const icons = [];
         if (p.shieldTimer > 0) icons.push({ color: 'blue', label: 'A' });
         if (p.speedBoostTimer > 0) icons.push({ color: 'green', label: 'Z' });
