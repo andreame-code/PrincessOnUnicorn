@@ -6,7 +6,15 @@ on:
 
 jobs:
   test:
+    name: tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - label: ""
+          - label: Playwright Container
+            container: mcr.microsoft.com/playwright:v1
+    container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
