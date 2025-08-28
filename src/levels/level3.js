@@ -359,7 +359,10 @@ export class Level3 extends BaseLevel {
       return;
     }
 
-    this.distance += move > 0 ? move : 0;
+    this.distance += move;
+    const maxDist = this.levelLength - this.game.worldWidth;
+    if (this.distance < 0) this.distance = 0;
+    if (this.distance > maxDist) this.distance = maxDist;
 
     const moveArr = arr => arr.forEach(e => e.update(move, delta));
     moveArr(this.platforms);

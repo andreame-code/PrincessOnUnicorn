@@ -14,6 +14,7 @@ import {
   WIND_HOOVES_DURATION,
   SUGAR_WINGS_DURATION,
   WIND_HOOVES_SPEED,
+  LEVEL3_DEADZONE_RIGHT,
 } from './src/config.js';
 import { Obstacle } from './src/obstacle.js';
 
@@ -37,7 +38,27 @@ test('level 3 does not auto advance without input', () => {
   assert.strictEqual(level.distance, 0);
   player.moveRight();
   game.update(1);
-  assert.strictEqual(level.distance, player.moveSpeed);
+  assert.ok(level.distance > 0);
+  assert.ok(level.distance < player.moveSpeed);
+});
+
+test('camera remains still while player stays in dead zone', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const { level, player } = game;
+  player.moveRight();
+  game.update(0.5); // move inside dead zone
+  assert.strictEqual(level.distance, 0);
+});
+
+test('camera follows player smoothly outside dead zone', () => {
+  const game = createStubGame({ search: '?level=3' });
+  const { level, player } = game;
+  player.moveRight();
+  game.update(1); // move beyond dead zone
+  const overshoot =
+    player.x - game.worldWidth * LEVEL3_DEADZONE_RIGHT; // distance beyond zone
+  assert.ok(level.distance > 0);
+  assert.ok(level.distance < overshoot);
 });
 
 // After travelling the entire level and clearing entities the level should end.

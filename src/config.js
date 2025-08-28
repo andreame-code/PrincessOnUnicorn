@@ -36,3 +36,8 @@ export const SUGAR_WINGS_DURATION = 3;
 // Effect values for Level 3 power-ups
 export const WIND_HOOVES_SPEED = 6; // temporary move speed while active
 export const SUGAR_WINGS_EXTRA_JUMPS = 1; // additional jumps granted
+
+// Camera configuration for Level 3
+export const LEVEL3_DEADZONE_LEFT = 0.4; // 40% from left edge
+export const LEVEL3_DEADZONE_RIGHT = 0.6; // 60% from left edge
+export const LEVEL3_CAMERA_SMOOTHING = 0.1; // lerp factor per frame
