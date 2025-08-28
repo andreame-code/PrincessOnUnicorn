@@ -36,3 +36,11 @@ export const SUGAR_WINGS_DURATION = 3;
 // Effect values for Level 3 power-ups
 export const WIND_HOOVES_SPEED = 6; // temporary move speed while active
 export const SUGAR_WINGS_EXTRA_JUMPS = 1; // additional jumps granted
+
+// Platforming physics parameters for Level 3
+export const LEVEL3_ACCELERATION = 30; // ground acceleration (wu/s^2)
+export const LEVEL3_AIR_ACCELERATION = 15; // air acceleration (wu/s^2)
+export const LEVEL3_FRICTION = 15; // horizontal deceleration when no input
+export const LEVEL3_COYOTE_TIME = 0.1; // seconds after leaving a ledge you can still jump
+export const LEVEL3_JUMP_BUFFER = 0.1; // seconds a jump input is buffered before landing
+export const LEVEL3_JUMP_HOLD = 0.2; // max duration the jump button can be held for extra height

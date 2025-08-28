@@ -64,6 +64,7 @@ export class Game {
         ArrowLeft: () => this.handleInput('ArrowLeft', 'down'),
       };
       const keyupMap = {
+        Space: () => this.handleInput('Space', 'up'),
         ArrowRight: () => this.handleInput('ArrowRight', 'up'),
         ArrowLeft: () => this.handleInput('ArrowLeft', 'up'),
       };
@@ -185,6 +186,11 @@ export class Game {
       if (this.levelNumber !== 3) return;
       if (type === 'down') this.player.moveLeft();
       else this.player.stopHorizontal();
+      return;
+    }
+
+    if (code === 'Space' && type === 'up') {
+      this.player.releaseJump();
       return;
     }
 
