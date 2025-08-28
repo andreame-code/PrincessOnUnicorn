@@ -29,6 +29,7 @@ export class Renderer {
     // Simple background clouds
     this.clouds = [];
     this.lastCloudTime = 0;
+    this.lastCloudDistance = 0;
     this.initClouds();
   }
 
@@ -155,17 +156,18 @@ export class Renderer {
       ctx.closePath();
       ctx.fill();
 
-      // Moving clouds for level 3
-      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
-      if (!this.lastCloudTime) this.lastCloudTime = now;
-      const delta = (now - this.lastCloudTime) / 1000;
-      this.lastCloudTime = now;
+      // Moving clouds for level 3 based on camera distance
+      const dist = game.level.distance;
+      const deltaDist = dist - this.lastCloudDistance;
+      this.lastCloudDistance = dist;
 
       ctx.fillStyle = '#ffffffaa';
       this.clouds.forEach(c => {
-        c.x -= c.speed * delta;
+        c.x -= c.speed * deltaDist;
         if (c.x < -c.width) {
           c.x = game.canvas.width + c.width;
+        } else if (c.x > game.canvas.width + c.width) {
+          c.x = -c.width;
         }
         const r = c.height / 2;
         ctx.beginPath();
@@ -252,7 +254,12 @@ export class Renderer {
         const delta = (now - this.lastSpriteTime) / 1000;
         this.lastSpriteTime = now;
         this.playerFrameTimer += delta;
-        const anim = this.game.gamePaused || this.game.gameOver ? 'idle' : 'run';
+        const anim =
+          this.game.gamePaused ||
+          this.game.gameOver ||
+          (this.game.level.disableAutoScroll && this.game.player.vx === 0)
+            ? 'idle'
+            : 'run';
         const frames = this.playerSprites[anim];
         if (this.playerFrameTimer >= this.frameInterval) {
           this.playerFrameTimer = 0;

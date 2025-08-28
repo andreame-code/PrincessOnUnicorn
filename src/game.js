@@ -216,11 +216,18 @@ export class Game {
     // Always apply gravity after a loss so the death animation completes.
     // Only skip gravity when the player has won, so they remain in place.
     const wasJumping = this.player.jumping;
+    const prevX = this.player.x;
     this.player.update(this.win ? 0 : this.gravity, this.groundY, delta);
+    const deltaX = this.player.x - prevX;
+    if (this.level.disableAutoScroll) {
+      this.player.x = prevX;
+      this.level.update(delta, deltaX);
+    } else {
+      this.level.update(delta);
+    }
     if (wasJumping && !this.player.jumping) {
       this.renderer.playSound('bounce');
     }
-    this.level.update(delta);
     if (this.gameOver && !this.player.dead && !this.win) {
       this.player.die();
     }
