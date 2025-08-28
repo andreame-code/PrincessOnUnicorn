@@ -4,7 +4,6 @@ import { ShadowCrow } from '../entities/shadowCrow.js';
 import { RhombusSprite } from '../entities/rhombusSprite.js';
 import { ThornGuard } from '../entities/thornGuard.js';
 import { PortalGuardian } from '../entities/portalGuardian.js';
-import { Platform } from '../entities/platform.js';
 import { CloudPlatform } from '../entities/cloudPlatform.js';
 import { FallingPlatform } from '../entities/fallingPlatform.js';
 import { Pipe } from '../entities/pipe.js';
@@ -31,18 +30,20 @@ import {
 import { PowerUp, POWERUP } from '../entities/powerUp.js';
 
 // Tile identifiers inspired by tylerreichle/mario_js.
-// 0 = empty, 1 = ground, 2 = platform, 3 = pipe, 4 = block, 5 = enemy
-// 6 = star collectible, 7 = checkpoint, 8 = rainbow portal (finish)
+// 0 = empty, 1 = ground, 2 = cloud platform, 3 = falling platform
+// 4 = pipe, 5 = block, 6 = enemy, 7 = star collectible
+// 8 = checkpoint, 9 = rainbow portal (finish)
 const TILE = {
   EMPTY: 0,
   GROUND: 1,
-  PLATFORM: 2,
-  PIPE: 3,
-  BLOCK: 4,
-  GOOMBA: 5,
-  STAR: 6,
-  CHECKPOINT: 7,
-  PORTAL: 8,
+  CLOUD_PLATFORM: 2,
+  FALLING_PLATFORM: 3,
+  PIPE: 4,
+  BLOCK: 5,
+  GOOMBA: 6,
+  STAR: 7,
+  CHECKPOINT: 8,
+  PORTAL: 9,
 };
 
 // Two dimensional map describing the level layout. Each number
@@ -57,7 +58,9 @@ const row1 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 
 // Ability section - small platforms to practice jumping
-for (let c = 10; c < 20; c += 2) row1[c] = TILE.PLATFORM;
+for (let c = 10, i = 0; c < 20; c += 2, i++) {
+  row1[c] = i % 2 === 0 ? TILE.CLOUD_PLATFORM : TILE.FALLING_PLATFORM;
+}
 
 // Secret star path high in the sky
 for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
@@ -134,13 +137,13 @@ export class Level3 extends BaseLevel {
         const x = this.game.worldWidth + col * this.tileSize + this.tileSize / 2;
         const y = this.game.groundY - row * this.tileSize - this.tileSize / 2;
         switch (tile) {
-          case TILE.PLATFORM:
-            const cls = this.platforms.length % 2 === 0 ? CloudPlatform : FallingPlatform;
-            if (cls === FallingPlatform) {
-              this.platforms.push(new FallingPlatform(x, y, this.tileSize, this.game.groundY));
-            } else {
-              this.platforms.push(new CloudPlatform(x, y, this.tileSize));
-            }
+          case TILE.CLOUD_PLATFORM:
+            this.platforms.push(new CloudPlatform(x, y, this.tileSize));
+            break;
+          case TILE.FALLING_PLATFORM:
+            this.platforms.push(
+              new FallingPlatform(x, y, this.tileSize, this.game.groundY)
+            );
             break;
           case TILE.PIPE:
             this.pipes.push(new Pipe(x, this.game.groundY, this.tileSize));
