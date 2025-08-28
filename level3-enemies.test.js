@@ -1,6 +1,6 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert';
-import { createLevel3Game, FRAME } from './level3TestHelpers.js';
+import { withLevel3, FRAME } from './level3TestHelpers.js';
 import { createStubGame } from './testHelpers.js';
 import { Goomba } from './src/entities/goomba.js';
 import { ShadowCrow } from './src/entities/shadowCrow.js';
@@ -13,23 +13,24 @@ import { PortalGuardian } from './src/entities/portalGuardian.js';
 describe('Level 3 enemies', () => {
   describe('spawning', () => {
     test('level 3 spawns exclusive enemies', () => {
-      const game = createLevel3Game({ skipLevelUpdate: true });
-      const level = game.level;
-      assert.ok(level.enemies.some(e => e instanceof ShadowCrow));
-      assert.ok(level.enemies.some(e => e instanceof RhombusSprite));
-      assert.ok(level.enemies.some(e => e instanceof ThornGuard));
+      withLevel3({ skipLevelUpdate: true }, ({ level }) => {
+        assert.ok(level.enemies.some(e => e instanceof ShadowCrow));
+        assert.ok(level.enemies.some(e => e instanceof RhombusSprite));
+        assert.ok(level.enemies.some(e => e instanceof ThornGuard));
+      });
     });
 
     test('portal guardian only appears in level 3', () => {
       const l1 = createStubGame({ search: '?level=1', skipLevelUpdate: true }).level;
       const l2 = createStubGame({ search: '?level=2', skipLevelUpdate: true }).level;
-      const l3 = createLevel3Game({ skipLevelUpdate: true }).level;
-      assert.ok(!(l1.boss instanceof PortalGuardian));
-      assert.ok(!(l2.boss instanceof PortalGuardian));
-      assert.ok(l3.boss instanceof PortalGuardian);
+      withLevel3({ skipLevelUpdate: true }, ({ level }) => {
+        assert.ok(!(l1.boss instanceof PortalGuardian));
+        assert.ok(!(l2.boss instanceof PortalGuardian));
+        assert.ok(level.boss instanceof PortalGuardian);
+      });
     });
 
-    test('exclusive enemies only appear in level 3', () => {
+    test('exclusive enemies are absent from levels 1 and 2', () => {
       const g1 = createStubGame({ search: '?level=1', skipLevelUpdate: true });
       const g2 = createStubGame({ search: '?level=2', skipLevelUpdate: true });
       const hasExclusive = lvl =>
@@ -46,21 +47,20 @@ describe('Level 3 enemies', () => {
 
   describe('boss', () => {
     test('defeating portal guardian opens portal', () => {
-      const game = createLevel3Game();
-      const level = game.level;
-      const boss = level.boss;
-      const player = game.player;
-      assert.strictEqual(level.portal.open, false);
-      assert.strictEqual(boss.phase, 1);
-      for (let i = 0; i < 3; i++) {
-        player.x = boss.x;
-        player.y = boss.y - boss.height / 2 - player.height / 2 + 0.01;
-        player.vy = 1;
-        level.update(FRAME);
-        if (i < 2) assert.strictEqual(boss.phase, i + 2);
-      }
-      assert.ok(boss.defeated);
-      assert.strictEqual(level.portal.open, true);
+      withLevel3({}, ({ game, level, player }) => {
+        const boss = level.boss;
+        assert.strictEqual(level.portal.open, false);
+        assert.strictEqual(boss.phase, 1);
+        for (let i = 0; i < 3; i++) {
+          player.x = boss.x;
+          player.y = boss.y - boss.height / 2 - player.height / 2 + 0.01;
+          player.vy = 1;
+          level.update(FRAME);
+          if (i < 2) assert.strictEqual(boss.phase, i + 2);
+        }
+        assert.ok(boss.defeated);
+        assert.strictEqual(level.portal.open, true);
+      });
     });
   });
 
@@ -93,32 +93,30 @@ describe('Level 3 enemies', () => {
 
   describe('combat', () => {
     test('player defeats enemy by landing on it', () => {
-      const game = createLevel3Game();
-      const level = game.level;
-      const player = game.player;
-      const enemy = new Goomba(player.x + 0.2, game.groundY - 0.5, 1);
-      level.enemies = [enemy];
-      level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
-      player.x = enemy.x;
-      player.y = enemy.y - enemy.height / 2 - player.height / 2 + 0.01;
-      player.vy = 1;
-      level.update(FRAME);
-      assert.strictEqual(level.enemies.length, 0);
-      assert.strictEqual(game.gameOver, false);
+      withLevel3({}, ({ game, level, player }) => {
+        const enemy = new Goomba(player.x + 0.2, game.groundY - 0.5, 1);
+        level.enemies = [enemy];
+        level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
+        player.x = enemy.x;
+        player.y = enemy.y - enemy.height / 2 - player.height / 2 + 0.01;
+        player.vy = 1;
+        level.update(FRAME);
+        assert.strictEqual(level.enemies.length, 0);
+        assert.strictEqual(game.gameOver, false);
+      });
     });
 
     test('player is hit when colliding with enemy from side', () => {
-      const game = createLevel3Game();
-      const level = game.level;
-      const player = game.player;
-      const enemy = new Goomba(player.x + 0.5, game.groundY - 0.5, 1);
-      level.enemies = [enemy];
-      level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
-      player.x = enemy.x - enemy.width / 2 - player.width / 2 + 0.01;
-      player.y = enemy.y;
-      player.vy = 0;
-      level.update(FRAME);
-      assert.strictEqual(game.gameOver, true);
+      withLevel3({}, ({ game, level, player }) => {
+        const enemy = new Goomba(player.x + 0.5, game.groundY - 0.5, 1);
+        level.enemies = [enemy];
+        level.obstacles = [...level.platforms, ...level.pipes, ...level.blocks, enemy];
+        player.x = enemy.x - enemy.width / 2 - player.width / 2 + 0.01;
+        player.y = enemy.y;
+        player.vy = 0;
+        level.update(FRAME);
+        assert.strictEqual(game.gameOver, true);
+      });
     });
   });
 });
