@@ -53,27 +53,42 @@ const TILE = {
 // level with a hidden star path, a central checkpoint and a rainbow
 // portal at the end.
 const MAP_WIDTH = 240; // ~120 seconds at move speed ~2
+
+// Column markers to aid level tuning
+const ABILITY_SECTION_START = 10; // beginning of platform practice
+const ABILITY_SECTION_END = 20; // end of platform practice
+const SECRET_STAR_START = 30; // start of hidden star path
+const SECRET_STAR_END = 35; // end (exclusive) of hidden star path
+const GOOMBA_COLUMNS = [60, 90, 130, 170, 210]; // enemy challenge columns
+const PIPE_COLUMNS = [70, 100, 160, 190]; // pipe obstacle columns
+const CHECKPOINT_COLUMN = 120; // central checkpoint location
+const PORTAL_OFFSET_FROM_END = 5; // distance from end for final portal
+
 const ground = Array(MAP_WIDTH).fill(TILE.GROUND);
 const row1 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 
 // Ability section - small platforms to practice jumping
-for (let c = 10, i = 0; c < 20; c += 2, i++) {
+for (
+  let c = ABILITY_SECTION_START, i = 0;
+  c < ABILITY_SECTION_END;
+  c += 2, i++
+) {
   row1[c] = i % 2 === 0 ? TILE.CLOUD_PLATFORM : TILE.FALLING_PLATFORM;
 }
 
 // Secret star path high in the sky
-for (let c = 30; c < 35; c++) row2[c] = TILE.STAR;
+for (let c = SECRET_STAR_START; c < SECRET_STAR_END; c++) row2[c] = TILE.STAR;
 
 // Challenge obstacles
-[60, 90, 130, 170, 210].forEach(c => (row1[c] = TILE.GOOMBA));
-[70, 100, 160, 190].forEach(c => (row1[c] = TILE.PIPE));
+GOOMBA_COLUMNS.forEach(c => (row1[c] = TILE.GOOMBA));
+PIPE_COLUMNS.forEach(c => (row1[c] = TILE.PIPE));
 
 // Central checkpoint
-row1[120] = TILE.CHECKPOINT;
+row1[CHECKPOINT_COLUMN] = TILE.CHECKPOINT;
 
 // Final rainbow portal
-row1[MAP_WIDTH - 5] = TILE.PORTAL;
+row1[MAP_WIDTH - PORTAL_OFFSET_FROM_END] = TILE.PORTAL;
 
 const MAP = [ground, row1, row2];
 
