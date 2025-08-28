@@ -14,6 +14,12 @@ import {
   SUGAR_WINGS_DURATION,
   WIND_HOOVES_SPEED,
   SUGAR_WINGS_EXTRA_JUMPS,
+  LEVEL3_ACCELERATION,
+  LEVEL3_AIR_ACCELERATION,
+  LEVEL3_FRICTION,
+  LEVEL3_COYOTE_TIME,
+  LEVEL3_JUMP_BUFFER,
+  LEVEL3_JUMP_HOLD,
 } from '../config.js';
 import { PowerUp, POWERUP } from '../entities/powerUp.js';
 
@@ -184,6 +190,15 @@ export class Level3 extends BaseLevel {
     super(game, random);
     this.game.player.maxJumps = 2;
     this.game.player.defaultMaxJumps = 2;
+    this.game.player.enablePlatformControls({
+      acceleration: LEVEL3_ACCELERATION,
+      airAcceleration: LEVEL3_AIR_ACCELERATION,
+      friction: LEVEL3_FRICTION,
+      coyoteTime: LEVEL3_COYOTE_TIME,
+      jumpBuffer: LEVEL3_JUMP_BUFFER,
+      jumpHold: LEVEL3_JUMP_HOLD,
+      jumpHoldForce: GRAVITY,
+    });
     this.map = MAP;
     this.tileSize = 1; // world units per tile
     this.distance = 0;
