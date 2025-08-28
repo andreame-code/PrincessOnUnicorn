@@ -28,6 +28,7 @@ import {
   LEVEL3_JUMP_HOLD,
 } from '../config.js';
 import { PowerUp, POWERUP } from '../entities/powerUp.js';
+import layout from './level3Map.json' with { type: 'json' };
 
 // Tile identifiers inspired by tylerreichle/mario_js.
 // 0 = empty, 1 = ground, 2 = cloud platform, 3 = falling platform
@@ -52,17 +53,18 @@ const TILE = {
 // The map is programmatically generated to provide a long progressive
 // level with a hidden star path, a central checkpoint and a rainbow
 // portal at the end.
-const MAP_WIDTH = 240; // ~120 seconds at move speed ~2
+// Layout constants loaded from JSON to simplify future tuning
+const MAP_WIDTH = layout.mapWidth; // ~120 seconds at move speed ~2
 
 // Column markers to aid level tuning
-const ABILITY_SECTION_START = 10; // beginning of platform practice
-const ABILITY_SECTION_END = 20; // end of platform practice
-const SECRET_STAR_START = 30; // start of hidden star path
-const SECRET_STAR_END = 35; // end (exclusive) of hidden star path
-const GOOMBA_COLUMNS = [60, 90, 130, 170, 210]; // enemy challenge columns
-const PIPE_COLUMNS = [70, 100, 160, 190]; // pipe obstacle columns
-const CHECKPOINT_COLUMN = 120; // central checkpoint location
-const PORTAL_OFFSET_FROM_END = 5; // distance from end for final portal
+const ABILITY_SECTION_START = layout.abilitySection.start; // beginning of platform practice
+const ABILITY_SECTION_END = layout.abilitySection.end; // end of platform practice
+const SECRET_STAR_START = layout.secretStar.start; // start of hidden star path
+const SECRET_STAR_END = layout.secretStar.end; // end (exclusive) of hidden star path
+const GOOMBA_COLUMNS = layout.goombaColumns; // enemy challenge columns
+const PIPE_COLUMNS = layout.pipeColumns; // pipe obstacle columns
+const CHECKPOINT_COLUMN = layout.checkpointColumn; // central checkpoint location
+const PORTAL_OFFSET_FROM_END = layout.portalOffsetFromEnd; // distance from end for final portal
 
 const ground = Array(MAP_WIDTH).fill(TILE.GROUND);
 const row1 = Array(MAP_WIDTH).fill(TILE.EMPTY);
