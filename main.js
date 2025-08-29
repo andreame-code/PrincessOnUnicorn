@@ -37,9 +37,14 @@ window.addEventListener('DOMContentLoaded', () => {
       game.reset();
     } else {
       game = new Game(canvas);
+      game.onLevelChange = level => {
+        mobileControls.classList.toggle('hidden', level !== 3);
+      };
     }
     game.resizeCanvas();
-    mobileControls.classList.toggle('hidden', game.levelNumber !== 3);
+    if (typeof game.onLevelChange === 'function') {
+      game.onLevelChange(game.levelNumber);
+    }
   });
 
   instructionsButton.addEventListener('click', () => {
