@@ -9,8 +9,27 @@ window.addEventListener('DOMContentLoaded', () => {
   const instructionsButton = document.getElementById('instructions-button');
   const creditsButton = document.getElementById('credits-button');
   const overlay = new Overlay();
+  const mobileControls = document.getElementById('mobile-controls');
+  const leftBtn = document.getElementById('left-control');
+  const rightBtn = document.getElementById('right-control');
+  const jumpBtn = document.getElementById('jump-control');
 
   let game;
+
+  const sendInput = (code, type) => {
+    if (!game) return;
+    game.handleInput(code, type);
+  };
+
+  const stop = e => e.stopPropagation();
+
+  leftBtn.addEventListener('pointerdown', e => { stop(e); sendInput('ArrowLeft', 'down'); });
+  leftBtn.addEventListener('pointerup', e => { stop(e); sendInput('ArrowLeft', 'up'); });
+  rightBtn.addEventListener('pointerdown', e => { stop(e); sendInput('ArrowRight', 'down'); });
+  rightBtn.addEventListener('pointerup', e => { stop(e); sendInput('ArrowRight', 'up'); });
+  jumpBtn.addEventListener('pointerdown', e => { stop(e); sendInput('Space', 'down'); });
+  jumpBtn.addEventListener('pointerup', e => { stop(e); sendInput('Space', 'up'); });
+
   playButton.addEventListener('click', () => {
     menu.classList.add('hidden');
     canvas.classList.remove('hidden');
@@ -20,6 +39,7 @@ window.addEventListener('DOMContentLoaded', () => {
       game = new Game(canvas);
     }
     game.resizeCanvas();
+    mobileControls.classList.toggle('hidden', game.levelNumber !== 3);
   });
 
   instructionsButton.addEventListener('click', () => {
