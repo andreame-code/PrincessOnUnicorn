@@ -22,6 +22,7 @@ export class Game {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.overlay = new Overlay();
+    this.onLevelChange = null;
     this.random = randomFn;
 
     this.speed = GAME_SPEED; // world units per second
@@ -261,6 +262,9 @@ export class Game {
 
     if (this.levelNumber === 1 && this.score >= LEVEL_UP_SCORE) {
       this.levelNumber = 2;
+      if (typeof this.onLevelChange === 'function') {
+        this.onLevelChange(this.levelNumber);
+      }
       this.initializeLevel();
       this.gamePaused = true;
       this.showOverlay(STORY_TEXT[1], () => {
@@ -270,6 +274,9 @@ export class Game {
 
     if (this.levelNumber === 2 && this.gameOver && this.win) {
       this.levelNumber = 3;
+      if (typeof this.onLevelChange === 'function') {
+        this.onLevelChange(this.levelNumber);
+      }
       this.initializeLevel();
       this.gamePaused = true;
       this.gameOver = false;
