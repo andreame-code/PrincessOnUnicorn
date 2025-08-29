@@ -79,4 +79,26 @@ canvas {
   color: #f5e6c8;
   font-family: "Bellefair", serif;
 }
+#mobile-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+}
+
+#mobile-controls button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 1.5em;
+  background: linear-gradient(#8b5a2b, #5e3f1c);
+  border: 2px solid #d4af37;
+  color: #f5e6c8;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #mobile-controls { display: none; }
+}
 .hidden { display: none !important; }
