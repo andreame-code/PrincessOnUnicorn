@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { isColliding } from './collision.js';
+import { isColliding, isLandingOn } from './collision.js';
 
 const groundY = 1.5;
 
@@ -51,4 +51,25 @@ test('extended width collider detects earlier collision', () => {
   const obstacle = createEntity(1.45, groundY, 0.32, 0.64);
   assert.strictEqual(isColliding(unicorn, obstacle), false);
   assert.strictEqual(isColliding(shielded, obstacle), true);
+});
+
+test('landing detected when overlaps are equal', () => {
+  const platform = createEntity(0, 1, 1, 1);
+  const falling = createEntity(0.75, 0.25, 0.25, 1);
+  falling.vy = 1;
+  assert.strictEqual(isLandingOn(falling, platform, 0), true);
+});
+
+test('allows small landing tolerance with epsilon', () => {
+  const platform = createEntity(0, 1, 1, 1);
+  const falling = createEntity(0.81, 0.2, 0.19, 1);
+  falling.vy = 1;
+  assert.strictEqual(isLandingOn(falling, platform, 0.02), true);
+});
+
+test('no landing when overlap exceeds epsilon', () => {
+  const platform = createEntity(0, 1, 1, 1);
+  const falling = createEntity(0.81, 0.2, 0.19, 1);
+  falling.vy = 1;
+  assert.strictEqual(isLandingOn(falling, platform, 0.005), false);
 });
