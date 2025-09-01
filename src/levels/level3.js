@@ -348,17 +348,7 @@ export class Level3 extends BaseLevel {
     ];
   }
 
-  update(delta, move = 0) {
-    if (this.respawning) {
-      this.respawnTimer += delta;
-      if (this.respawnTimer >= 1) {
-        this.respawnPlayer();
-      }
-      return;
-    }
-
-    this.distance += move > 0 ? move : 0;
-
+  updateEntities(move, delta) {
     const moveArr = arr => arr.forEach(e => e.update(move, delta));
     moveArr(this.platforms);
     moveArr(this.pipes);
@@ -371,15 +361,12 @@ export class Level3 extends BaseLevel {
     const spawnedWalls = [];
     this.enemies.forEach(e => {
       const spawn = e.update(move, delta);
-      if (spawn && spawn.length) {
-        spawnedWalls.push(...spawn);
-      }
+      if (spawn && spawn.length) spawnedWalls.push(...spawn);
     });
     spawnedWalls.forEach(w => this.thornWalls.push(w));
+  }
 
-    const player = this.game.player;
-
-    // Handle platform collisions allowing the player to stand on them.
+  resolvePlatformCollisions(player) {
     for (const p of this.platforms) {
       if (!p.visible) continue;
       if (isColliding(player, p)) {
@@ -420,7 +407,9 @@ export class Level3 extends BaseLevel {
         }
       }
     }
+  }
 
+  handleEnemies(player) {
     const collideArr = arr => {
       for (const e of arr) {
         if (isColliding(player, e)) {
@@ -431,11 +420,10 @@ export class Level3 extends BaseLevel {
       return true;
     };
 
-    if (!collideArr(this.pipes)) return;
-    if (!collideArr(this.blocks)) return;
-    if (!collideArr(this.thornWalls)) return;
+    if (!collideArr(this.pipes)) return false;
+    if (!collideArr(this.blocks)) return false;
+    if (!collideArr(this.thornWalls)) return false;
 
-    // Handle enemy collisions and cull off-screen entities
     this.enemies = this.enemies.filter(e => {
       if (e === this.boss) {
         if (isLandingOn(player, e)) {
@@ -467,7 +455,10 @@ export class Level3 extends BaseLevel {
       }
       return e.x + e.width / 2 > 0;
     });
+    return true;
+  }
 
+  processPickups(player) {
     const filterArr = arr => arr.filter(e => e.x + e.width / 2 > 0);
     this.platforms = filterArr(this.platforms);
     this.pipes = filterArr(this.pipes);
@@ -487,12 +478,16 @@ export class Level3 extends BaseLevel {
         } else if (p.kind === POWERUP.WIND_HOOVES) {
           player.activateSpeedBoost(WIND_HOOVES_DURATION, WIND_HOOVES_SPEED);
         } else if (p.kind === POWERUP.SUGAR_WINGS) {
-          player.activateWings(SUGAR_WINGS_DURATION, SUGAR_WINGS_EXTRA_JUMPS);
+          player.activateWings(
+            SUGAR_WINGS_DURATION,
+            SUGAR_WINGS_EXTRA_JUMPS
+          );
         }
         return false;
       }
       return p.x + p.width / 2 > 0;
     });
+
     if (
       !this.checkpointReached &&
       this.checkpoint &&
@@ -516,6 +511,26 @@ export class Level3 extends BaseLevel {
       this.game.gameOver = true;
       this.game.win = true;
     }
+  }
+
+  update(delta, move = 0) {
+    if (this.respawning) {
+      this.respawnTimer += delta;
+      if (this.respawnTimer >= 1) {
+        this.respawnPlayer();
+      }
+      return;
+    }
+
+    this.distance += move > 0 ? move : 0;
+
+    this.updateEntities(move, delta);
+
+    const player = this.game.player;
+    this.resolvePlatformCollisions(player);
+    if (!this.handleEnemies(player)) return;
+    this.processPickups(player);
+
     this.obstacles = [
       ...this.platforms.filter(p => p.visible),
       ...this.pipes,
