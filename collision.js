@@ -17,7 +17,9 @@ export function isColliding(a, b) {
   );
 }
 
-export function isLandingOn(a, b) {
+export const LANDING_EPSILON = 0.001;
+
+export function isLandingOn(a, b, epsilon = LANDING_EPSILON) {
   if (!isColliding(a, b)) return false;
   const aBottom = a.y + a.height / 2;
   const bTop = b.y - b.height / 2;
@@ -27,5 +29,5 @@ export function isLandingOn(a, b) {
   const bRight = b.x + b.width / 2;
   const bLeft = b.x - b.width / 2;
   const horizontalOverlap = Math.min(aRight, bRight) - Math.max(aLeft, bLeft);
-  return verticalOverlap < horizontalOverlap && a.vy > 0;
+  return verticalOverlap <= horizontalOverlap + epsilon && a.vy > 0;
 }
