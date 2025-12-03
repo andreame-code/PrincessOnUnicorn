@@ -256,19 +256,21 @@ export class Level3 extends BaseLevel {
 
   respawnPlayer() {
     const player = this.game.player;
-    this.scrollX = 0;
-    this.distance = 0;
-    const { x, y } = this.respawnPoint || {
+    const respawn = this.respawnPoint || {
       x: player.x,
       y: this.game.groundY - player.height / 2,
+      scrollX: 0,
+      distance: 0,
     };
-    player.x = x;
-    player.y = y;
+    player.x = respawn.x;
+    player.y = respawn.y;
     player.vx = 0;
     player.vy = 0;
     player.dead = false;
     player.jumping = false;
     player.jumpCount = 0;
+    this.scrollX = respawn.scrollX || 0;
+    this.distance = respawn.distance || 0;
     this.respawning = false;
 
     // Rebuild platforms, enemies and power-ups from the original level map so
@@ -296,8 +298,11 @@ export class Level3 extends BaseLevel {
     // Only keep objects that are ahead of the respawn point.
     const filterAhead = arr => arr.filter(o => o.x + o.width / 2 > player.x - 0.01);
 
+    const scrollOffset = this.scrollX;
+
     // Reset stateful properties so entities behave as if never interacted with.
     this.platforms = filterAhead(this.platforms).map(p => {
+      p.x -= scrollOffset;
       if (p.kind === 'cloud') {
         p.visible = true;
         p.stepped = false;
@@ -313,10 +318,17 @@ export class Level3 extends BaseLevel {
       return p;
     });
 
-    this.pipes = filterAhead(this.pipes);
-    this.blocks = filterAhead(this.blocks);
+    this.pipes = filterAhead(this.pipes).map(o => {
+      o.x -= scrollOffset;
+      return o;
+    });
+    this.blocks = filterAhead(this.blocks).map(o => {
+      o.x -= scrollOffset;
+      return o;
+    });
 
     this.enemies = filterAhead(this.enemies).map(e => {
+      e.x -= scrollOffset;
       if (e instanceof ShadowCrow) {
         e.time = 0;
         e.y = e.baseY;
@@ -333,9 +345,21 @@ export class Level3 extends BaseLevel {
       return e;
     });
 
-    this.thornWalls = filterAhead(this.thornWalls);
-    this.stars = filterAhead(this.stars);
-    this.powerUps = filterAhead(this.powerUps);
+    this.thornWalls = filterAhead(this.thornWalls).map(o => {
+      o.x -= scrollOffset;
+      return o;
+    });
+    this.stars = filterAhead(this.stars).map(o => {
+      o.x -= scrollOffset;
+      return o;
+    });
+    this.powerUps = filterAhead(this.powerUps).map(o => {
+      o.x -= scrollOffset;
+      return o;
+    });
+
+    if (this.checkpoint) this.checkpoint.x -= scrollOffset;
+    if (this.portal) this.portal.x -= scrollOffset;
 
     // Rebuild combined obstacle list for collision checks.
     this.obstacles = [
@@ -494,7 +518,12 @@ export class Level3 extends BaseLevel {
       isColliding(player, this.checkpoint)
     ) {
       this.checkpointReached = true;
-      this.respawnPoint = { x: player.x, y: this.game.groundY - player.height / 2 };
+      this.respawnPoint = {
+        x: player.x,
+        y: this.game.groundY - player.height / 2,
+        scrollX: this.scrollX,
+        distance: this.distance,
+      };
     }
     if (this.portal && this.portal.open && isColliding(player, this.portal)) {
       this.game.gameOver = true;
