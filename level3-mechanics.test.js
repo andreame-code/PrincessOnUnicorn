@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { withLevel3, FRAME } from './level3TestHelpers.js';
 import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
+import layout from './src/levels/level3Map.json' assert { type: 'json' };
 import { JUMP_VELOCITY, SHIELD_GRACE } from './src/config.js';
 import { Goomba } from './src/entities/goomba.js';
 import { Block } from './src/entities/block.js';
@@ -389,6 +390,37 @@ describe('Level 3 mechanics', () => {
         assert.strictEqual(level.respawning, false);
         assert.strictEqual(game.gameOver, false);
         assert.ok(Math.abs(player.x - level.respawnPoint.x) < 1e-6);
+      });
+    });
+
+    test('respawn restores checkpoint progress and world position', () => {
+      withLevel3({ skipLevelUpdate: true }, ({ game, level, player }) => {
+        const scrollX = 25;
+        const distance = 25;
+        level.checkpointReached = true;
+        level.respawnPoint = {
+          x: player.x,
+          y: game.groundY - player.height / 2,
+          scrollX,
+          distance,
+        };
+
+        level.respawnPlayer();
+
+        assert.strictEqual(level.scrollX, scrollX);
+        assert.strictEqual(level.distance, distance);
+        assert.strictEqual(player.x, level.respawnPoint.x);
+
+        const expectedPlatformX =
+          game.worldWidth + layout.abilitySection.start + 0.5 - scrollX;
+        const firstPlatform = level.platforms.find(
+          p => Math.abs(p.x - expectedPlatformX) < 1e-6
+        );
+        assert.ok(firstPlatform, 'platform positions should reflect scrolled world');
+
+        const expectedCheckpointX =
+          game.worldWidth + layout.checkpointColumn + 0.5 - scrollX;
+        assert.ok(Math.abs(level.checkpoint.x - expectedCheckpointX) < 1e-6);
       });
     });
 
