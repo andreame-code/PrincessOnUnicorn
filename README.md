@@ -50,7 +50,13 @@ npm test
 During development you can enable watch mode to automatically rerun tests on file changes:
 
 ```
-npm test -- --watch
+npm run test:watch
+```
+
+To run the end-to-end user acceptance suite only:
+
+```
+npm run test:uat
 ```
 
 ## Contributing
