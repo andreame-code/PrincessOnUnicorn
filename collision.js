@@ -1,4 +1,6 @@
-export function isColliding(a, b) {
+export const COLLISION_EPSILON = 0.0001;
+
+export function isColliding(a, b, epsilon = COLLISION_EPSILON) {
   const aLeft = a.x - a.width / 2;
   const aRight = a.x + a.width / 2;
   const aTop = a.y - a.height / 2;
@@ -10,10 +12,10 @@ export function isColliding(a, b) {
   const bBottom = b.y + b.height / 2;
 
   return (
-    aLeft < bRight &&
-    aRight > bLeft &&
-    aBottom > bTop &&
-    aTop < bBottom
+    aLeft <= bRight + epsilon &&
+    aRight >= bLeft - epsilon &&
+    aBottom >= bTop - epsilon &&
+    aTop <= bBottom + epsilon
   );
 }
 
