@@ -1,15 +1,15 @@
 {
-  "mapWidth": 240,
+  "mapWidth": 220,
   "abilitySection": {
-    "start": 10,
-    "end": 20
+    "start": 12,
+    "end": 32
   },
   "secretStar": {
     "start": 30,
     "end": 35
   },
-  "goombaColumns": [60, 90, 130, 170, 210],
-  "pipeColumns": [70, 100, 160, 190],
-  "checkpointColumn": 120,
+  "goombaColumns": [85, 120, 155, 195],
+  "pipeColumns": [100, 140, 180],
+  "checkpointColumn": 110,
   "portalOffsetFromEnd": 5
 }
