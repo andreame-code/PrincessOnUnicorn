@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { withLevel3, FRAME } from './level3TestHelpers.js';
 import { createStubGame, destroyStubGame } from './testHelpers.js';
 import { LEVEL3_MAP } from './src/levels/level3.js';
-import layout from './src/levels/level3Map.json' assert { type: 'json' };
+import layout from './src/levels/level3Map.json' with { type: 'json' };
 import { JUMP_VELOCITY, SHIELD_GRACE } from './src/config.js';
 import { Goomba } from './src/entities/goomba.js';
 import { Block } from './src/entities/block.js';
