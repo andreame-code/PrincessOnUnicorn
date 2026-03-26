@@ -28,7 +28,6 @@ import {
   LEVEL3_JUMP_HOLD,
 } from '../config.js';
 import { PowerUp, POWERUP } from '../entities/powerUp.js';
-import layout from './level3Map.json' with { type: 'json' };
 
 // Tile identifiers inspired by tylerreichle/mario_js.
 // 0 = empty, 1 = ground, 2 = cloud platform, 3 = falling platform
@@ -50,54 +49,63 @@ const TILE = {
 // Two dimensional map describing the level layout. Each number
 // corresponds to a tile type defined above. The first row is the
 // ground and subsequent rows stack upwards.
-// The map is programmatically generated to provide a long progressive
-// level with a hidden star path, a central checkpoint and a rainbow
-// portal at the end.
-// Layout constants loaded from JSON to simplify future tuning
-const MAP_WIDTH = layout.mapWidth; // ~120 seconds at move speed ~2
-
-// Column markers to aid level tuning
-const ABILITY_SECTION_START = layout.abilitySection.start; // beginning of platform practice
-const ABILITY_SECTION_END = layout.abilitySection.end; // end of platform practice
-const SECRET_STAR_START = layout.secretStar.start; // start of hidden star path
-const SECRET_STAR_END = layout.secretStar.end; // end (exclusive) of hidden star path
-const GOOMBA_COLUMNS = layout.goombaColumns; // enemy challenge columns
-const PIPE_COLUMNS = layout.pipeColumns; // pipe obstacle columns
-const CHECKPOINT_COLUMN = layout.checkpointColumn; // central checkpoint location
-const PORTAL_OFFSET_FROM_END = layout.portalOffsetFromEnd; // distance from end for final portal
+//
+// Rhythm goals for this map:
+// - clear left-to-right progression
+// - easy opening, then small jump lessons
+// - readable obstacles with a few gentle surprises
+// - increasing challenge after a midpoint checkpoint
+// - explicit finale with guardian + portal
+const MAP_WIDTH = 220; // ~100s at move speed ~2.2
+const CHECKPOINT_COLUMN = 110;
+const PORTAL_OFFSET_FROM_END = 6;
 
 const ground = Array(MAP_WIDTH).fill(TILE.GROUND);
 const row1 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 const row2 = Array(MAP_WIDTH).fill(TILE.EMPTY);
+const row3 = Array(MAP_WIDTH).fill(TILE.EMPTY);
+const row4 = Array(MAP_WIDTH).fill(TILE.EMPTY);
 
-// Ability section - small platforms to practice jumping
-const CLOUD_PLATFORM_COLUMNS = [];
-const FALLING_PLATFORM_COLUMNS = [];
-for (
-  let c = ABILITY_SECTION_START, i = 0;
-  c < ABILITY_SECTION_END;
-  c += 2, i++
-) {
-  if (i % 2 === 0) CLOUD_PLATFORM_COLUMNS.push(c);
-  else FALLING_PLATFORM_COLUMNS.push(c);
-}
-CLOUD_PLATFORM_COLUMNS.forEach(c => (row1[c] = TILE.CLOUD_PLATFORM));
-FALLING_PLATFORM_COLUMNS.forEach(c => (row1[c] = TILE.FALLING_PLATFORM));
+const setTiles = (row, columns, tile) => {
+  columns.forEach(col => {
+    if (col >= 0 && col < MAP_WIDTH) row[col] = tile;
+  });
+};
 
-// Secret star path high in the sky
-for (let c = SECRET_STAR_START; c < SECRET_STAR_END; c++) row2[c] = TILE.STAR;
+// Gentle intro: first readable jumps (World 1-1 style pacing, fantasy variant).
+setTiles(row1, [12, 16, 20, 25], TILE.CLOUD_PLATFORM);
+setTiles(row1, [30], TILE.FALLING_PLATFORM);
+setTiles(row1, [35, 40], TILE.CLOUD_PLATFORM);
 
-// Challenge obstacles
-GOOMBA_COLUMNS.forEach(c => (row1[c] = TILE.GOOMBA));
-PIPE_COLUMNS.forEach(c => (row1[c] = TILE.PIPE));
+// Crystal stair hint and first cute danger.
+setTiles(row1, [48, 52], TILE.BLOCK);
+setTiles(row2, [56, 60], TILE.BLOCK);
+setTiles(row3, [64], TILE.BLOCK);
+setTiles(row1, [68], TILE.GOOMBA);
+setTiles(row1, [72], TILE.PIPE);
 
-// Central checkpoint
+// Optional high "rainbow cloud" secret: exactly five stars.
+setTiles(row4, [58, 60, 62, 64, 66], TILE.STAR);
+
+// Mid game: alternating stable/falling clouds to teach rhythm.
+setTiles(row1, [80, 84, 92, 100], TILE.CLOUD_PLATFORM);
+setTiles(row1, [88, 96, 104], TILE.FALLING_PLATFORM);
+
+// Midpoint checkpoint.
 row1[CHECKPOINT_COLUMN] = TILE.CHECKPOINT;
 
-// Final rainbow portal
+// Second half: denser but still readable challenge.
+setTiles(row1, [118, 132, 146, 160, 176, 192], TILE.PIPE);
+setTiles(row1, [124, 138, 152, 168, 184, 198], TILE.GOOMBA);
+setTiles(row2, [130, 134, 142, 150, 158, 166], TILE.CLOUD_PLATFORM);
+setTiles(row2, [174, 182, 190], TILE.FALLING_PLATFORM);
+setTiles(row3, [186, 194, 202], TILE.BLOCK);
+
+// Clear ending runway to the portal.
+setTiles(row1, [208, 210], TILE.CLOUD_PLATFORM);
 row1[MAP_WIDTH - PORTAL_OFFSET_FROM_END] = TILE.PORTAL;
 
-const MAP = [ground, row1, row2];
+const MAP = [ground, row1, row2, row3, row4];
 
 
 // Level 3 - Unicornolandia converted to a tile-based platform section
@@ -591,4 +599,3 @@ export class Level3 extends BaseLevel {
 }
 
 export { MAP as LEVEL3_MAP, TILE };
-
