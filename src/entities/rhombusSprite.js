@@ -7,6 +7,7 @@ export class RhombusSprite {
     this.baseWidth = size;
     this.baseHeight = size;
     this.spriteScale = 1;
+    this.type = 'rhombus';
     this.state = 'waiting';
     this.timer = 0;
     this.dashInterval = 0.5; // seconds between dashes

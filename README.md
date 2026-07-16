@@ -30,7 +30,7 @@ To explore the enchanted third level with mini cactus enemies, open:
 index.html?level=3
 ```
 
-In Level 3 the princess rides through Unicornolandia, jumping over rows of mischievous mini cactus.
+Level 3 is a short platforming adventure through Unicornolandia. Use the arrow keys (or the touch controls), jump and double-jump with Space, collect optional stars and magical power-ups, and activate the midpoint checkpoint. At the end, land on the portal guardian three times to open the rainbow portal.
 
 You can jump to any available level by adjusting the `level` query parameter, for example `index.html?level=4` once a fourth level is added.
 
@@ -66,4 +66,3 @@ For more details about the game, see the [wiki](docs/WIKI.md).
 
 ## Credits
 Game created primarily with the help of ChatGPT.
-

@@ -101,10 +101,20 @@ describe('Level 3 mechanics', () => {
       });
     });
 
-    test('level 3 duration is between 90 and 150 seconds', () => {
+    test('level 3 traversal stays under a minute before the boss', () => {
       withLevel3({ skipLevelUpdate: true }, ({ level }) => {
-        const duration = level.levelLength / level.getMoveSpeed();
-        assert.ok(duration >= 90 && duration <= 150);
+        const duration = level.levelLength / level.game.player.defaultMoveSpeed;
+        assert.ok(duration >= 40 && duration <= 60);
+      });
+    });
+
+    test('off-screen enemies stay dormant until the player advances', () => {
+      withLevel3({}, ({ game, level }) => {
+        const positions = level.enemies.map(enemy => enemy.x);
+        for (let i = 0; i < 60 * 20; i++) game.update(FRAME);
+        assert.deepStrictEqual(level.enemies.map(enemy => enemy.x), positions);
+        assert.strictEqual(level.thornWalls.length, 0);
+        assert.strictEqual(game.gameOver, false);
       });
     });
   });
@@ -284,27 +294,40 @@ describe('Level 3 mechanics', () => {
       assert.strictEqual(game.gameOver, true);
     });
 
-    test('player dies when hitting a block', () => {
+    test('crystal blocks are safe solid platforms', () => {
       const game = createStubGame({ search: '?level=3' });
       const level = game.level;
       const player = game.player;
       level.getMoveSpeed = () => 0;
-      const block = new Block(player.x, player.y, 1);
+      const block = new Block(player.x, player.y - 1, 1);
       level.blocks = [block];
       level.pipes = [];
       level.enemies = [];
       level.platforms = [];
       level.thornWalls = [];
       level.obstacles = [block];
-      let calls = 0;
-      const orig = level.handlePlayerDeath.bind(level);
-      level.handlePlayerDeath = () => {
-        calls++;
-        orig();
-      };
+      player.y = block.y - block.height / 2 - player.height / 2 + 0.01;
+      player.vy = 1;
       level.update(FRAME);
-      assert.strictEqual(calls, 1);
-      assert.strictEqual(game.gameOver, true);
+      const expectedY = block.y - block.height / 2 - player.height / 2;
+      assert.ok(Math.abs(player.y - expectedY) < 1e-6);
+      assert.strictEqual(game.gameOver, false);
+    });
+
+    test('aura shield absorbs one enemy hit', () => {
+      withLevel3({}, ({ game, level, player }) => {
+        const enemy = new Goomba(player.x, player.y, 1);
+        level.platforms = [];
+        level.pipes = [];
+        level.blocks = [];
+        level.thornWalls = [];
+        level.enemies = [enemy];
+        player.activateShield(3, 0);
+        level.update(FRAME);
+        assert.strictEqual(game.gameOver, false);
+        assert.strictEqual(player.shieldActive, false);
+        assert.strictEqual(level.enemies.length, 0);
+      });
     });
 
     test('player respawns after hitting a thorn wall post-checkpoint', () => {
@@ -369,6 +392,16 @@ describe('Level 3 mechanics', () => {
       assert.ok(!game2.level.stars || game2.level.stars.length === 0);
     });
 
+    test('all level goals are exposed to the renderer', () => {
+      withLevel3({ skipLevelUpdate: true }, ({ level }) => {
+        const renderables = level.getRenderables();
+        assert.ok(renderables.includes(level.checkpoint));
+        assert.ok(renderables.includes(level.portal));
+        level.stars.forEach(star => assert.ok(renderables.includes(star)));
+        assert.ok(renderables.some(entity => entity.type === 'portal-guardian'));
+      });
+    });
+
     test('player respawns at checkpoint in level 3', () => {
       withLevel3({}, ({ game, level, player }) => {
         const cp = level.checkpoint;
@@ -393,6 +426,15 @@ describe('Level 3 mechanics', () => {
       });
     });
 
+    test('jumping past the checkpoint still activates it', () => {
+      withLevel3({}, ({ game, level, player }) => {
+        player.x = level.checkpoint.x + 1;
+        player.y = game.groundY - player.height / 2 - 2;
+        level.update(FRAME);
+        assert.strictEqual(level.checkpointReached, true);
+      });
+    });
+
     test('respawn restores checkpoint progress and world position', () => {
       withLevel3({ skipLevelUpdate: true }, ({ game, level, player }) => {
         const scrollX = 25;
@@ -411,16 +453,38 @@ describe('Level 3 mechanics', () => {
         assert.strictEqual(level.distance, distance);
         assert.strictEqual(player.x, level.respawnPoint.x);
 
-        const expectedPlatformX =
-          game.worldWidth + layout.abilitySection.start + 0.5 - scrollX;
-        const firstPlatform = level.platforms.find(
-          p => Math.abs(p.x - expectedPlatformX) < 1e-6
+        assert.ok(
+          level.platforms.every(
+            platform => platform.x + platform.width / 2 > player.x - 0.01
+          ),
+          'respawn should discard platforms that are already behind the player'
         );
-        assert.ok(firstPlatform, 'platform positions should reflect scrolled world');
 
         const expectedCheckpointX =
           game.worldWidth + layout.checkpointColumn + 0.5 - scrollX;
         assert.ok(Math.abs(level.checkpoint.x - expectedCheckpointX) < 1e-6);
+        assert.strictEqual(player.shieldActive, true);
+      });
+    });
+
+    test('respawn does not recreate collected stars', () => {
+      withLevel3({}, ({ game, level, player }) => {
+        const star = level.stars[0];
+        star.x = player.x;
+        star.y = player.y;
+        level.update(FRAME);
+        assert.strictEqual(game.stars, 1);
+        const collectedColumn = star.mapColumn;
+        level.checkpointReached = true;
+        level.respawnPoint = {
+          x: player.x,
+          y: game.groundY - player.height / 2,
+          scrollX: 0,
+          distance: 0,
+        };
+        level.respawnPlayer();
+        assert.strictEqual(game.stars, 1);
+        assert.ok(level.stars.every(candidate => candidate.mapColumn !== collectedColumn));
       });
     });
 

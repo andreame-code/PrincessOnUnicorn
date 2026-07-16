@@ -21,14 +21,23 @@ window.addEventListener('DOMContentLoaded', () => {
     game.handleInput(code, type);
   };
 
-  const stop = e => e.stopPropagation();
+  const bindHoldControl = (button, code) => {
+    button.addEventListener('pointerdown', e => {
+      e.stopPropagation();
+      if (button.setPointerCapture) button.setPointerCapture(e.pointerId);
+      sendInput(code, 'down');
+    });
+    const release = e => {
+      e.stopPropagation();
+      sendInput(code, 'up');
+    };
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+  };
 
-  leftBtn.addEventListener('pointerdown', e => { stop(e); sendInput('ArrowLeft', 'down'); });
-  leftBtn.addEventListener('pointerup', e => { stop(e); sendInput('ArrowLeft', 'up'); });
-  rightBtn.addEventListener('pointerdown', e => { stop(e); sendInput('ArrowRight', 'down'); });
-  rightBtn.addEventListener('pointerup', e => { stop(e); sendInput('ArrowRight', 'up'); });
-  jumpBtn.addEventListener('pointerdown', e => { stop(e); sendInput('Space', 'down'); });
-  jumpBtn.addEventListener('pointerup', e => { stop(e); sendInput('Space', 'up'); });
+  bindHoldControl(leftBtn, 'ArrowLeft');
+  bindHoldControl(jumpBtn, 'Space');
+  bindHoldControl(rightBtn, 'ArrowRight');
 
   playButton.addEventListener('click', () => {
     menu.classList.add('hidden');

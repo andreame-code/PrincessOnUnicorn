@@ -7,6 +7,7 @@ export class PortalGuardian {
     this.baseWidth = size;
     this.baseHeight = size;
     this.spriteScale = 1;
+    this.type = 'portal-guardian';
     this.hits = 0;
     this.phase = 1;
     this.attackPhases = ['sweep', 'charge', 'rage'];

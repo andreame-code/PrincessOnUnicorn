@@ -47,6 +47,17 @@ test('resets when action is triggered after game over', () => {
   assert.ok(resetCalled);
 });
 
+test('does not reset from a key release after game over', () => {
+  const game = createStubGame({ skipLevelUpdate: true });
+  let resetCalled = false;
+  game.reset = () => {
+    resetCalled = true;
+  };
+  game.gameOver = true;
+  game.handleInput('ArrowRight', 'up');
+  assert.strictEqual(resetCalled, false);
+});
+
 test('detaches and reattaches input listeners on reset', () => {
   const game = createStubGame({ skipLevelUpdate: true });
   let detachCalls = 0;
@@ -54,9 +65,11 @@ test('detaches and reattaches input listeners on reset', () => {
   game.input.detach = () => { detachCalls++; };
   game.input.attach = () => { attachCalls++; };
   game.showOverlay = (_text, onClose) => { if (onClose) onClose(); };
+  game.stars = 3;
   game.reset();
   assert.strictEqual(detachCalls, 1);
   assert.strictEqual(attachCalls, 1);
+  assert.strictEqual(game.stars, 0);
 });
 
 test('removes resize listener on destroy', () => {

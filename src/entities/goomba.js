@@ -7,6 +7,7 @@ export class Goomba {
     this.baseWidth = size;
     this.baseHeight = size;
     this.spriteScale = 1;
+    this.type = 'goomba';
     // Horizontal speed relative to the world
     this.vx = -0.5;
   }
