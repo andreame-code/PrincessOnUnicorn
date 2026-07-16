@@ -9,6 +9,7 @@ export class ThornGuard {
     this.baseWidth = size;
     this.baseHeight = size;
     this.spriteScale = 1;
+    this.type = 'thorn-guard';
     this.throwInterval = 1; // seconds between throws
     this.timer = 0;
   }
@@ -32,6 +33,8 @@ export class ThornGuard {
           width,
           height
         );
+        wall.type = 'thorn-wall';
+        wall.vx = -2.4;
         wall.setScale(this.spriteScale);
         spawned.push(wall);
       }

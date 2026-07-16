@@ -167,7 +167,7 @@ export class Game {
 
   handleInput(code = 'Space', type = 'down') {
     if (this.gameOver) {
-      this.reset();
+      if (type === 'down') this.reset();
       return;
     }
 
@@ -210,6 +210,7 @@ export class Game {
     this.resizeCanvas();
     this.score = 0;
     this.coins = 0;
+    this.stars = 0;
     this.gameOver = false;
     this.win = false;
     this.initializeLevel();

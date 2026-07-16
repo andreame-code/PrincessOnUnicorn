@@ -8,6 +8,7 @@ export class ShadowCrow {
     this.baseWidth = size;
     this.baseHeight = size;
     this.spriteScale = 1;
+    this.type = 'shadow-crow';
     this.amplitude = amplitude;
     this.frequency = frequency; // cycles per second
     this.time = 0;

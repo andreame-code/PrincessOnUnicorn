@@ -22,6 +22,7 @@ export class Renderer {
     this.playerFrameTimer = 0;
     this.frameInterval = 0.1;
     this.lastSpriteTime = 0;
+    this.playerAnimation = null;
     this.knightFrameIndex = 0;
     this.knightFrameTimer = 0;
     this.lastKnightTime = 0;
@@ -261,6 +262,11 @@ export class Renderer {
             ? 'idle'
             : 'run';
         const frames = this.playerSprites[anim];
+        if (this.playerAnimation !== anim) {
+          this.playerAnimation = anim;
+          this.playerFrameIndex = 0;
+          this.playerFrameTimer = 0;
+        }
         if (this.playerFrameTimer >= this.frameInterval) {
           this.playerFrameTimer = 0;
           this.playerFrameIndex = (this.playerFrameIndex + 1) % frames.length;
@@ -318,62 +324,260 @@ export class Renderer {
     });
   }
 
+  drawStar(ctx, x, y, radius) {
+    ctx.beginPath();
+    for (let point = 0; point < 10; point++) {
+      const angle = -Math.PI / 2 + point * Math.PI / 5;
+      const r = point % 2 === 0 ? radius : radius * 0.45;
+      const px = x + Math.cos(angle) * r;
+      const py = y + Math.sin(angle) * r;
+      if (point === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  drawLevel3Entity(ctx, entity, scale) {
+    const left = (entity.x - entity.width / 2) * scale;
+    const top = (entity.y - entity.height / 2) * scale;
+    const width = entity.width * scale;
+    const height = entity.height * scale;
+    const centerX = entity.x * scale;
+    const centerY = entity.y * scale;
+
+    switch (entity.type) {
+      case 'platform': {
+        const cloudHeight = height * 0.55;
+        ctx.fillStyle = entity.kind === 'falling' ? '#ffd6a5' : '#ffffff';
+        ctx.strokeStyle = entity.kind === 'falling' ? '#e08f62' : '#9adcf4';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(left + width * 0.25, top + cloudHeight * 0.65, cloudHeight * 0.32, 0, Math.PI * 2);
+        ctx.arc(left + width * 0.5, top + cloudHeight * 0.42, cloudHeight * 0.42, 0, Math.PI * 2);
+        ctx.arc(left + width * 0.75, top + cloudHeight * 0.65, cloudHeight * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        if (entity.kind === 'falling') {
+          ctx.strokeStyle = '#b45f4b';
+          ctx.beginPath();
+          ctx.moveTo(centerX, top + cloudHeight * 0.55);
+          ctx.lineTo(centerX - width * 0.08, top + cloudHeight * 0.9);
+          ctx.lineTo(centerX + width * 0.06, top + cloudHeight);
+          ctx.stroke();
+        }
+        break;
+      }
+      case 'pipe':
+        ctx.fillStyle = '#7b2cbf';
+        ctx.fillRect(left + width * 0.2, top + height * 0.12, width * 0.6, height * 0.88);
+        ctx.fillStyle = '#9d4edd';
+        ctx.fillRect(left, top + height * 0.08, width, height * 0.18);
+        ctx.fillStyle = '#d8b4fe';
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(left + width * (0.18 + i * 0.28), top + height * 0.12);
+          ctx.lineTo(left + width * (0.28 + i * 0.28), top - height * 0.08);
+          ctx.lineTo(left + width * (0.38 + i * 0.28), top + height * 0.12);
+          ctx.fill();
+        }
+        break;
+      case 'block':
+        ctx.fillStyle = '#8be9fd';
+        ctx.strokeStyle = '#3182a0';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, top);
+        ctx.lineTo(left + width, centerY);
+        ctx.lineTo(centerX, top + height);
+        ctx.lineTo(left, centerY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = '#e6fbff';
+        ctx.beginPath();
+        ctx.moveTo(centerX, top + height * 0.12);
+        ctx.lineTo(centerX, top + height * 0.88);
+        ctx.stroke();
+        break;
+      case 'goomba':
+        ctx.fillStyle = '#57a773';
+        ctx.fillRect(left + width * 0.3, top + height * 0.2, width * 0.4, height * 0.8);
+        ctx.fillRect(left + width * 0.08, top + height * 0.45, width * 0.84, height * 0.22);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(left + width * 0.36, top + height * 0.3, width * 0.1, height * 0.12);
+        ctx.fillRect(left + width * 0.54, top + height * 0.3, width * 0.1, height * 0.12);
+        break;
+      case 'shadow-crow':
+        ctx.fillStyle = '#43345d';
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(left, top + height * 0.25);
+        ctx.lineTo(left + width * 0.28, top + height * 0.78);
+        ctx.lineTo(centerX, top + height * 0.58);
+        ctx.lineTo(left + width * 0.72, top + height * 0.78);
+        ctx.lineTo(left + width, top + height * 0.25);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#f7d154';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, Math.max(2, width * 0.08), 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      case 'rhombus':
+        ctx.fillStyle = entity.state === 'dashing' ? '#ff4d9d' : '#ff8cc6';
+        ctx.strokeStyle = '#9c1d68';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, top);
+        ctx.lineTo(left + width, centerY);
+        ctx.lineTo(centerX, top + height);
+        ctx.lineTo(left, centerY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        break;
+      case 'thorn-guard':
+        ctx.fillStyle = '#2d6a4f';
+        ctx.fillRect(left + width * 0.25, top + height * 0.18, width * 0.5, height * 0.82);
+        ctx.fillStyle = '#95d5b2';
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(left + width * (0.18 + i * 0.28), top + height * 0.22);
+          ctx.lineTo(left + width * (0.28 + i * 0.28), top);
+          ctx.lineTo(left + width * (0.38 + i * 0.28), top + height * 0.22);
+          ctx.fill();
+        }
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(left + width * 0.36, top + height * 0.38, width * 0.1, height * 0.1);
+        ctx.fillRect(left + width * 0.55, top + height * 0.38, width * 0.1, height * 0.1);
+        break;
+      case 'thorn-wall':
+        ctx.fillStyle = '#40916c';
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(left + width * i / 3, top + height);
+          ctx.lineTo(left + width * (i + 0.5) / 3, top);
+          ctx.lineTo(left + width * (i + 1) / 3, top + height);
+          ctx.fill();
+        }
+        break;
+      case 'portal-guardian':
+        ctx.fillStyle = entity.defeated ? '#b8f2e6' : '#5a189a';
+        ctx.fillRect(left + width * 0.16, top + height * 0.18, width * 0.68, height * 0.82);
+        ctx.fillStyle = '#ffca3a';
+        for (let i = 0; i < Math.max(0, 3 - entity.hits); i++) {
+          ctx.beginPath();
+          ctx.arc(left + width * (0.3 + i * 0.2), top + height * 0.42, width * 0.05, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = '#9d4edd';
+        ctx.beginPath();
+        ctx.moveTo(left + width * 0.16, top + height * 0.2);
+        ctx.lineTo(left, top);
+        ctx.lineTo(left + width * 0.34, top + height * 0.18);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(left + width * 0.84, top + height * 0.2);
+        ctx.lineTo(left + width, top);
+        ctx.lineTo(left + width * 0.66, top + height * 0.18);
+        ctx.fill();
+        break;
+      case 'powerup': {
+        const colors = {
+          'aura-shield': '#4cc9f0',
+          'wind-hooves': '#52b788',
+          'sugar-wings': '#f15bb5',
+        };
+        const labels = { 'aura-shield': 'S', 'wind-hooves': 'V', 'sugar-wings': 'A' };
+        ctx.fillStyle = colors[entity.kind] || '#ffffff';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, Math.min(width, height) * 0.42, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#2b1742';
+        ctx.font = `bold ${Math.max(10, width * 0.42)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labels[entity.kind] || '?', centerX, centerY + 1);
+        break;
+      }
+      case 'star':
+        ctx.fillStyle = '#ffd60a';
+        ctx.strokeStyle = '#e09f00';
+        ctx.lineWidth = 2;
+        this.drawStar(ctx, centerX, centerY, Math.min(width, height) * 0.45);
+        ctx.stroke();
+        break;
+      case 'checkpoint':
+        ctx.strokeStyle = '#6d3b1f';
+        ctx.lineWidth = Math.max(3, width * 0.08);
+        ctx.beginPath();
+        ctx.moveTo(left + width * 0.25, top + height);
+        ctx.lineTo(left + width * 0.25, top);
+        ctx.stroke();
+        ctx.fillStyle = this.game.level.checkpointReached ? '#52b788' : '#ff70a6';
+        ctx.beginPath();
+        ctx.moveTo(left + width * 0.28, top + height * 0.08);
+        ctx.lineTo(left + width, top + height * 0.28);
+        ctx.lineTo(left + width * 0.28, top + height * 0.5);
+        ctx.closePath();
+        ctx.fill();
+        break;
+      case 'portal':
+        ctx.strokeStyle = entity.open ? '#00e5ff' : '#8064a2';
+        ctx.lineWidth = Math.max(5, width * 0.16);
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, width * 0.42, height * 0.46, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = entity.open ? '#fff59d' : '#4b3b5f';
+        ctx.lineWidth = Math.max(2, width * 0.06);
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, width * 0.28, height * 0.38, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        if (!entity.open) {
+          ctx.fillStyle = '#4b3b5f';
+          ctx.fillRect(centerX - width * 0.13, centerY - height * 0.05, width * 0.26, height * 0.18);
+        }
+        break;
+      default:
+        ctx.fillStyle = '#ffb7ce';
+        ctx.fillRect(left, top, width, height);
+        break;
+    }
+  }
+
   drawObstacles() {
     const { game } = this;
     this.withContext(ctx => {
       const scale = this.game.scale;
-      game.level.obstacles.forEach(o => {
+      const obstacles =
+        game.levelNumber === 3 && typeof game.level.getRenderables === 'function'
+          ? game.level.getRenderables()
+          : game.level.obstacles;
+      obstacles.forEach(o => {
+        if (game.levelNumber === 3) {
+          this.drawLevel3Entity(ctx, o, scale);
+          return;
+        }
         const w = o.width * scale * SPRITE_SCALE;
         const h = o.height * scale * SPRITE_SCALE;
         const left = o.x * scale - w / 2;
         const bottom = (o.y + o.height / 2) * scale;
         const top = bottom - h;
-        if (game.levelNumber === 3) {
-          if (o.type === 'platform') {
-            // Cloud platforms
-            ctx.fillStyle = '#ffffff';
-            const r = h / 2;
-            ctx.beginPath();
-            ctx.arc(left + r, top + r, r, 0, Math.PI * 2);
-            ctx.arc(left + r * 2, top + r * 0.5, r, 0, Math.PI * 2);
-            ctx.arc(left + r * 3, top + r, r, 0, Math.PI * 2);
-            ctx.fill();
-          } else if (o.type === 'pipe') {
-            // Purple brambles
-            ctx.fillStyle = '#a64ac9';
-            ctx.fillRect(left, top, w, h);
-            ctx.fillStyle = '#8e24aa';
-            for (let i = 0; i < w; i += w / 5) {
-              ctx.beginPath();
-              ctx.moveTo(left + i, top);
-              ctx.lineTo(left + i + w / 10, top - 10);
-              ctx.lineTo(left + i + w / 5, top);
-              ctx.fill();
-            }
-          } else if (o.type === 'block') {
-            // Moon milk lakes
-            ctx.fillStyle = '#f0f8ff';
-            ctx.fillRect(left, top, w, h);
-            ctx.strokeStyle = '#d0eaff';
-            ctx.strokeRect(left, top, w, h);
-          } else {
-            // Enemies or other objects
-            ctx.fillStyle = '#ffb7ce';
-            ctx.fillRect(left, top, w, h);
-          }
+        const sprites = o.type === 'tree' ? this.treeSprites : null;
+        if (sprites) {
+          const img = sprites[(o.imageIndex ?? 0) % sprites.length];
+          ctx.drawImage(img, left, top, w, h);
+        } else if (o.type === 'cactus') {
+          ctx.fillStyle = 'green';
+          ctx.fillRect(left + w * 0.4, top, w * 0.2, h);
+          ctx.fillRect(left, top + h * 0.4, w, h * 0.2);
         } else {
-          const sprites = o.type === 'tree' ? this.treeSprites : null;
-          if (sprites) {
-            const img = sprites[(o.imageIndex ?? 0) % sprites.length];
-            ctx.drawImage(img, left, top, w, h);
-          } else if (o.type === 'cactus') {
-            ctx.fillStyle = 'green';
-            ctx.fillRect(left + w * 0.4, top, w * 0.2, h);
-            ctx.fillRect(left, top + h * 0.4, w, h * 0.2);
-          } else {
-            ctx.fillStyle = 'green';
-            ctx.fillRect(left, top, w, h);
-          }
+          ctx.fillStyle = 'green';
+          ctx.fillRect(left, top, w, h);
         }
       });
     });
@@ -456,21 +660,21 @@ export class Renderer {
         margin + 20,
       );
 
-      const coinX = game.canvas.width - margin;
-      const coinY = margin + 10;
-      ctx.fillStyle = 'gold';
-      ctx.beginPath();
-      ctx.arc(coinX, coinY, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#000';
-      ctx.textAlign = 'right';
-      ctx.fillText(`x ${game.coins}`, coinX - 10, margin);
-      ctx.textAlign = 'left';
-
       const p = game.player;
       const iconSize = 16;
       const iconY = margin + 38;
       if (game.levelNumber !== 3) {
+        const coinX = game.canvas.width - margin;
+        const coinY = margin + 10;
+        ctx.fillStyle = 'gold';
+        ctx.beginPath();
+        ctx.arc(coinX, coinY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'right';
+        ctx.fillText(`x ${game.coins}`, coinX - 10, margin);
+        ctx.textAlign = 'left';
+
         if (this.shieldSprite) {
           ctx.drawImage(this.shieldSprite, margin, iconY, iconSize, iconSize);
         } else {
@@ -491,11 +695,37 @@ export class Renderer {
         ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
         ctx.fillRect(barX, barY, barWidth * progress, barHeight);
       } else {
+        const progressWidth = Math.min(240, game.canvas.width * 0.34);
+        const progressX = (game.canvas.width - progressWidth) / 2;
+        const progressY = margin + 4;
+        const progress = Math.max(
+          0,
+          Math.min(1, game.level.distance / game.level.levelLength)
+        );
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
+        ctx.fillRect(progressX, progressY, progressWidth, 16);
+        ctx.fillStyle = '#d84fa3';
+        ctx.fillRect(progressX, progressY, progressWidth * progress, 16);
+        ctx.strokeStyle = '#66345f';
+        ctx.strokeRect(progressX, progressY, progressWidth, 16);
+        ctx.fillStyle = '#2b1742';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Portale ${Math.floor(progress * 100)}%`, game.canvas.width / 2, progressY + 1);
+
+        ctx.fillStyle = '#ffd60a';
+        this.drawStar(ctx, game.canvas.width - 24, margin + 10, 9);
+        ctx.fillStyle = '#2b1742';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${game.stars}/5`, game.canvas.width - 38, margin);
+        ctx.textAlign = 'left';
+
         let x = margin;
         const icons = [];
-        if (p.shieldTimer > 0) icons.push({ color: 'blue', label: 'A' });
-        if (p.speedBoostTimer > 0) icons.push({ color: 'green', label: 'Z' });
-        if (p.wingsTimer > 0) icons.push({ color: 'purple', label: 'W' });
+        if (p.shieldTimer > 0) icons.push({ color: '#4cc9f0', label: 'S' });
+        if (p.speedBoostTimer > 0) icons.push({ color: '#52b788', label: 'V' });
+        if (p.wingsTimer > 0) icons.push({ color: '#f15bb5', label: 'A' });
         icons.forEach(icon => {
           ctx.fillStyle = icon.color;
           ctx.fillRect(x, iconY, iconSize, iconSize);
@@ -504,13 +734,20 @@ export class Renderer {
           ctx.fillText(icon.label, x + 4, iconY + 12);
           x += iconSize + 5;
         });
+        if (game.level.checkpointReached) {
+          ctx.fillStyle = '#2d6a4f';
+          ctx.font = '13px sans-serif';
+          ctx.fillText('✓ Checkpoint', margin, iconY + 22);
+        }
       }
 
       if (game.gameOver) {
         ctx.fillStyle = '#000';
         ctx.font = '24px sans-serif';
         const lines = game.win
-          ? ['Complimenti!', 'Hai sconfitto il Cavaliere Nero!']
+          ? game.levelNumber === 3
+            ? ['Complimenti!', 'Hai salvato Unicornolandia!']
+            : ['Complimenti!', 'Hai sconfitto il Cavaliere Nero!']
           : ['Game Over', 'Tocca o premi Spazio', 'per ricominciare'];
         const lineHeight = 30;
         lines.forEach((line, index) => {
@@ -543,4 +780,3 @@ export class Renderer {
     this.drawUI();
   }
 }
-

@@ -1,7 +1,7 @@
 export const INSTRUCTIONS_TEXT = {
   1: 'Salta gli ostacoli premendo la barra spaziatrice o toccando lo schermo.',
   2: 'Attiva lo scudo per rompere i muri del Cavaliere Nero premendo la barra spaziatrice o toccando lo schermo.',
-  3: 'Affronta il sentiero incantato di Unicornolandia: usa le frecce o i pulsanti sullo schermo per muoverti e salta con la barra spaziatrice o il pulsante centrale.'
+  3: 'Unicornolandia ha bisogno di te! Muoviti con le frecce o i pulsanti, salta anche due volte e raccogli i poteri. Il checkpoint salva i progressi; salta tre volte sul guardiano per aprire il portale.'
 };
 
 export const STORY_TEXT = {
